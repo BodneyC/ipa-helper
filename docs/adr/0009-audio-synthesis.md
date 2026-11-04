@@ -62,3 +62,6 @@ If criteria 1, 2 or 3 fail, re-run with espeak-ng WASM and amend this ADR.
 - Introduces a large lazy asset and a Worker. Neither affects NFR-3, because
   they aren't part of the initial bundle.
 - Licence notices are needed for the engine, the runtime and the voice (NFR-8).
+- The project licence is **GPL-3.0-or-later** (chosen at M0.7), so bundling
+  espeak-ng (GPL-3.0) is compatible and the option-3 fallback carries no extra
+  licence risk. Voice model licences (option 4) still need checking during the spike.
