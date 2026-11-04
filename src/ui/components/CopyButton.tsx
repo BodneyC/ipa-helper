@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useAnnounce } from './Announcer';
+import { useCopy } from './copy';
 import styles from './CopyButton.module.css';
-import { useServices } from '../../state/hooks';
 
 interface CopyButtonProps {
   /** What to copy. */
@@ -28,8 +27,7 @@ export function CopyButton({
   disabled = false,
   variant = 'primary',
 }: CopyButtonProps) {
-  const { clipboard } = useServices();
-  const announce = useAnnounce();
+  const copyText = useCopy();
   const [copied, setCopied] = useState(false);
   const timer = useRef<number | undefined>(undefined);
 
@@ -41,12 +39,7 @@ export function CopyButton({
   );
 
   const copy = async () => {
-    const result = await clipboard.writeText(text);
-    if (!result.ok) {
-      announce(`Couldn't copy. Select the text and copy it by hand.`);
-      return;
-    }
-    announce(done);
+    if (!(await copyText(text, done))) return;
     setCopied(true);
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => {

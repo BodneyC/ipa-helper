@@ -1,0 +1,43 @@
+/* A popover surface, so it gets the one elevation shadow (SPEC §6). */
+.dialog {
+  width: min(32rem, calc(100vw - 2 * var(--page-gutter)));
+  max-height: calc(100dvh - 2 * var(--page-gutter));
+  padding: var(--space-5);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-popover);
+}
+
+.dialog::backdrop {
+  background: var(--gb-dark0-hard);
+  opacity: 0.6;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.close {
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--color-surface-raised);
+}

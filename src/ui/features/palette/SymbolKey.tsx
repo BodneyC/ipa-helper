@@ -4,6 +4,7 @@ import type { PointerEvent } from 'react';
 import styles from './SymbolKey.module.css';
 import type { PhoneSymbol } from '../../../domain/inventory/types';
 import type { SymbolLabels } from '../../../domain/serialise/labels';
+import { ROVING_ITEM } from '../../components/roving-focus';
 import { Tooltip } from '../../components/Tooltip';
 
 interface SymbolKeyProps {
@@ -100,6 +101,7 @@ export function SymbolKey({ symbol, labels, onActivate }: SymbolKeyProps) {
         type="button"
         className={styles['key']}
         aria-describedby={tipaId}
+        {...{ [ROVING_ITEM]: '' }}
         onClick={() => {
           if (swallowClick.current) {
             swallowClick.current = false;

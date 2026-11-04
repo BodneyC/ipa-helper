@@ -152,6 +152,9 @@ pronounced in British English, at no cost and without signing up for anything.
 - **FR-51** Global shortcuts (shown in a `?` help dialog): Backspace/Delete/←/→
   act on the word whenever focus isn't in a text input. `/` focuses the filter,
   `Ctrl+Shift+C` copies the IPA, `Ctrl+Shift+L` copies the TIPA, and `Escape` closes dialogs.
+  Inside a palette group, ←/→ move between keys (FR-50) rather than the word
+  cursor; Backspace and Delete still edit the word. No shortcut fires while a
+  dialog is open.
 
 ## 5. Non-functional requirements
 

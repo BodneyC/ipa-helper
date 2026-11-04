@@ -1,9 +1,8 @@
-import { useId, useMemo } from 'react';
+import { useId } from 'react';
 
 import styles from './OutputPanel.module.css';
-import { createIpaSerialiser } from '../../../domain/serialise/ipa';
-import { createTipaSerialiser } from '../../../domain/serialise/tipa';
-import { useEditor, useSettings } from '../../../state/hooks';
+import { useOutputs } from './outputs';
+import { useSettings } from '../../../state/hooks';
 import { CopyButton } from '../../components/CopyButton';
 
 /**
@@ -11,21 +10,9 @@ import { CopyButton } from '../../components/CopyButton';
  * also copies the full macro call, e.g. `\ipa{"TO:nIk}`.
  */
 export function OutputPanel() {
-  const { state } = useEditor();
   const { settings, dispatch } = useSettings();
   const toggleId = useId();
-  const { word } = state;
-  const empty = word.length === 0;
-
-  const { ipaShown, ipaCopied, tipa } = useMemo(() => {
-    const { rDisplay } = settings;
-    return {
-      ipaShown: createIpaSerialiser({ slashes: true, rDisplay }).serialise(word),
-      ipaCopied: createIpaSerialiser({ slashes: settings.ipaSlashes, rDisplay }).serialise(word),
-      tipa: createTipaSerialiser({ slashes: settings.tipaSlashes, rDisplay }).serialise(word),
-    };
-  }, [word, settings]);
-  const macro = `\\${settings.macroName}{${tipa}}`;
+  const { empty, ipaShown, ipaCopied, tipa, macro } = useOutputs();
 
   return (
     <dl className={styles['panel']}>

@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { ConsonantChart } from './ConsonantChart';
 import { GROUPS } from './groups';
 import type { Group } from './groups';
@@ -14,6 +16,7 @@ import type {
 import { assertNever } from '../../../domain/result';
 import type { RDisplay } from '../../../domain/serialise/serialiser';
 import { Card } from '../../components/Card';
+import { useRovingFocus } from '../../components/roving-focus';
 
 interface PaletteProps {
   readonly inventory: InventoryId;
@@ -69,10 +72,15 @@ export function Palette({ inventory, rDisplay, onActivate }: PaletteProps) {
                   : undefined
             }
           >
-            {body(group, members)}
+            <RovingGroup>{body(group, members)}</RovingGroup>
           </Card>
         );
       })}
     </section>
   );
+}
+
+/** FR-50: each group is one Tab stop; arrow keys move between its keys. */
+function RovingGroup({ children }: { readonly children: ReactNode }) {
+  return <div ref={useRovingFocus<HTMLDivElement>()}>{children}</div>;
 }

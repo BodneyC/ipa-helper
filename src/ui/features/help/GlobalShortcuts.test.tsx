@@ -1,0 +1,108 @@
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
+
+import { App } from '../../../app/App';
+import { Providers } from '../../../app/providers';
+import { symbolId } from '../../../domain/inventory/symbol-id';
+import { NULL_FRAGMENTS } from '../../../domain/ports';
+import type { Clipboard } from '../../../domain/ports';
+import { ok } from '../../../domain/result';
+import { wordFromIds } from '../../../domain/word/word';
+import type { Word } from '../../../domain/word/word';
+
+const ids = (...raw: string[]) => wordFromIds(raw.map(symbolId));
+
+const setup = (initialWord: Word = ids('s', 'i', 'p')) => {
+  const writeText = vi.fn<Clipboard['writeText']>(() => Promise.resolve(ok(undefined)));
+  render(
+    <Providers
+      initialWord={initialWord}
+      services={{ clipboard: { writeText }, fragments: NULL_FRAGMENTS }}
+    >
+      <App />
+    </Providers>,
+  );
+  const word = screen.getByRole('textbox', { name: 'Word' });
+  return { writeText, word, user: userEvent.setup() };
+};
+
+describe('global shortcuts (FR-51)', () => {
+  it('Backspace and Delete edit the word from anywhere outside a text input', async () => {
+    const { user, word } = setup();
+    await user.click(screen.getByRole('heading', { level: 1 }));
+    await user.keyboard('{Backspace}');
+    expect(word).toHaveTextContent('/si/');
+    await user.keyboard('{ArrowLeft}{ArrowLeft}{Delete}');
+    expect(word).toHaveTextContent('/i/');
+  });
+
+  it('← and → move the cursor, so the next key inserts there', async () => {
+    const { user, word } = setup();
+    await user.click(screen.getByRole('heading', { level: 1 }));
+    await user.keyboard('{ArrowLeft}{ArrowLeft}{ArrowRight}');
+    await user.click(screen.getByRole('button', { name: /^ʃ\s?,/ }));
+    expect(word).toHaveTextContent('/siʃp/');
+  });
+
+  it('Backspace on a palette key deletes, but arrows there move between keys', async () => {
+    const { user, word } = setup();
+    const theta = screen.getByRole('button', { name: /^θ\s?,/ });
+    theta.focus();
+    await user.keyboard('{ArrowRight}');
+    expect(screen.getByRole('button', { name: /^ð\s?,/ })).toHaveFocus();
+    await user.keyboard('{Backspace}');
+    expect(word).toHaveTextContent('/si/');
+  });
+
+  it('leaves typed keys alone in text inputs and modified keys alone everywhere', async () => {
+    const { user, word } = setup();
+    const input = document.createElement('input');
+    document.body.append(input);
+    input.focus();
+    await user.keyboard('{Backspace}?');
+    expect(word).toHaveTextContent('/sip/');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('heading', { level: 1 }));
+    await user.keyboard('{Alt>}{Backspace}{/Alt}{Shift>}{ArrowLeft}{/Shift}');
+    expect(word).toHaveTextContent('/sip/');
+    input.remove();
+  });
+
+  it('Ctrl+Shift+C copies the IPA and Ctrl+Shift+L the TIPA, with an announcement', async () => {
+    const { user, writeText } = setup(ids('esh', 'i', 'p'));
+    await user.click(screen.getByRole('heading', { level: 1 }));
+    await user.keyboard('{Control>}{Shift>}C{/Shift}{/Control}');
+    await user.keyboard('{Meta>}{Shift>}L{/Shift}{/Meta}');
+    expect(writeText.mock.calls.map(([text]) => text)).toEqual(['/ʃip/', 'Sip']);
+    expect(await screen.findByText('Copied TIPA')).toBeInTheDocument();
+  });
+
+  it('says there is nothing to copy for an empty word', async () => {
+    const { user, writeText } = setup([]);
+    await user.click(screen.getByRole('heading', { level: 1 }));
+    await user.keyboard('{Control>}{Shift>}L{/Shift}{/Control}');
+    expect(writeText).not.toHaveBeenCalled();
+    expect(await screen.findByText('Nothing to copy yet')).toBeInTheDocument();
+  });
+
+  it('? opens the shortcuts dialog, where the word keys stop acting on the word', async () => {
+    const { user, word } = setup();
+    await user.click(screen.getByRole('heading', { level: 1 }));
+    await user.keyboard('?');
+    const dialog = screen.getByRole('dialog', { name: 'Keyboard shortcuts' });
+    screen.getByRole('button', { name: 'Close' }).focus();
+    await user.keyboard('{Backspace}');
+    expect(word).toHaveTextContent('/sip/');
+    act(() => {
+      dialog.dispatchEvent(new Event('close'));
+    });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('the top bar button opens the same dialog', async () => {
+    const { user } = setup();
+    await user.click(screen.getByRole('button', { name: 'Keyboard shortcuts' }));
+    expect(screen.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeInTheDocument();
+  });
+});

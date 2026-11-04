@@ -1,0 +1,37 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) 0;
+  text-align: left;
+  vertical-align: top;
+  border-top: 1px solid var(--color-border);
+}
+
+.table .keys {
+  padding-right: var(--space-4);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.keys kbd {
+  display: inline-block;
+  min-width: 1.75rem;
+  padding: 0 var(--space-1);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  text-align: center;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.note {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}

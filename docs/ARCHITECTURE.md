@@ -264,7 +264,15 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `KeyGrid` for the rest.
 - `<SymbolKey>`: a `<button>` with `aria-label` "ʃ, voiceless postalveolar
   fricative, as in ship". A tooltip/popover shows details. Roving tabindex is
-  managed per group by a `useRovingFocus` hook.
+  managed per group by `useRovingFocus` (`ui/components/roving-focus.ts`):
+  ←/→ follow DOM order, ↑/↓ follow the rendered layout, and navigation keys are
+  always `preventDefault`ed inside a group.
+- `<GlobalShortcuts>` (`ui/features/help/`) listens on `document` for FR-51 and
+  skips events a widget already handled (`defaultPrevented`), text inputs and
+  anything inside a `<dialog>`. Copy shortcuts share `useOutputs` and `useCopy`
+  with the output panel.
+- Dialogs use the native `<dialog>` with `showModal()` (`ui/components/Dialog.tsx`),
+  so the browser handles inertness and Escape. Focus returns to the opener.
 - Live region: one app-level `<Announcer>` for "Added ʃ", "Copied TIPA", and so on.
 - Components stay presentational where possible. Feature containers connect to state
   via hooks.

@@ -1,8 +1,12 @@
+import { useState } from 'react';
+
 import styles from './App.module.css';
 import { TopBar } from './TopBar';
 import { useEditor, useSettings } from '../state/hooks';
 import { AnnouncerProvider } from '../ui/components/Announcer';
 import { Card } from '../ui/components/Card';
+import { GlobalShortcuts } from '../ui/features/help/GlobalShortcuts';
+import { HelpDialog } from '../ui/features/help/HelpDialog';
 import { OutputPanel } from '../ui/features/output/OutputPanel';
 import { Palette } from '../ui/features/palette/Palette';
 import { UrlSync } from '../ui/features/word/UrlSync';
@@ -16,9 +20,14 @@ import { WordDisplay } from '../ui/features/word/WordDisplay';
 export function App() {
   const { dispatch } = useEditor();
   const { settings } = useSettings();
+  const [helpOpen, setHelpOpen] = useState(false);
+  const openHelp = () => {
+    setHelpOpen(true);
+  };
   return (
     <AnnouncerProvider>
-      <TopBar />
+      <GlobalShortcuts onHelp={openHelp} />
+      <TopBar onHelp={openHelp} />
       <main className={styles['main']}>
         <div className={styles['workbench']}>
           <Card title="Word" headingLevel={2} hideTitle>
@@ -38,6 +47,12 @@ export function App() {
           }}
         />
       </main>
+      <HelpDialog
+        open={helpOpen}
+        onClose={() => {
+          setHelpOpen(false);
+        }}
+      />
     </AnnouncerProvider>
   );
 }

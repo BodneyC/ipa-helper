@@ -2,27 +2,7 @@ import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 import { expectNoA11yViolations } from './a11y';
-
-/** Records clipboard writes in the page, the same way in every browser. */
-const recordClipboard = (page: Page) =>
-  page.addInitScript(() => {
-    const copied: string[] = [];
-    Object.defineProperty(window, '__copied', { value: copied });
-    Object.defineProperty(navigator, 'clipboard', {
-      value: {
-        writeText: (text: string) => {
-          copied.push(text);
-          return Promise.resolve();
-        },
-      },
-    });
-  });
-
-const copiedTexts = (page: Page) =>
-  page.evaluate(() => {
-    const value: unknown = Reflect.get(window, '__copied');
-    return Array.isArray(value) ? value.map(String) : [];
-  });
+import { copiedTexts, recordClipboard } from './clipboard';
 
 const build = async (page: Page, glyphs: readonly string[]) => {
   const palette = page.getByRole('region', { name: 'Symbols' });

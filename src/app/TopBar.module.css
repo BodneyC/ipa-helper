@@ -9,16 +9,18 @@
 
 .inner {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-4);
   max-width: var(--page-max-width);
   height: 100%;
   margin: 0 auto;
-  padding: var(--space-3) var(--page-gutter);
+  padding: 0 var(--page-gutter);
 }
 
 .title {
+  flex-shrink: 0;
   margin: 0;
+  white-space: nowrap;
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -29,10 +31,31 @@
 }
 
 .tagline {
+  min-width: 0;
   margin: 0;
   overflow: hidden;
   color: var(--color-text-muted);
   font-size: 0.875rem;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.controls {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.iconButton {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  font-weight: 600;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  background: var(--color-surface-raised);
 }
