@@ -8,10 +8,19 @@ import {
   THEMES,
   isMacroName,
   isSettings,
+  loadSettings,
   parseSettings,
+  saveSettings,
   settingsReducer,
 } from './settings';
 import type { Settings } from './settings';
+import type { KeyValueStore } from '../domain/ports';
+
+/** An in-memory KeyValueStore. */
+const memoryStore = (initial: Record<string, string> = {}): KeyValueStore => {
+  const data = new Map(Object.entries(initial));
+  return { get: (k) => data.get(k), set: (k, v) => void data.set(k, v) };
+};
 
 const custom: Settings = {
   theme: 'light',
@@ -144,5 +153,38 @@ describe('settings reducer', () => {
   it('throws on an unknown action, as untyped data could carry', () => {
     // @ts-expect-error: deliberately not a SettingsAction.
     expect(() => settingsReducer(custom, { type: 'bogus' })).toThrow('Unexpected value');
+  });
+});
+
+describe('settings persistence (FR-42)', () => {
+  it('round-trips any settings through a store', () => {
+    fc.assert(
+      fc.property(anySettings, (settings) => {
+        const store = memoryStore();
+        saveSettings(store, settings);
+        expect(loadSettings(store)).toEqual(settings);
+      }),
+    );
+  });
+
+  it('stores JSON under the versioned key the no-flash script reads', () => {
+    const store = memoryStore();
+    saveSettings(store, custom);
+    expect(JSON.parse(store.get(SETTINGS_STORAGE_KEY) ?? '')).toEqual(custom);
+  });
+
+  it('falls back to the defaults for nothing stored or corrupt JSON', () => {
+    expect(loadSettings(memoryStore())).toBe(DEFAULT_SETTINGS);
+    expect(loadSettings(memoryStore({ [SETTINGS_STORAGE_KEY]: '{not json' }))).toBe(
+      DEFAULT_SETTINGS,
+    );
+  });
+
+  it('keeps the valid fields of partly bad data', () => {
+    const raw = JSON.stringify({ theme: 'light', macroName: 'no digits 1' });
+    expect(loadSettings(memoryStore({ [SETTINGS_STORAGE_KEY]: raw }))).toEqual({
+      ...DEFAULT_SETTINGS,
+      theme: 'light',
+    });
   });
 });

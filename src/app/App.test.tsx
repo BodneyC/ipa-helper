@@ -29,4 +29,13 @@ describe('<App>', () => {
     await user.click(screen.getByRole('button', { name: /^ɪ\s?,/ }));
     expect(screen.getByRole('textbox', { name: 'Word' })).toHaveTextContent('/θɪ/');
   });
+
+  it('FR-42: the Settings button opens the settings dialog', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    await user.click(screen.getByRole('button', { name: 'Settings' }));
+    expect(screen.getByRole('dialog', { name: 'Settings' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
 });

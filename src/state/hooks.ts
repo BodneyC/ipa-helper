@@ -3,7 +3,7 @@ import type { Dispatch } from 'react';
 
 import type { EditorAction, EditorState } from './editor';
 import type { Settings, SettingsAction } from './settings';
-import type { Clipboard, FragmentStore } from '../domain/ports';
+import type { Clipboard, DocumentTheme, FragmentStore, KeyValueStore } from '../domain/ports';
 
 /** The editor store (ARCHITECTURE §5), provided by `<Providers>`. */
 export interface EditorStore {
@@ -36,6 +36,10 @@ export const useSettings = (): SettingsStore =>
 export interface Services {
   readonly clipboard: Clipboard;
   readonly fragments: FragmentStore;
+  /** Where settings persist (FR-42). */
+  readonly store: KeyValueStore;
+  /** Applies the theme to the page (FR-40, FR-41). */
+  readonly theme: DocumentTheme;
 }
 
 export const ServicesContext = createContext<Services | null>(null);

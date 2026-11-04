@@ -94,7 +94,7 @@ ipa-helper/
 │  │  │  └─ ipa-tokeniser.ts  # M6: greedy longest-match IPA → Word
 │  │  ├─ codec/
 │  │  │  └─ url.ts            # Word ↔ URL fragment: `w=1:id.id.id`, decode → Result
-│  │  ├─ ports.ts             # Clipboard, KeyValueStore, AudioPlayer interfaces
+│  │  ├─ ports.ts             # Clipboard, FragmentStore, KeyValueStore, DocumentTheme, AudioPlayer interfaces
 │  │  └─ result.ts            # Result<T, E> type and helpers
 │  ├─ state/
 │  │  ├─ editor.ts            # reducer: word, cursor, undo/redo stacks
@@ -102,7 +102,8 @@ ipa-helper/
 │  │  └─ hooks.ts             # EditorContext/SettingsContext + useEditor, useSettings (providers in app/providers.tsx)
 │  ├─ adapters/
 │  │  ├─ clipboard.ts         # navigator.clipboard implementation of the Clipboard port
-│  │  ├─ local-storage.ts     # KeyValueStore over localStorage (with a versioned schema)
+│  │  ├─ local-storage.ts     # KeyValueStore over localStorage; blocked storage reads as empty
+│  │  ├─ document-theme.ts    # DocumentTheme: <html data-theme data-contrast>, follows the system live
 │  │  ├─ url-hash.ts          # sync editor ↔ location.hash
 │  │  └─ audio/               # M4+: AudioPlayer implementations, Web Worker entry
 │  ├─ ui/
@@ -111,7 +112,7 @@ ipa-helper/
 │  │     ├─ palette/          # SymbolKey, ConsonantChart, VowelTrapezoid (domain: chart.ts vowelTrapezoid), KeyGrid…
 │  │     ├─ word/             # WordDisplay, TokenCursor
 │  │     ├─ output/           # OutputPanel, CopyRow
-│  │     ├─ settings/
+│  │     ├─ settings/         # SettingsDialog (FR-42), suggested \newcommand
 │  │     └─ help/
 │  └─ styles/
 │     ├─ tokens.css           # THE ONLY place hex colours may appear
@@ -246,6 +247,8 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   value) without discarding the valid ones. Fields: `theme` (system|dark|light),
   `contrast`, `inventory`, `macroName` (letters only), `ipaSlashes` (FR-20),
   `tipaSlashes` (Q-2), `rDisplay`, `collapsedGroups` (categories), `soundOnSelect`.
+  `main.tsx` reads them with `loadSettings(store)` before the first render;
+  `<SettingsSync>` writes them back with `saveSettings` on every change.
 - **URL sync**: the editor word is mirrored to `location.hash`
   (`history.replaceState`, debounced 250 ms) through the `FragmentStore` port
   (`adapters/url-hash.ts`). On load, `main.tsx` decodes the hash through
@@ -294,6 +297,9 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   pair declared in `src/styles/contrast-pairs.ts`, in both themes.
 - Theme is applied with `data-theme="dark|light"` and `data-contrast="soft|medium|hard"`
   on `<html>`, set before first paint by a tiny inline script to avoid a flash.
+  After that, `<SettingsSync>` (`app/`) applies settings through the
+  `DocumentTheme` port (`adapters/document-theme.ts`), which also follows
+  `prefers-color-scheme` live while the theme is `system`.
 
 ## 8. Audio (M4–M5, ADR-0009 — Proposed)
 

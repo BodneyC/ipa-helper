@@ -1,7 +1,7 @@
 import { useMemo, useReducer } from 'react';
 import type { ReactNode } from 'react';
 
-import { NULL_CLIPBOARD, NULL_FRAGMENTS } from '../domain/ports';
+import { NULL_CLIPBOARD, NULL_FRAGMENTS, NULL_STORE, NULL_THEME } from '../domain/ports';
 import { EMPTY_WORD } from '../domain/word/word';
 import type { Word } from '../domain/word/word';
 import { editorReducer, initialEditorState } from '../state/editor';
@@ -10,14 +10,19 @@ import type { Services } from '../state/hooks';
 import { DEFAULT_SETTINGS, settingsReducer } from '../state/settings';
 import type { Settings } from '../state/settings';
 
-const NULL_SERVICES: Services = { clipboard: NULL_CLIPBOARD, fragments: NULL_FRAGMENTS };
+const NULL_SERVICES: Services = {
+  clipboard: NULL_CLIPBOARD,
+  fragments: NULL_FRAGMENTS,
+  store: NULL_STORE,
+  theme: NULL_THEME,
+};
 
 interface ProvidersProps {
   /** The word to start with, e.g. decoded from the URL fragment (FR-15). */
   readonly initialWord?: Word;
   readonly initialSettings?: Settings;
-  /** Adapters for the domain ports. Defaults to null objects (tests, no browser). */
-  readonly services?: Services;
+  /** Adapters for the domain ports. Any left out are null objects (tests, no browser). */
+  readonly services?: Partial<Services>;
   readonly children: ReactNode;
 }
 
@@ -31,12 +36,17 @@ export function Providers({
   services = NULL_SERVICES,
   children,
 }: ProvidersProps) {
+  const { clipboard, fragments, store, theme } = { ...NULL_SERVICES, ...services };
+  const allServices = useMemo(
+    () => ({ clipboard, fragments, store, theme }),
+    [clipboard, fragments, store, theme],
+  );
   const [state, dispatch] = useReducer(editorReducer, initialWord, initialEditorState);
   const [settings, settingsDispatch] = useReducer(settingsReducer, initialSettings);
   const editor = useMemo(() => ({ state, dispatch }), [state]);
   const settingsStore = useMemo(() => ({ settings, dispatch: settingsDispatch }), [settings]);
   return (
-    <ServicesContext value={services}>
+    <ServicesContext value={allServices}>
       <SettingsContext value={settingsStore}>
         <EditorContext value={editor}>{children}</EditorContext>
       </SettingsContext>

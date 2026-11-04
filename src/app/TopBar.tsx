@@ -11,13 +11,16 @@ interface TopBarProps {
   readonly filterRef: RefObject<HTMLInputElement | null>;
   /** Opens the keyboard shortcuts dialog (FR-51). */
   readonly onHelp: () => void;
+  /** Opens the settings dialog (FR-42). */
+  readonly onSettings: () => void;
 }
 
 /**
  * The sticky top bar (SPEC §6): the title, then the inventory switch (FR-3),
- * the filter (FR-4) and the shortcuts button.
+ * the filter (FR-4), the shortcuts button and settings (FR-42). On a phone the
+ * shortcuts button gives way; the settings dialog links to the shortcuts too.
  */
-export function TopBar({ query, onQueryChange, filterRef, onHelp }: TopBarProps) {
+export function TopBar({ query, onQueryChange, filterRef, onHelp, onSettings }: TopBarProps) {
   const { settings, dispatch } = useSettings();
   return (
     <header className={styles['bar']}>
@@ -64,12 +67,26 @@ export function TopBar({ query, onQueryChange, filterRef, onHelp }: TopBarProps)
           </label>
           <button
             type="button"
-            className={styles['iconButton']}
+            className={`${styles['iconButton'] ?? ''} ${styles['help'] ?? ''}`}
             aria-keyshortcuts="?"
             onClick={onHelp}
           >
             <span aria-hidden="true">?</span>
             <span className="visuallyHidden">Keyboard shortcuts</span>
+          </button>
+          <button type="button" className={styles['iconButton']} onClick={onSettings}>
+            <svg
+              className={styles['icon']}
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" />
+              <circle cx="16" cy="6" r="2" />
+              <circle cx="10" cy="12" r="2" />
+              <circle cx="18" cy="18" r="2" />
+            </svg>
+            <span className="visuallyHidden">Settings</span>
           </button>
         </div>
       </div>

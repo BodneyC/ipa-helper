@@ -25,9 +25,10 @@
     />
     <script>
       // No-flash theme (ADR-0006, FR-40): set data-theme and data-contrast before
-      // first paint. A stored theme override wins; otherwise follow the system,
-      // and keep following it while the page is open. Keep the storage key and
-      // values in step with src/state/settings.ts.
+      // first paint. A stored theme override wins; otherwise follow the system.
+      // Once the app runs, src/adapters/document-theme.ts takes over (including
+      // following system changes). Keep the storage key and values in step with
+      // src/state/settings.ts.
       (function () {
         var root = document.documentElement;
         var settings = {};
@@ -38,11 +39,7 @@
         }
         var query = window.matchMedia('(prefers-color-scheme: light)');
         var override = settings.theme === 'dark' || settings.theme === 'light';
-        var apply = function () {
-          root.dataset.theme = override ? settings.theme : query.matches ? 'light' : 'dark';
-        };
-        apply();
-        if (!override) query.addEventListener('change', apply);
+        root.dataset.theme = override ? settings.theme : query.matches ? 'light' : 'dark';
         root.dataset.contrast =
           settings.contrast === 'soft' || settings.contrast === 'hard'
             ? settings.contrast

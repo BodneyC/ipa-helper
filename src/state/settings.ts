@@ -1,5 +1,6 @@
 import { CATEGORIES, INVENTORY_IDS } from '../domain/inventory/types';
 import type { Category, InventoryId } from '../domain/inventory/types';
+import type { KeyValueStore } from '../domain/ports';
 import { assertNever } from '../domain/result';
 import type { RDisplay } from '../domain/serialise/serialiser';
 
@@ -141,4 +142,23 @@ export const settingsReducer = (state: Settings, action: SettingsAction): Settin
     default:
       return assertNever(action);
   }
+};
+
+/**
+ * Reads the stored settings (FR-42). Missing, unparsable or invalid data falls
+ * back to the defaults, field by field ({@link parseSettings}).
+ */
+export const loadSettings = (store: KeyValueStore): Settings => {
+  const raw = store.get(SETTINGS_STORAGE_KEY);
+  if (raw === undefined) return DEFAULT_SETTINGS;
+  try {
+    return parseSettings(JSON.parse(raw));
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+};
+
+/** Stores the settings (FR-42). */
+export const saveSettings = (store: KeyValueStore, settings: Settings): void => {
+  store.set(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
 };
