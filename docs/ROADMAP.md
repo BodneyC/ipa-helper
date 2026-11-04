@@ -46,18 +46,18 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 ## M2: UI MVP
 
-- [ ] **M2.1** Design tokens (`tokens.css`, `themes.css`) for gruvbox dark and light, a
-  no-flash theme script, and a contrast unit test. refs: FR-40, ADR-0006, NFR-2
-- [ ] **M2.2** Fonts: self-hosted Charis SIL subset (IPA glyphs used) and a mono font, with
-  `font-display: swap` and preloading. refs: NFR-7
-- [ ] **M2.3** App shell: top bar, workbench card, palette area, responsive layout. deps: M2.1 · refs: SPEC §6
-- [ ] **M2.4** `SymbolKey` component (states, aria-label, tooltip with name, example, TIPA). deps: M2.1, M1.2 · refs: FR-2
-- [ ] **M2.5** Palette groups: `ConsonantChart` (place × manner grid), `KeyGrid`
-  (affricates, diphthongs, suprasegmentals) and an initial vowel grid. deps: M2.4 · refs: FR-1
-- [ ] **M2.6** `WordDisplay` with token cursor, click-to-place cursor and keyboard editing. deps: M1.7, M2.3 · refs: FR-11–FR-13
-- [ ] **M2.7** `OutputPanel`: IPA and TIPA rows, copy buttons, full-macro copy, live-region feedback. deps: M1.4, M1.5 · refs: FR-20–FR-23
-- [ ] **M2.8** URL hash sync. deps: M1.6, M2.6 · refs: FR-15
-- [ ] **M2.9** E2E: build `/ˈθɔːnɪk/` by clicking, check both outputs, copy, reload the shared URL, and run axe. deps: M2.5–M2.8
+- [x] **M2.1** Design tokens (`tokens.css`, `themes.css`) for gruvbox dark and light, a
+  no-flash theme script, and a contrast unit test. refs: FR-40, ADR-0006, NFR-2 (19b6def)
+- [x] **M2.2** Fonts: self-hosted Charis SIL subset (IPA glyphs used) and a mono font, with
+  `font-display: swap` and preloading. refs: NFR-7 (6aa4e3a)
+- [x] **M2.3** App shell: top bar, workbench card, palette area, responsive layout. deps: M2.1 · refs: SPEC §6 (c262080)
+- [x] **M2.4** `SymbolKey` component (states, aria-label, tooltip with name, example, TIPA). deps: M2.1, M1.2 · refs: FR-2 (fe378cc)
+- [x] **M2.5** Palette groups: `ConsonantChart` (place × manner grid), `KeyGrid`
+  (affricates, diphthongs, suprasegmentals) and an initial vowel grid. deps: M2.4 · refs: FR-1 (ddf8b9a)
+- [x] **M2.6** `WordDisplay` with token cursor, click-to-place cursor and keyboard editing. deps: M1.7, M2.3 · refs: FR-11–FR-13 (b71e8d7)
+- [x] **M2.7** `OutputPanel`: IPA and TIPA rows, copy buttons, full-macro copy, live-region feedback. deps: M1.4, M1.5 · refs: FR-20–FR-23 (6bb3b8f)
+- [x] **M2.8** URL hash sync. deps: M1.6, M2.6 · refs: FR-15 (b628b74)
+- [x] **M2.9** E2E: build `/ˈθɔːnɪk/` by clicking, check both outputs, copy, reload the shared URL, and run axe. deps: M2.5–M2.8 (c45ed04)
 - [ ] **M2.10** First deploy to GitHub Pages. deps: M0.6, M2.9
 
 ## M3: Polish and usability
@@ -111,3 +111,8 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 - "Minimal braces" TIPA output mode.
 - Syllable-structure visualisation (onset/nucleus/coda colouring).
 - Import/export saved words as JSON.
+- Compact sticky word card on short phone screens: at 360 × 640 the sticky card
+  (word, actions, both output rows) covers about 70% of the viewport. Collapse the
+  output rows or un-stick below a height threshold.
+- Run WebKit e2e locally on WSL: install its system libraries
+  (`sudo pnpm exec playwright install-deps webkit`). CI already does this.
