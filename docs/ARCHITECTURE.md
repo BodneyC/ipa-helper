@@ -82,7 +82,7 @@ ipa-helper/
 │  │  │  └─ index.ts          # registry: byId, inventories, groups
 │  │  ├─ word/
 │  │  │  ├─ word.ts           # Word = readonly Token[]; pure ops (insert, delete…)
-│  │  │  └─ cursor.ts
+│  │  │  └─ cursor.ts         # CursorWord = { word, cursor }; ops return the input object on no-op
 │  │  ├─ serialise/
 │  │  │  ├─ serialiser.ts     # interface Serialiser { serialise(word): string }
 │  │  │  ├─ ipa.ts
