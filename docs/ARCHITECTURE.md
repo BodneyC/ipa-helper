@@ -340,6 +340,7 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 | E2E | Playwright (Chromium, Firefox, WebKit) | each spec FR, keyboard flows, URL sharing | all green |
 | A11y | @axe-core/playwright | every page state in e2e | 0 violations |
 | Visual | Playwright screenshots, `visual` project (`tests/visual`, Chromium) | dark/light × 360/768/1280 px | reviewed diffs (non-blocking CI job) |
+| Performance | Lighthouse CI (`lighthouserc.json`), median of 3 runs | NFR-3 on simulated Fast 4G (60 ms RTT, 9 Mbps down, 1.5 Mbps up, 4× CPU) | perf ≥ 95, a11y = 100, LCP ≤ 1.5 s |
 | TeX | `pdflatex` in CI (M6.4) | TIPA output for every symbol compiles | all compile |
 
 Visual baselines live in `tests/visual/__screenshots__/` with no OS suffix. To
@@ -363,6 +364,7 @@ Test names cite requirement IDs where applicable: `it('FR-13: Backspace deletes 
 | `pnpm test` / `test:watch` / `test:coverage` | Vitest |
 | `pnpm test:e2e` | Playwright |
 | `pnpm test:visual` | Playwright screenshot comparison (`visual` project) |
+| `pnpm lighthouse` | Build, then Lighthouse CI against `dist/` with Playwright's Chromium: performance ≥ 95, accessibility = 100, LCP ≤ 1.5 s (NFR-3); reports in `.lighthouseci/` |
 | `pnpm knip` | Unused files, exports and dependencies |
 | `pnpm size` | size-limit: initial JS ≤ 100 kB gzipped (NFR-3), measured on `dist/` |
 | `pnpm check` | typecheck → lint → format:check → knip → test:coverage → build → size |

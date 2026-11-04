@@ -15,3 +15,7 @@ package-lock.json
 yarn.lock
 bun.lockb
 .claude/settings.local.json
+.lighthouseci/
+# Under WSL, chrome-launcher (via Lighthouse CI) makes its Chrome profile dirs
+# under a Windows-style relative path in the working directory.
+/C:*
