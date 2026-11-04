@@ -8,6 +8,7 @@ import styles from './Palette.module.css';
 import { VowelTrapezoid } from './VowelTrapezoid';
 import { symbolsIn } from '../../../domain/inventory';
 import type {
+  Category,
   ConsonantSymbol,
   InventoryId,
   PhoneSymbol,
@@ -24,6 +25,9 @@ interface PaletteProps {
   readonly rDisplay: RDisplay;
   /** FR-4: the filter text; blank shows everything. */
   readonly query: string;
+  /** FR-5: groups the user has collapsed. Ignored while filtering, so matches show. */
+  readonly collapsedGroups: readonly Category[];
+  readonly onToggleGroup: (group: Category) => void;
   /** FR-10: a key was activated. */
   readonly onActivate: (symbol: PhoneSymbol) => void;
 }
@@ -36,7 +40,14 @@ const isVowel = (s: PhoneSymbol): s is VowelSymbol => s.category === 'vowel';
  * FR-1, FR-3, FR-4: the symbol palette. One card per group that has symbols in
  * the chosen inventory matching the filter, in display order.
  */
-export function Palette({ inventory, rDisplay, query, onActivate }: PaletteProps) {
+export function Palette({
+  inventory,
+  rDisplay,
+  query,
+  collapsedGroups,
+  onToggleGroup,
+  onActivate,
+}: PaletteProps) {
   const symbols = symbolsIn(inventory).filter((s) => matchesFilter(s, query, rDisplay));
   const filtering = query.trim() !== '';
 
@@ -72,6 +83,16 @@ export function Palette({ inventory, rDisplay, query, onActivate }: PaletteProps
             title={group.title}
             headingLevel={3}
             accent={group.accent}
+            collapse={
+              filtering
+                ? undefined
+                : {
+                    collapsed: collapsedGroups.includes(group.category),
+                    onToggle: () => {
+                      onToggleGroup(group.category);
+                    },
+                  }
+            }
             className={
               group.layout === 'chart'
                 ? styles['wide']

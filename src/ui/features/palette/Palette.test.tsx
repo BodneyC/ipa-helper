@@ -5,12 +5,22 @@ import { describe, expect, it, vi } from 'vitest';
 import { headerLabel } from './groups';
 import { Palette } from './Palette';
 import { symbolsIn } from '../../../domain/inventory';
-import type { PhoneSymbol } from '../../../domain/inventory/types';
+import type { Category, PhoneSymbol } from '../../../domain/inventory/types';
 
 const renderPalette = (rDisplay: 'narrow' | 'broad' = 'narrow', query = '') => {
   const onActivate = vi.fn<(s: PhoneSymbol) => void>();
-  render(<Palette inventory="rp" rDisplay={rDisplay} query={query} onActivate={onActivate} />);
-  return { onActivate };
+  const onToggleGroup = vi.fn<(g: Category) => void>();
+  const view = render(
+    <Palette
+      inventory="rp"
+      rDisplay={rDisplay}
+      query={query}
+      collapsedGroups={[]}
+      onToggleGroup={onToggleGroup}
+      onActivate={onActivate}
+    />,
+  );
+  return { onActivate, onToggleGroup, view };
 };
 
 describe('<Palette>', () => {
@@ -31,7 +41,8 @@ describe('<Palette>', () => {
 
   it('FR-1, FR-3: has one key per RP symbol', () => {
     renderPalette();
-    expect(screen.getAllByRole('button')).toHaveLength(symbolsIn('rp').length);
+    const keys = screen.getAllByRole('button').filter((b) => !b.hasAttribute('aria-expanded'));
+    expect(keys).toHaveLength(symbolsIn('rp').length);
   });
 
   it('FR-1: lays consonants out as a chart with place and manner headers', () => {
@@ -108,7 +119,14 @@ describe('<Palette>', () => {
 
   it('FR-4: says so when nothing matches, and when one symbol does', () => {
     const { unmount } = render(
-      <Palette inventory="rp" rDisplay="narrow" query="zzz" onActivate={vi.fn()} />,
+      <Palette
+        inventory="rp"
+        rDisplay="narrow"
+        query="zzz"
+        collapsedGroups={[]}
+        onToggleGroup={vi.fn()}
+        onActivate={vi.fn()}
+      />,
     );
     expect(screen.queryAllByRole('heading', { level: 3 })).toEqual([]);
     expect(screen.getByRole('status')).toHaveTextContent('No symbols match “zzz”.');
@@ -120,6 +138,31 @@ describe('<Palette>', () => {
   it('keeps the status region quiet without a filter', () => {
     renderPalette();
     expect(screen.getByRole('status')).toBeEmptyDOMElement();
+  });
+
+  it('FR-5: collapses groups, and shows every match while filtering', async () => {
+    const user = userEvent.setup();
+    const { onToggleGroup, view } = renderPalette();
+    await user.click(screen.getByRole('button', { name: 'Vowels' }));
+    expect(onToggleGroup).toHaveBeenCalledWith('vowel');
+
+    const props = {
+      inventory: 'rp',
+      rDisplay: 'narrow',
+      onToggleGroup,
+      onActivate: vi.fn(),
+    } as const;
+    view.rerender(<Palette {...props} query="" collapsedGroups={['vowel']} />);
+    expect(screen.getByRole('button', { name: 'Vowels' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+    expect(screen.queryByRole('button', { name: /^ə\s?,/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^ʃ\s?,/ })).toBeVisible();
+
+    view.rerender(<Palette {...props} query="about" collapsedGroups={['vowel']} />);
+    expect(screen.queryByRole('button', { name: 'Vowels' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^ə\s?,/ })).toBeVisible();
   });
 
   it('turns feature names into header labels', () => {

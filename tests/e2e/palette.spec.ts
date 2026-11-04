@@ -85,6 +85,23 @@ test.describe('symbol palette (FR-1, FR-2)', () => {
     await expectNoA11yViolations(page);
   });
 
+  test('FR-5: collapsed groups stay collapsed after a reload', async ({ page }) => {
+    await page.goto('/');
+    const toggle = page.getByRole('button', { name: 'Diphthongs' });
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    const diphthongs = page.getByRole('region', { name: 'Diphthongs' });
+    await expect(diphthongs.getByRole('button', { name: /^eɪ\s?,/ })).toBeHidden();
+    await expectNoA11yViolations(page);
+
+    await page.reload();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(diphthongs.getByRole('button', { name: /^eɪ\s?,/ })).toBeHidden();
+    await toggle.press('Enter');
+    await expect(diphthongs.getByRole('button', { name: /^eɪ\s?,/ })).toBeVisible();
+  });
+
   test('NFR-4: keys are at least 44 × 44 px', async ({ page }) => {
     await page.goto('/');
     const sizes = await page

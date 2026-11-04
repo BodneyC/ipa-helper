@@ -78,7 +78,8 @@ pronounced in British English, at no cost and without signing up for anything.
   every query word must match (`voiceless fric`). The palette says how many
   symbols match, and hides groups with none.
 - **FR-5** Users can collapse and expand palette groups. The app remembers which
-  groups are collapsed across reloads.
+  groups are collapsed across reloads. While a filter is active (FR-4), matching groups
+  show expanded, so no match is hidden.
 
 ### 4.2 Building a word
 

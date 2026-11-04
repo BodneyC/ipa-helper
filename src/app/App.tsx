@@ -21,7 +21,7 @@ import { WordDisplay } from '../ui/features/word/WordDisplay';
  */
 export function App() {
   const { dispatch } = useEditor();
-  const { settings } = useSettings();
+  const { settings, dispatch: settingsDispatch } = useSettings();
   const [helpOpen, setHelpOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -61,6 +61,10 @@ export function App() {
         <Palette
           inventory={settings.inventory}
           query={query}
+          collapsedGroups={settings.collapsedGroups}
+          onToggleGroup={(group) => {
+            settingsDispatch({ type: 'toggleGroup', group });
+          }}
           rDisplay={settings.rDisplay}
           onActivate={(symbol) => {
             dispatch({ type: 'insert', symbolId: symbol.id });

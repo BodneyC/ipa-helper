@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 
 import { Card } from './Card';
 
@@ -34,5 +35,32 @@ describe('<Card>', () => {
       </Card>,
     );
     expect(screen.getByRole('button', { name: 'Collapse' })).toBeVisible();
+  });
+
+  it('FR-5: can collapse, with the heading as a disclosure button', async () => {
+    const user = userEvent.setup();
+    const onToggle = vi.fn();
+    const { rerender } = render(
+      <Card title="Vowels" headingLevel={3} collapse={{ collapsed: false, onToggle }}>
+        <p>body</p>
+      </Card>,
+    );
+    const toggle = screen.getByRole('button', { name: 'Vowels' });
+    expect(screen.getByRole('heading', { level: 3, name: 'Vowels' })).toContainElement(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('body')).toBeVisible();
+    await user.click(toggle);
+    expect(onToggle).toHaveBeenCalledOnce();
+
+    rerender(
+      <Card title="Vowels" headingLevel={3} collapse={{ collapsed: true, onToggle }}>
+        <p>body</p>
+      </Card>,
+    );
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByText('body')).not.toBeVisible();
+    const body = document.getElementById(toggle.getAttribute('aria-controls') ?? '');
+    expect(body).toContainElement(screen.getByText('body'));
+    expect(screen.getByRole('region', { name: 'Vowels' })).toBeInTheDocument();
   });
 });

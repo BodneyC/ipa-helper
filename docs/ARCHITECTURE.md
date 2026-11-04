@@ -278,6 +278,10 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   with the output panel.
 - Dialogs use the native `<dialog>` with `showModal()` (`ui/components/Dialog.tsx`),
   so the browser handles inertness and Escape. Focus returns to the opener.
+- Collapsible groups (FR-5): `<Card collapse>` makes the heading a disclosure
+  button (`aria-expanded`/`aria-controls`) and hides the body. The state is
+  `settings.collapsedGroups`, so it persists. While a filter is active, groups
+  show their matches expanded and drop the toggle.
 - Live region: one app-level `<Announcer>` for "Added ʃ", "Copied TIPA", and so on.
 - Components stay presentational where possible. Feature containers connect to state
   via hooks.
