@@ -229,9 +229,9 @@ export default defineConfig(
     },
   },
 
-  // End-to-end tests.
+  // End-to-end and visual tests.
   {
-    files: ['tests/e2e/**/*.ts'],
+    files: ['tests/e2e/**/*.ts', 'tests/visual/**/*.ts'],
     ...playwright.configs['flat/recommended'],
     rules: {
       ...playwright.configs['flat/recommended'].rules,

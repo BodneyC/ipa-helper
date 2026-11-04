@@ -4,8 +4,9 @@ const port = 4173;
 const isCI = process.env['CI'] !== undefined;
 
 // E2E runs against the production build served by `vite preview` (ADR-0005).
+// The `visual` project holds the screenshot baselines (M3.8): Chromium only, and
+// not part of the per-browser e2e runs.
 export default defineConfig({
-  testDir: './tests/e2e',
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
@@ -17,10 +18,21 @@ export default defineConfig({
     baseURL: `http://localhost:${String(port)}`,
     trace: 'on-first-retry',
   },
+  expect: {
+    toHaveScreenshot: {
+      animations: 'disabled',
+      caret: 'hide',
+      // Absorbs anti-aliasing differences between machines, not layout changes.
+      maxDiffPixelRatio: 0.01,
+    },
+  },
+  // One baseline per screenshot, whatever the OS: the visual tests pin fonts.
+  snapshotPathTemplate: '{testDir}/__screenshots__/{arg}{ext}',
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    { name: 'chromium', testDir: './tests/e2e', use: { ...devices['Desktop Chrome'] } },
+    { name: 'firefox', testDir: './tests/e2e', use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', testDir: './tests/e2e', use: { ...devices['Desktop Safari'] } },
+    { name: 'visual', testDir: './tests/visual', use: { ...devices['Desktop Chrome'] } },
   ],
   webServer: {
     command: `pnpm exec vite build && pnpm exec vite preview --port ${String(port)} --strictPort`,

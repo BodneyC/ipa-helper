@@ -339,8 +339,14 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 | Component | Vitest + Testing Library + user-event | each UI component's behaviour and ARIA | included in coverage |
 | E2E | Playwright (Chromium, Firefox, WebKit) | each spec FR, keyboard flows, URL sharing | all green |
 | A11y | @axe-core/playwright | every page state in e2e | 0 violations |
-| Visual | Playwright screenshots (M3+) | themes × breakpoints | reviewed diffs |
+| Visual | Playwright screenshots, `visual` project (`tests/visual`, Chromium) | dark/light × 360/768/1280 px | reviewed diffs (non-blocking CI job) |
 | TeX | `pdflatex` in CI (M6.4) | TIPA output for every symbol compiles | all compile |
+
+Visual baselines live in `tests/visual/__screenshots__/` with no OS suffix. To
+keep them machine-independent, the visual tests pin the UI font to the
+self-hosted face, emulate reduced motion, and allow a 1 % pixel difference for
+anti-aliasing. They check layout, colour and spacing, not the system font.
+Accept intentional changes with `pnpm test:visual --update-snapshots`.
 
 Test names cite requirement IDs where applicable: `it('FR-13: Backspace deletes the token before the cursor')`.
 
@@ -356,6 +362,7 @@ Test names cite requirement IDs where applicable: `it('FR-13: Backspace deletes 
 | `pnpm format` / `format:check` | Prettier |
 | `pnpm test` / `test:watch` / `test:coverage` | Vitest |
 | `pnpm test:e2e` | Playwright |
+| `pnpm test:visual` | Playwright screenshot comparison (`visual` project) |
 | `pnpm knip` | Unused files, exports and dependencies |
 | `pnpm size` | size-limit: initial JS ≤ 100 kB gzipped (NFR-3), measured on `dist/` |
 | `pnpm check` | typecheck → lint → format:check → knip → test:coverage → build → size |

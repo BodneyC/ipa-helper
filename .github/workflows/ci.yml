@@ -70,3 +70,33 @@ jobs:
             test-results/
           retention-days: 14
           if-no-files-found: ignore
+
+  visual:
+    # M3.8 / ADR-0005: screenshot diffs are reviewed, not gating. A failure here
+    # uploads the diffs; accept intentional ones with `pnpm test:visual --update-snapshots`.
+    name: visual (reviewed)
+    needs: check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Playwright Chromium and OS dependencies
+        run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:visual
+      - name: Upload visual diffs
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-diffs
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+          if-no-files-found: ignore
