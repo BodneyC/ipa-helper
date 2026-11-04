@@ -90,7 +90,7 @@ ipa-helper/
 │  │  ├─ parse/
 │  │  │  └─ ipa-tokeniser.ts  # M6: greedy longest-match IPA → Word
 │  │  ├─ codec/
-│  │  │  └─ url.ts            # Word ↔ URL fragment
+│  │  │  └─ url.ts            # Word ↔ URL fragment: `w=1:id.id.id`, decode → Result
 │  │  ├─ ports.ts             # Clipboard, KeyValueStore, AudioPlayer interfaces
 │  │  └─ result.ts            # Result<T, E> type and helpers
 │  ├─ state/

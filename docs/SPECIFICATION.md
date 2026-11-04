@@ -88,8 +88,9 @@ pronounced in British English, at no cost and without signing up for anything.
 - **FR-13** Editing actions: **Backspace** deletes the token before the cursor,
   **Delete** the token after it, and **Clear** empties the word. Clear can be undone.
 - **FR-14** Undo/redo (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z) cover every word edit.
-- **FR-15** The current word is encoded in the URL fragment (e.g.
-  `#w=ˈ.f.l.ɒ.ɡ.ɪ.ʃ`, or a compact ID form), so a shared link restores it.
+- **FR-15** The current word is encoded in the URL fragment as versioned
+  symbol IDs (e.g. `#w=1:primary-stress.f.l.turned-script-a.g.small-cap-i.esh`
+  for `/ˈflɒɡɪʃ/`, see ADR-0007), so a shared link restores it.
   Invalid fragments are ignored and the app shows a non-blocking notice.
 - **FR-16** *(M3)* **Saved words**: the user can save the current word with
   an optional gloss/label to a local list (browser storage), then reload,
