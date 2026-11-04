@@ -1,0 +1,57 @@
+.card {
+  position: relative;
+  min-width: 0;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+/* The accent bar: a thin top edge, never a large fill (SPEC §6). */
+.card[data-accent]::before {
+  content: '';
+  position: absolute;
+  inset: -1px -1px auto;
+  height: 3px;
+  background: var(--accent);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.card[data-accent='consonant'] {
+  --accent: var(--color-accent-consonant);
+}
+
+.card[data-accent='affricate'] {
+  --accent: var(--color-accent-affricate);
+}
+
+.card[data-accent='vowel'] {
+  --accent: var(--color-accent-vowel);
+}
+
+.card[data-accent='diphthong'] {
+  --accent: var(--color-accent-diphthong);
+}
+
+.card[data-accent='supra'] {
+  --accent: var(--color-accent-supra);
+}
+
+.card[data-accent='diacritic'] {
+  --accent: var(--color-accent-diacritic);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}

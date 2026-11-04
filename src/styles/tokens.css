@@ -59,11 +59,22 @@
   --duration-medium: 240ms;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --shadow-popover: 0 8px 24px -8px var(--gb-dark0-hard);
+
+  /* Layout. */
+  --page-max-width: 75rem;
+  --page-gutter: var(--space-4);
+  --topbar-height: 3.5rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
     --duration-fast: 0ms;
     --duration-medium: 0ms;
+  }
+}
+
+@media (width >= 768px) {
+  :root {
+    --page-gutter: var(--space-6);
   }
 }

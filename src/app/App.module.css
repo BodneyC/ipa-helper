@@ -1,0 +1,36 @@
+.main {
+  display: grid;
+  align-content: start;
+  gap: var(--space-5);
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding: var(--space-5) var(--page-gutter) var(--space-8);
+}
+
+.workbench {
+  z-index: 10;
+}
+
+/* Group cards flow into as many columns as fit; wide groups span them all. */
+.palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.placeholder {
+  margin: 0;
+  color: var(--color-text-subtle);
+  font-family: var(--font-ipa);
+  font-size: 2.5rem;
+}
+
+/* Narrow screens: the word card stays in view while the palette scrolls (SPEC §6). */
+@media (width < 768px) {
+  .workbench {
+    position: sticky;
+    top: calc(var(--topbar-height) + var(--space-2));
+    box-shadow: 0 var(--space-2) 0 var(--color-bg);
+  }
+}
