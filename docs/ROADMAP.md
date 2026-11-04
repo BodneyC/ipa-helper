@@ -32,17 +32,17 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 ## M1: Domain core (pure TypeScript)
 
 - [x] **M1.1** Inventory types (`PhoneSymbol` union, `TipaEncoding`, branded `SymbolId`) and the `Result` type. refs: ARCH §4 (23548f2)
-- [ ] **M1.2** RP inventory data: consonants, affricates, vowels, diphthongs and
-  suprasegmentals exactly as in SPEC §7. deps: M1.1 · refs: FR-1, FR-2
+- [x] **M1.2** RP inventory data: consonants, affricates, vowels, diphthongs and
+  suprasegmentals exactly as in SPEC §7. deps: M1.1 · refs: FR-1, FR-2 (863806d)
   - AC: invariant tests cover unique IDs/IPA, NFC normalisation, `ɡ` U+0261 (not `g`),
     every RP symbol has an example with a valid highlight range, and no chart cell collisions.
-- [ ] **M1.3** Word model and cursor operations (insert, deleteBackward/Forward, move, clear). deps: M1.1 · refs: FR-10–FR-13, ADR-0007
-- [ ] **M1.4** IPA serialiser (with or without slashes, r-display option). deps: M1.2, M1.3 · refs: FR-11, FR-20, Q-3
-- [ ] **M1.5** TIPA serialiser with boundary safety, plus a test-only TIPA tokeniser and
-  fast-check round-trip tests. deps: M1.2, M1.3 · refs: FR-21, FR-22, ADR-0008
+- [x] **M1.3** Word model and cursor operations (insert, deleteBackward/Forward, move, clear). deps: M1.1 · refs: FR-10–FR-13, ADR-0007 (a041206)
+- [x] **M1.4** IPA serialiser (with or without slashes, r-display option). deps: M1.2, M1.3 · refs: FR-11, FR-20, Q-3 (c94ecfb)
+- [x] **M1.5** TIPA serialiser with boundary safety, plus a test-only TIPA tokeniser and
+  fast-check round-trip tests. deps: M1.2, M1.3 · refs: FR-21, FR-22, ADR-0008 (1512d21)
   - AC: `/ˈθɔːnɪk/` → `"TO:nIk`; `/træp/` → `tr\ae{}p`; consecutive stresses never merge.
-- [ ] **M1.6** URL fragment codec (Word ↔ string, symbol-ID based, versioned). deps: M1.3 · refs: FR-15
-- [ ] **M1.7** Editor reducer with undo/redo, and settings schema with a type guard. deps: M1.3 · refs: FR-13, FR-14, FR-42
+- [x] **M1.6** URL fragment codec (Word ↔ string, symbol-ID based, versioned). deps: M1.3 · refs: FR-15 (de70ac5)
+- [x] **M1.7** Editor reducer with undo/redo, and settings schema with a type guard. deps: M1.3 · refs: FR-13, FR-14, FR-42 (32df53f)
 
 ## M2: UI MVP
 
