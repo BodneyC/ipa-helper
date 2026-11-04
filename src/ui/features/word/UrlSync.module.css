@@ -1,0 +1,29 @@
+/* FR-15: a non-blocking notice, never a dialog. */
+.notice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-focus);
+  border-radius: var(--radius-sm);
+}
+
+.text {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.dismiss {
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.dismiss:hover {
+  background: var(--color-surface-raised);
+}

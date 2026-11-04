@@ -1,7 +1,7 @@
 import { useMemo, useReducer } from 'react';
 import type { ReactNode } from 'react';
 
-import { NULL_CLIPBOARD } from '../domain/ports';
+import { NULL_CLIPBOARD, NULL_FRAGMENTS } from '../domain/ports';
 import { EMPTY_WORD } from '../domain/word/word';
 import type { Word } from '../domain/word/word';
 import { editorReducer, initialEditorState } from '../state/editor';
@@ -10,7 +10,7 @@ import type { Services } from '../state/hooks';
 import { DEFAULT_SETTINGS, settingsReducer } from '../state/settings';
 import type { Settings } from '../state/settings';
 
-const NULL_SERVICES: Services = { clipboard: NULL_CLIPBOARD };
+const NULL_SERVICES: Services = { clipboard: NULL_CLIPBOARD, fragments: NULL_FRAGMENTS };
 
 interface ProvidersProps {
   /** The word to start with, e.g. decoded from the URL fragment (FR-15). */

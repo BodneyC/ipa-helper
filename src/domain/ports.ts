@@ -15,3 +15,19 @@ export interface Clipboard {
 export const NULL_CLIPBOARD: Clipboard = {
   writeText: () => Promise.resolve(err({ kind: 'clipboard-unavailable' })),
 };
+
+/** The URL fragment, without its `#` (FR-15). Implemented in src/adapters. */
+export interface FragmentStore {
+  read(): string;
+  /** Replaces the fragment without adding a history entry. */
+  write(fragment: string): void;
+  /** Calls `listener` when the user changes the fragment. Returns an unsubscribe function. */
+  subscribe(listener: (fragment: string) => void): () => void;
+}
+
+/** A fragment store with nothing in it, for tests and environments without a URL. */
+export const NULL_FRAGMENTS: FragmentStore = {
+  read: () => '',
+  write: () => undefined,
+  subscribe: () => () => undefined,
+};

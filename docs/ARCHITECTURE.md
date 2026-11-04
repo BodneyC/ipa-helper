@@ -245,8 +245,12 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `contrast`, `inventory`, `macroName` (letters only), `ipaSlashes` (FR-20),
   `tipaSlashes` (Q-2), `rDisplay`, `collapsedGroups` (categories), `soundOnSelect`.
 - **URL sync**: the editor word is mirrored to `location.hash`
-  (`history.replaceState`, debounced). On load, the hash is decoded through
-  `domain/codec/url.ts`.
+  (`history.replaceState`, debounced 250 ms) through the `FragmentStore` port
+  (`adapters/url-hash.ts`). On load, `main.tsx` decodes the hash through
+  `domain/codec/url.ts` into the initial word, so loading adds no undo step. The
+  `<UrlSync>` component writes edits back, loads user-changed fragments
+  (`hashchange`) as one undoable `replace`, and shows a dismissible notice for an
+  invalid fragment.
 - No global state library. If one becomes necessary, write an ADR.
 
 ## 6. UI composition

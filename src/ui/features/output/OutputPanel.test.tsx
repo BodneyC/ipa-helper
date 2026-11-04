@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { OutputPanel } from './OutputPanel';
 import { Providers } from '../../../app/providers';
 import { symbolId } from '../../../domain/inventory/symbol-id';
+import { NULL_FRAGMENTS } from '../../../domain/ports';
 import type { Clipboard } from '../../../domain/ports';
 import { err, ok } from '../../../domain/result';
 import { wordFromIds } from '../../../domain/word/word';
@@ -25,7 +26,7 @@ const setup = (
     <Providers
       initialWord={word}
       initialSettings={{ ...DEFAULT_SETTINGS, ...settings }}
-      services={{ clipboard }}
+      services={{ clipboard, fragments: NULL_FRAGMENTS }}
     >
       <AnnouncerProvider>
         <OutputPanel />

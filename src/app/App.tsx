@@ -5,6 +5,7 @@ import { AnnouncerProvider } from '../ui/components/Announcer';
 import { Card } from '../ui/components/Card';
 import { OutputPanel } from '../ui/features/output/OutputPanel';
 import { Palette } from '../ui/features/palette/Palette';
+import { UrlSync } from '../ui/features/word/UrlSync';
 import { WordActions } from '../ui/features/word/WordActions';
 import { WordDisplay } from '../ui/features/word/WordDisplay';
 
@@ -22,6 +23,7 @@ export function App() {
         <div className={styles['workbench']}>
           <Card title="Word" headingLevel={2} hideTitle>
             <div className={styles['workbenchBody']}>
+              <UrlSync />
               <WordDisplay />
               <WordActions />
               <OutputPanel />
