@@ -25,8 +25,21 @@ re-check the bundled npm packages, run `pnpm licenses list --prod`.
 
 ## Fonts
 
-*None yet.* Charis SIL (SIL Open Font License 1.1) and a monospace font are added in
-roadmap task M2.2.
+Both fonts are subset by `scripts/subset-fonts.sh` (glyphs outside the ranges in
+`src/styles/fonts.css` are removed and the result converted to woff2). Under the
+OFL a subset is a *Modified Version*. Charis SIL declares the Reserved Font Names
+"Charis" and "SIL", and OFL §3 bars a Modified Version from using them, so the
+script renames the subset to **ipa-helper IPA** (internal name table and CSS
+`font-family`). JetBrains Mono declares no Reserved Font Name and keeps its name.
+The full licence text ships next to each file.
+
+| Font | Version | File | Licence | Copyright |
+| --- | --- | --- | --- | --- |
+| [Charis SIL](https://software.sil.org/charis/), subset and renamed "ipa-helper IPA" | 7.000 | `public/fonts/ipa-helper-ipa.woff2` | SIL Open Font License 1.1 ([`OFL-CharisSIL.txt`](public/fonts/OFL-CharisSIL.txt)) | SIL Global |
+| [JetBrains Mono](https://www.jetbrains.com/lp/mono/), subset | 2.304 | `public/fonts/jetbrains-mono-ascii.woff2` | SIL Open Font License 1.1 ([`OFL-JetBrainsMono.txt`](public/fonts/OFL-JetBrainsMono.txt)) | The JetBrains Mono Project Authors |
+
+The OFL permits bundling these fonts with GPL software; the fonts themselves stay
+under the OFL.
 
 ## Audio and voice models
 

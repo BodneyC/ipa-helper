@@ -60,9 +60,10 @@ ipa-helper/
 ├─ .claude/commands/          # Slash commands for working on this repo
 ├─ docs/                      # Spec, architecture, ADRs, roadmap
 ├─ scripts/
-│  └─ install-toolchain.sh    # Installs fnm, Node, pnpm, deps, browsers
+│  ├─ install-toolchain.sh    # Installs fnm, Node, pnpm, deps, browsers
+│  └─ subset-fonts.sh         # Rebuilds public/fonts (pinned downloads + fontTools in a temp venv)
 ├─ public/
-│  └─ fonts/                  # Charis SIL (subset woff2), mono font
+│  └─ fonts/                  # Charis SIL subset renamed "ipa-helper IPA" (OFL RFN), JetBrains Mono subset; built by scripts/subset-fonts.sh
 ├─ src/
 │  ├─ main.tsx                # Composition root: wires adapters → providers → <App/>
 │  ├─ app/

@@ -1,0 +1,28 @@
+/*
+ * Self-hosted font subsets (NFR-7), built by scripts/subset-fonts.sh.
+ * 'ipa-helper IPA' is a renamed subset of Charis SIL: Charis reserves its
+ * font names, so the OFL bars a subset from using them. Each
+ * unicode-range must equal the range the script subsets to, so the browser
+ * falls back for anything outside it. fonts.test.ts checks the IPA range covers
+ * every inventory symbol. index.html preloads both files.
+ */
+@font-face {
+  font-family: 'ipa-helper IPA';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/ipa-helper-ipa.woff2') format('woff2');
+  unicode-range:
+    U+0020-007E, U+00E6-00E7, U+00F0, U+00F8, U+0127, U+014B, U+0153, U+01C0-01C3, U+0250-036F,
+    U+03B2, U+03B8, U+03C7, U+1D4A, U+207F, U+2016, U+2026, U+203F, U+2191, U+2193, U+2197-2198,
+    U+A71B-A71F;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-ascii.woff2') format('woff2');
+  unicode-range: U+0020-007E, U+2026;
+}

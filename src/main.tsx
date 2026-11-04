@@ -5,6 +5,7 @@ import { App } from './app/App';
 import { Providers } from './app/providers';
 import './styles/tokens.css';
 import './styles/themes.css';
+import './styles/fonts.css';
 import './styles/global.css';
 
 const container = document.getElementById('root');

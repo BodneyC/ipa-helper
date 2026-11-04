@@ -52,7 +52,7 @@
   --radius-sm: 6px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --font-ipa: 'Charis SIL', 'Doulos SIL', 'Noto Serif', serif;
+  --font-ipa: 'ipa-helper IPA', 'Charis SIL', 'Doulos SIL', 'Noto Serif', serif;
   --font-ui: system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', menlo, consolas, monospace;
   --duration-fast: 120ms;
