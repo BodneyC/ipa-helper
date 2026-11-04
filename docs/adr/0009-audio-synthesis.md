@@ -1,7 +1,7 @@
 # 0009. Free, sign-up-less British audio via in-browser synthesis
 
-- Status: **Proposed** (to be Accepted or revised after spike M4.1)
-- Date: 2026-11-04
+- Status: **Accepted** (after spike M4.1, with criterion 3 amended; see "Spike M4.1 findings")
+- Date: 2026-11-04 (proposed), 2026-11-04 (accepted)
 - Relates to: FR-30–FR-34, NFR-5, NFR-6, NFR-8
 
 ## Context
@@ -58,7 +58,72 @@ spelling. Most TTS takes text, so we need an engine that accepts phonemes.
 
 If criteria 1, 2 or 3 fail, re-run with espeak-ng WASM and amend this ADR.
 
+**Criterion 3 as amended after the spike** (the original 1.5 s cold start
+proved to be a floor set by runtime and weight loading, not something a
+setting can tune away; the maintainer chose to amend it rather than fall
+back to espeak-ng):
+
+3. (a) Warm synthesis has a median < 300 ms per word on the reference machine.
+   (b) The model session is created in a Web Worker, never on the main
+   thread, and creation starts on the user's first audio request (or when
+   "Sound on select" is switched on), with a visible loading state until
+   it is ready. (c) Session creation takes < 3 s on the reference machine.
+
+## Spike M4.1 findings
+
+Spike code: `spikes/m4.1-piper/` (static page plus a headless-Chromium bench;
+see its README). Reference machine: AMD Ryzen 5 7600X desktop, WSL2, headless
+Chromium 1248, onnxruntime-web 1.20.1, wasm execution provider, **one thread**
+(GitHub Pages cannot send COOP/COEP, ADR-0010). A mid-range laptop is expected
+to be roughly twice as slow.
+
+**Voice chosen: `en_GB-cori-medium`** (rhasspy/piper-voices).
+
+espeak-ng WASM was **not** benchmarked. Under the rule above it is only
+re-run if Piper fails criteria 1–3, and the maintainer chose to amend
+criterion 3 instead. It remains the documented fallback.
+
+| Criterion | Result |
+| --- | --- |
+| 1. Licence | ✅ Trained **from scratch** on public-domain LibriVox recordings; the voices repository is MIT. Other en_GB voices were rejected: `alba`, `vctk` are fine-tuned from the US `lessac` voice (unclear upstream dataset terms); `northern_english_male`, `southern_english_female` are CC-BY-SA; `semaine` is CC-BY-NC-SA; `alan`, `jenny_dioco` defer to external terms; `aru` is CC-BY 4.0 but multi-speaker Liverpool English, not RP. |
+| 2. Intelligibility, stress | ✅ Judged by the maintainer: intelligible, though it struggles with some words. Stress pairs (`ˈtʃæmbɹɪk`/`tʃæmˈbɹɪk` and others) were in the list. |
+| 3. Timing (amended) | ✅ (a) median 133–140 ms over seven fp32 runs. (b) is an M5.2 requirement. (c) 1.21–1.63 s. The original cold-start criterion (< 1.5 s, session creation plus first word) failed: 1.44–1.82 s. `graphOptimizationLevel` (`disabled`…`all`) made no difference beyond run-to-run noise. |
+| 4. Hosting | ✅ 63.5 MB fp32 model, under Pages' 100 MB per-file limit. |
+| 5. Phoneme coverage | ✅ All 56 RP inventory symbols decompose into codepoints present in the voice's `phoneme_id_map`; no approximations needed. Affricates and diphthongs are sequences (`t`+`ʃ`, `e`+`ɪ`). |
+
+**Stress placement.** Piper's training data came from espeak-ng, which writes
+the stress mark immediately before the stressed **vowel** (`flˈɒɡɪʃ`), not at
+the syllable onset as dictionaries do (`ˈflɒɡɪʃ`). With onset placement the
+model sometimes misbehaves: `/ˈmaʊzɛlt/` produced 3.1 s of audio against
+0.68 s with nucleus placement. The synthesis serialiser (M5.1) must move each
+stress mark rightwards past consonants to the next vowel.
+
+**Compressed model.** Dynamic int8 quantisation (`onnxruntime.quantization`,
+MatMul + Gemm + Conv weights) shrinks the model to **19.5 MB**, but session
+creation is no faster (1.57–1.65 s) and warm synthesis is about 60% slower
+(median 219–225 ms), because the wasm provider lacks fast int8 convolution
+kernels. Quantising only MatMul/Gemm saves nothing (this voice is mostly
+convolutions). **Decision: ship fp32.** It is a one-off, lazily fetched and
+cached download, whereas synthesis speed is paid on every word, and the int8
+margin under 300 ms would vanish on slower hardware. Revisit if download size
+becomes the binding constraint (e.g. for the M7 PWA precache).
+
+**Encoding.** Phoneme IDs are BOS `^`, then each phoneme followed by PAD `_`,
+then EOS `$`. Inputs: `input` (int64 `[1, n]`), `input_lengths` (int64 `[1]`),
+`scales` (float32 `[noise_scale, length_scale, noise_w]` from the voice
+config: 0.667, 1, 0.8). Output: float32 PCM at 22 050 Hz.
+
+**Pinned artefacts** (SHA-256):
+- `en_GB-cori-medium.onnx`: `1899f98e5fb8310154f3c2973f4b8a929ba7245e722b3d3a85680b833d95f10d`
+- `en_GB-cori-medium.onnx.json`: `e262c16d7f192f69d4edd6b4ef8a5915379e67495fcc402f1ab15eeb33da3d36`
+
 ## Consequences
+- The model and the onnxruntime-web wasm files are **self-hosted** on the
+  same static host, so audio makes no third-party requests (NFR-6). The 63.5 MB
+  model is not committed to git: the build fetches it from the pinned
+  Hugging Face URL and verifies the SHA-256 above (M4.3/M5.2).
+- Symbol clips (M4.3) are generated with the same voice and serialiser
+  rules, so symbols and words sound alike.
 - Introduces a large lazy asset and a Worker. Neither affects NFR-3, because
   they aren't part of the initial bundle.
 - Licence notices are needed for the engine, the runtime and the voice (NFR-8).

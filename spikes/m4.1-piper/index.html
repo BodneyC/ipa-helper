@@ -1,0 +1,36 @@
+<!doctype html>
+<!--
+  Spike M4.1 (ADR-0009): Piper en_GB-cori-medium in the browser via onnxruntime-web.
+  Throwaway code. Not part of the app, not linted, not built.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Spike M4.1: Piper in the browser</title>
+    <style>
+      body { font: 16px/1.5 system-ui, sans-serif; max-width: 52rem; margin: 2rem auto; padding: 0 1rem; }
+      table { border-collapse: collapse; width: 100%; }
+      td, th { padding: 0.25rem 0.5rem; border-bottom: 1px solid #8884; text-align: left; }
+      .ipa { font-family: 'Charis SIL', 'Doulos SIL', serif; font-size: 1.15em; }
+      #status { font-family: monospace; white-space: pre-wrap; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js"></script>
+  </head>
+  <body>
+    <h1>Spike M4.1: Piper <code>en_GB-cori-medium</code></h1>
+    <p>
+      Each made-up word is synthesised from IPA two ways: <b>dict</b> keeps dictionary stress
+      placement (mark at the start of the syllable, as the app writes it); <b>nucleus</b> moves
+      each stress mark to just before the stressed vowel, which is how espeak-ng wrote Piper's
+      training data. Judge intelligibility and whether stress audibly moves (ADR-0009 AC2).
+    </p>
+    <p><label><input type="checkbox" id="frame" /> Speak in a carrier frame (“say … again”)</label></p>
+    <div id="status">Loading model…</div>
+    <table>
+      <thead><tr><th>#</th><th>IPA</th><th>Note</th><th>dict</th><th>nucleus</th></tr></thead>
+      <tbody id="words"></tbody>
+    </table>
+    <script type="module" src="./spike.js"></script>
+  </body>
+</html>

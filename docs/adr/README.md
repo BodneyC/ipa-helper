@@ -17,7 +17,7 @@ digits.
 | [0006](0006-gruvbox-design-tokens.md) | Gruvbox theming via CSS design tokens | Accepted |
 | [0007](0007-token-based-word-model.md) | Words are token lists, not strings | Accepted |
 | [0008](0008-tipa-serialisation.md) | TIPA output via per-token encodings and a pluggable serialiser | Accepted |
-| [0009](0009-audio-synthesis.md) | Free, sign-up-less British audio via in-browser synthesis | Proposed |
+| [0009](0009-audio-synthesis.md) | Free, sign-up-less British audio via in-browser synthesis | Accepted |
 | [0010](0010-static-hosting-github-pages.md) | Static hosting on GitHub Pages via Actions | Accepted |
 | [0011](0011-toolchain-versions-at-bootstrap.md) | Pin the toolchain to versions the lint stack supports | Proposed |
 

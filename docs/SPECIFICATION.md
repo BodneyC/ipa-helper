@@ -175,9 +175,9 @@ pronounced in British English, at no cost and without signing up for anything.
   Responsive from 360 px wide upwards. Touch-friendly targets (≥ 44×44 CSS px).
 - **NFR-5 Offline / hosting**: a fully static build that deploys to any static host
   (GitHub Pages by default, ADR-0010). *(M7)* Installable PWA that works offline.
-- **NFR-6 Privacy**: no analytics, no cookies, no third-party requests at runtime
-  except for audio assets, if ADR-0009 settles on remote static files. All
-  state stays on the device.
+- **NFR-6 Privacy**: no analytics, no cookies, no third-party requests at runtime.
+  Audio models and runtime files are served from the app's own host (ADR-0009).
+  All state stays on the device.
 - **NFR-7 Typography**: IPA renders in a font with full IPA coverage (Charis SIL,
   self-hosted, subset to the symbols used). The UI text font is a modern sans.
 - **NFR-8 Licensing**: the licence of every bundled asset (fonts, audio, voice
@@ -299,6 +299,6 @@ single-character shortcuts, prefer the **long-form macros** (`\textturnh`,
 
 | ID | Question | Resolution path |
 | --- | --- | --- |
-| Q-1 | Which in-browser TTS engine gives acceptable British audio from IPA input? | Spike M4.1 → ADR-0009 Accepted/Superseded. |
+| Q-1 | Which in-browser TTS engine gives acceptable British audio from IPA input? | **Resolved** (M4.1): Piper `en_GB-cori-medium`, ADR-0009 Accepted. |
 | Q-2 | Should the copied `\ipa{}` include slashes inside the braces? | Default: no (the macro adds them). Configurable. |
 | Q-3 | Display `ɹ` or `r` for the British "r"? | Default `ɹ` (narrow), with a setting to display `r` (broad, dictionary convention). |

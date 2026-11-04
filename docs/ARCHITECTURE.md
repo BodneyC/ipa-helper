@@ -51,7 +51,7 @@ itself. `ui` reaches adapters only through the composition root
 | Dead code / deps | knip | 0005 |
 | Git hooks | lefthook (pre-commit: lint-staged equivalents; pre-push: `pnpm check`) | 0005 |
 | CI / deploy | GitHub Actions → GitHub Pages | 0010 |
-| Audio | **Proposed**: in-browser neural TTS from phonemes (Piper/ONNX) with an espeak-ng WASM fallback | 0009 |
+| Audio | In-browser neural TTS from phonemes: Piper `en_GB-cori-medium` on onnxruntime-web (wasm, one thread), self-hosted | 0009 |
 
 ## 3. Source layout
 
@@ -318,16 +318,21 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `DocumentTheme` port (`adapters/document-theme.ts`), which also follows
   `prefers-color-scheme` live while the theme is `system`.
 
-## 8. Audio (M4–M5, ADR-0009 — Proposed)
+## 8. Audio (M4–M5, ADR-0009)
 
 - Port: `interface AudioPlayer { playSymbol(id): Promise<Result<void, AudioError>>;
   playWord(word): Promise<Result<void, AudioError>>; readonly status: … }`.
 - The adapter runs synthesis in a **Web Worker** so the UI thread never blocks,
   lazy-loads its model/WASM on first use, caches it with the Cache API, and plays
   through Web Audio (`AudioContext`).
-- Word synthesis takes the Word through a dedicated serialiser (e.g.
-  `piperPhonemeSerialiser` or `espeakMnemonicSerialiser`) so stress and length
-  carry through. The UI never handles raw synthesis strings.
+- Word synthesis takes the Word through `piperPhonemeSerialiser` (domain, pure)
+  so stress and length carry through. It emits Piper phoneme IDs and moves each
+  stress mark from the syllable onset to just before the stressed vowel, which is
+  how the voice was trained (ADR-0009 findings). The UI never handles raw
+  synthesis strings.
+- The worker creates the onnxruntime session on the first audio request (or
+  when "Sound on select" is switched on) and reports a loading status; creation
+  takes about 1.2–1.6 s on a fast desktop.
 - A `NullAudioPlayer` is used in tests and when audio is unsupported.
 
 ## 9. Testing strategy (ADR-0005)

@@ -75,7 +75,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 ## M4: Symbol audio
 
-- [ ] **M4.1** **Spike**: evaluate Piper (ONNX Web) and espeak-ng WASM against the ADR-0009 criteria.
+- [x] **M4.1** **Spike**: evaluate Piper (ONNX Web) and espeak-ng WASM against the ADR-0009 criteria.
   Write findings into ADR-0009 and set its status to Accepted (or supersede it). Throwaway code lives in `spikes/`, and is not merged into `src/`.
 - [ ] **M4.2** `AudioPlayer` port, `NullAudioPlayer`, and a Web Audio playback adapter. deps: M4.1 · refs: ARCH §8
 - [ ] **M4.3** Build-time generation of per-symbol clips (Node script, CI-reproducible), with lazy loading and caching. deps: M4.2 · refs: FR-30, FR-33
@@ -84,7 +84,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 ## M5: Word audio
 
-- [ ] **M5.1** Synthesis-phoneme serialiser (Piper phoneme IDs or espeak mnemonics, per ADR-0009), with tests. deps: M4.1
+- [ ] **M5.1** `piperPhonemeSerialiser`: Word → Piper phoneme IDs, stress moved to the vowel nucleus (ADR-0009 findings), with fast-check tests. deps: M4.1
 - [ ] **M5.2** Worker-based synthesis adapter: lazy model fetch, Cache API, progress UI. deps: M5.1, M4.2 · refs: FR-31, FR-33
 - [ ] **M5.3** "Play word" button, loading/error states, and an e2e test with a mocked worker. deps: M5.2
 
@@ -107,7 +107,12 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 ## Backlog (unscheduled ideas)
 
 - More export formats: X-SAMPA, Kirshenbaum, espeak mnemonics, Markdown/HTML snippet.
-- Accent switch for audio (General American) once ADR-0009 is settled.
+- Accent switch for audio (General American), e.g. a second Piper voice (ADR-0009).
+- Cori mispronounces some made-up words (maintainer, M4.1). Collect the failing
+  words, then try tuning `length_scale`/`noise_w` or a carrier frame
+  ("say … again") before considering another voice.
+- int8 Cori is 19.5 MB vs 63.5 MB but ~60% slower on wasm (ADR-0009). Revisit
+  if download size becomes the constraint (M7 PWA precache), or with WebGPU.
 - "Minimal braces" TIPA output mode.
 - Syllable-structure visualisation (onset/nucleus/coda colouring).
 - Import/export saved words as JSON.

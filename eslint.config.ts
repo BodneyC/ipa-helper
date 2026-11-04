@@ -42,6 +42,8 @@ export default defineConfig(
     'test-results/',
     'blob-report/',
     'node_modules/',
+    // Throwaway spike code, never merged into src/ (ADR-0009, roadmap M4.1).
+    'spikes/',
   ]),
 
   // Base: JS recommended plus typescript-eslint's strictest type-aware presets.

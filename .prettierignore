@@ -8,3 +8,5 @@ LICENSE
 # Hand-authored Markdown (spec, ADRs, roadmap, commands) keeps its authors' layout;
 # Prettier would only re-pad tables and swap emphasis markers.
 *.md
+# Throwaway spike code, never merged into src/ (ADR-0009, roadmap M4.1).
+spikes/
