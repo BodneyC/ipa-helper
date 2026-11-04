@@ -10,6 +10,7 @@ import { GlobalShortcuts } from '../ui/features/help/GlobalShortcuts';
 import { HelpDialog } from '../ui/features/help/HelpDialog';
 import { OutputPanel } from '../ui/features/output/OutputPanel';
 import { Palette } from '../ui/features/palette/Palette';
+import { SavedWordsDialog } from '../ui/features/saved/SavedWordsDialog';
 import { SettingsDialog } from '../ui/features/settings/SettingsDialog';
 import { UrlSync } from '../ui/features/word/UrlSync';
 import { WordActions } from '../ui/features/word/WordActions';
@@ -24,6 +25,7 @@ export function App() {
   const { settings, dispatch: settingsDispatch } = useSettings();
   const [helpOpen, setHelpOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [savedOpen, setSavedOpen] = useState(false);
   const [query, setQuery] = useState('');
   const filterRef = useRef<HTMLInputElement>(null);
   const openHelp = () => {
@@ -53,7 +55,11 @@ export function App() {
             <div className={styles['workbenchBody']}>
               <UrlSync />
               <WordDisplay />
-              <WordActions />
+              <WordActions
+                onSaved={() => {
+                  setSavedOpen(true);
+                }}
+              />
               <OutputPanel />
             </div>
           </Card>
@@ -71,6 +77,12 @@ export function App() {
           }}
         />
       </main>
+      <SavedWordsDialog
+        open={savedOpen}
+        onClose={() => {
+          setSavedOpen(false);
+        }}
+      />
       <SettingsDialog
         open={settingsOpen}
         onClose={() => {

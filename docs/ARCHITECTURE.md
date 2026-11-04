@@ -99,6 +99,7 @@ ipa-helper/
 │  ├─ state/
 │  │  ├─ editor.ts            # reducer: word, cursor, undo/redo stacks
 │  │  ├─ settings.ts          # reducer and schema for persisted settings
+│  │  ├─ saved-words.ts       # FR-16: saved list reducer, validation, load/save
 │  │  └─ hooks.ts             # EditorContext/SettingsContext + useEditor, useSettings (providers in app/providers.tsx)
 │  ├─ adapters/
 │  │  ├─ clipboard.ts         # navigator.clipboard implementation of the Clipboard port
@@ -113,6 +114,7 @@ ipa-helper/
 │  │     ├─ word/             # WordDisplay, TokenCursor
 │  │     ├─ output/           # OutputPanel, CopyRow
 │  │     ├─ settings/         # SettingsDialog (FR-42), suggested \newcommand
+│  │     ├─ saved/            # SavedWordsDialog (FR-16)
 │  │     └─ help/
 │  └─ styles/
 │     ├─ tokens.css           # THE ONLY place hex colours may appear
@@ -256,6 +258,12 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `<UrlSync>` component writes edits back, loads user-changed fragments
   (`hashchange`) as one undoable `replace`, and shows a dismissible notice for an
   invalid fragment.
+- **Saved words** (FR-16, `src/state/saved-words.ts`): a newest-first list of
+  `{ id, fragment, gloss, savedAt }` under `ipa-helper:saved-words:v1`. The word
+  is stored as its URL-codec fragment (ADR-0007), so it is versioned and
+  re-validated on load; entries whose word no longer decodes are dropped. The
+  `<SavedWordsDialog>` owns the list (`useReducer` seeded from the store) and
+  loads a word into the editor as one undoable `replace`.
 - No global state library. If one becomes necessary, write an ADR.
 
 ## 6. UI composition

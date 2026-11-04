@@ -47,6 +47,13 @@ test.describe('inventory and filter (FR-3, FR-4)', () => {
     const overflow = await bar.evaluate((el) => el.scrollWidth - el.clientWidth);
     expect(overflow).toBe(0);
     await expect(page.getByRole('searchbox', { name: 'Filter symbols' })).toBeVisible();
+    const right = await page
+      .getByRole('combobox', { name: 'Inventory' })
+      .evaluate((el) => el.getBoundingClientRect().right);
+    const left = await page
+      .getByRole('searchbox', { name: 'Filter symbols' })
+      .evaluate((el) => el.getBoundingClientRect().left);
+    expect(right).toBeLessThan(left);
     await expect(page.getByRole('button', { name: 'Settings' })).toBeInViewport();
     await expectNoA11yViolations(page);
   });

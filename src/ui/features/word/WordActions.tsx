@@ -1,8 +1,16 @@
 import styles from './WordActions.module.css';
 import { useEditor } from '../../../state/hooks';
 
-/** FR-13, FR-14: Undo, Redo and Clear for the word. Clear can itself be undone. */
-export function WordActions() {
+interface WordActionsProps {
+  /** Opens the saved words dialog (FR-16). */
+  readonly onSaved: () => void;
+}
+
+/**
+ * FR-13, FR-14, FR-16: Undo, Redo and Clear for the word (Clear can itself be
+ * undone), and the way into saved words.
+ */
+export function WordActions({ onSaved }: WordActionsProps) {
   const { state, dispatch } = useEditor();
   return (
     <div className={styles['actions']} role="group" aria-label="Word actions">
@@ -35,6 +43,9 @@ export function WordActions() {
         }}
       >
         Clear
+      </button>
+      <button type="button" className={styles['button']} onClick={onSaved}>
+        Saved words…
       </button>
     </div>
   );

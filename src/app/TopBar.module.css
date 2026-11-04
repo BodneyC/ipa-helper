@@ -54,6 +54,11 @@
   min-width: 0;
 }
 
+/* The filter gives way on narrow screens; the inventory switch doesn't. */
+.field:has(.select) {
+  flex-shrink: 0;
+}
+
 .select,
 .filter {
   min-height: 2.75rem;
