@@ -1,7 +1,7 @@
 /*
  * Raw Gruvbox palette (ADR-0006). This is the ONLY file in which colour
  * literals are allowed; everything else uses the semantic tokens from
- * themes.css (roadmap task M2.1).
+ * themes.css.
  */
 :root {
   --gb-dark0-hard: #1d2021;
@@ -40,4 +40,30 @@
   --gb-faded-purple: #8f3f71;
   --gb-faded-aqua: #427b58;
   --gb-faded-orange: #af3a03;
+
+  /* Non-colour tokens (ADR-0006): spacing (4 px base), radii, type, motion. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --font-ipa: 'Charis SIL', 'Doulos SIL', 'Noto Serif', serif;
+  --font-ui: system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', menlo, consolas, monospace;
+  --duration-fast: 120ms;
+  --duration-medium: 240ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --shadow-popover: 0 8px 24px -8px var(--gb-dark0-hard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-medium: 0ms;
+  }
 }

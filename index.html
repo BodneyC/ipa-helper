@@ -7,7 +7,34 @@
       name="description"
       content="Build IPA transcriptions of made-up words by clicking symbols, with TIPA LaTeX output."
     />
+    <meta name="color-scheme" content="dark light" />
     <title>ipa-helper</title>
+    <script>
+      // No-flash theme (ADR-0006, FR-40): set data-theme and data-contrast before
+      // first paint. A stored theme override wins; otherwise follow the system,
+      // and keep following it while the page is open. Keep the storage key and
+      // values in step with src/state/settings.ts.
+      (function () {
+        var root = document.documentElement;
+        var settings = {};
+        try {
+          settings = JSON.parse(localStorage.getItem('ipa-helper:settings:v1') || '{}') || {};
+        } catch (e) {
+          settings = {};
+        }
+        var query = window.matchMedia('(prefers-color-scheme: light)');
+        var override = settings.theme === 'dark' || settings.theme === 'light';
+        var apply = function () {
+          root.dataset.theme = override ? settings.theme : query.matches ? 'light' : 'dark';
+        };
+        apply();
+        if (!override) query.addEventListener('change', apply);
+        root.dataset.contrast =
+          settings.contrast === 'soft' || settings.contrast === 'hard'
+            ? settings.contrast
+            : 'medium';
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

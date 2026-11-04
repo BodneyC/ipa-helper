@@ -61,3 +61,21 @@ Also tokenised: spacing scale (4 px base), radii (6/12/16 px), font stacks
 - A unit test asserts that every semantic text/surface pair in both themes meets WCAG AA.
   Some Gruvbox combinations fail (e.g. `gray` on `light0`), so those pairings are
   simply not used for text.
+
+## Amendment (2026-11-04, M2.1)
+- **Light-theme cards use `light0-hard`, not `light1` (bg1).** With cards on
+  `light1`, `faded-yellow` (the vowel accent) reaches only 2.8:1 against the card,
+  which fails the 3:1 non-text minimum for focus rings and group bars (WCAG
+  1.4.11). On `light0-hard`, every faded accent passes. `light1` becomes the raised
+  (hover) surface. In the light "hard" contrast the page and cards share
+  `light0-hard`, and cards are told apart by their border alone. Dark-theme
+  cards stay on `dark1`, as SPEC §6 says.
+- Accents are declared only against page and card surfaces: key focus rings use
+  `outline-offset`, so they never sit on a key's raised fill. On hover, key labels
+  switch from `--color-text-muted` to `--color-text`, because muted text on the raised
+  fill isn't a declared pair.
+- `--color-text-subtle` (`fg4`) is for large text only (≥ 3:1), e.g. the word
+  display slashes.
+- The contrast test lives in `src/styles/contrast.test.ts`. It resolves
+  `themes.css` against `tokens.css`, so `themes.css` must stay flat: no nesting
+  and no `@media`.

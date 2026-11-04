@@ -1,0 +1,72 @@
+/*
+ * Semantic tokens (ADR-0006). Components use only these, never --gb-*.
+ *
+ * <html data-theme="dark|light" data-contrast="soft|medium|hard"> is set
+ * before first paint by the inline script in index.html. Contrast changes
+ * --color-bg only. Every text/surface pair used is listed in contrast-pairs.ts
+ * and checked against WCAG AA by a unit test (NFR-2).
+ *
+ * Selectors are flat (no nesting, no @media) so that the contrast test can
+ * resolve them.
+ */
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-bg: var(--gb-dark0);
+  --color-surface: var(--gb-dark1);
+  --color-surface-raised: var(--gb-dark2);
+  --color-border: var(--gb-dark2);
+  --color-text: var(--gb-light1);
+  --color-text-muted: var(--gb-light3);
+  --color-text-subtle: var(--gb-light4);
+  --color-focus: var(--gb-bright-blue);
+  --color-danger: var(--gb-bright-red);
+  --color-accent-consonant: var(--gb-bright-aqua);
+  --color-accent-affricate: var(--gb-bright-blue);
+  --color-accent-vowel: var(--gb-bright-yellow);
+  --color-accent-diphthong: var(--gb-bright-orange);
+  --color-accent-supra: var(--gb-bright-purple);
+  --color-accent-diacritic: var(--gb-bright-green);
+}
+
+:root[data-theme='dark'][data-contrast='hard'] {
+  --color-bg: var(--gb-dark0-hard);
+}
+
+:root[data-theme='dark'][data-contrast='soft'] {
+  --color-bg: var(--gb-dark0-soft);
+}
+
+/*
+ * Light cards sit on light0-hard rather than light1 (bg1): on light1 the faded
+ * accents (e.g. faded-yellow, 2.8:1) fail the 3:1 non-text contrast that focus
+ * rings and card borders need. See ADR-0006.
+ */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --color-bg: var(--gb-light0);
+  --color-surface: var(--gb-light0-hard);
+  --color-surface-raised: var(--gb-light1);
+  --color-border: var(--gb-light2);
+  --color-text: var(--gb-dark1);
+  --color-text-muted: var(--gb-dark3);
+  --color-text-subtle: var(--gb-dark4);
+  --color-focus: var(--gb-faded-blue);
+  --color-danger: var(--gb-faded-red);
+  --color-accent-consonant: var(--gb-faded-aqua);
+  --color-accent-affricate: var(--gb-faded-blue);
+  --color-accent-vowel: var(--gb-faded-yellow);
+  --color-accent-diphthong: var(--gb-faded-orange);
+  --color-accent-supra: var(--gb-faded-purple);
+  --color-accent-diacritic: var(--gb-faded-green);
+}
+
+:root[data-theme='light'][data-contrast='hard'] {
+  --color-bg: var(--gb-light0-hard);
+}
+
+:root[data-theme='light'][data-contrast='soft'] {
+  --color-bg: var(--gb-light0-soft);
+}
