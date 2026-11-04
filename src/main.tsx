@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import { createBrowserClipboard } from './adapters/clipboard';
 import { App } from './app/App';
 import { Providers } from './app/providers';
 import './styles/tokens.css';
@@ -15,7 +16,7 @@ if (container === null) {
 
 createRoot(container).render(
   <StrictMode>
-    <Providers>
+    <Providers services={{ clipboard: createBrowserClipboard() }}>
       <App />
     </Providers>
   </StrictMode>,

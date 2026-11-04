@@ -1,7 +1,9 @@
 import styles from './App.module.css';
 import { TopBar } from './TopBar';
 import { useEditor, useSettings } from '../state/hooks';
+import { AnnouncerProvider } from '../ui/components/Announcer';
 import { Card } from '../ui/components/Card';
+import { OutputPanel } from '../ui/features/output/OutputPanel';
 import { Palette } from '../ui/features/palette/Palette';
 import { WordActions } from '../ui/features/word/WordActions';
 import { WordDisplay } from '../ui/features/word/WordDisplay';
@@ -14,7 +16,7 @@ export function App() {
   const { dispatch } = useEditor();
   const { settings } = useSettings();
   return (
-    <>
+    <AnnouncerProvider>
       <TopBar />
       <main className={styles['main']}>
         <div className={styles['workbench']}>
@@ -22,6 +24,7 @@ export function App() {
             <div className={styles['workbenchBody']}>
               <WordDisplay />
               <WordActions />
+              <OutputPanel />
             </div>
           </Card>
         </div>
@@ -33,6 +36,6 @@ export function App() {
           }}
         />
       </main>
-    </>
+    </AnnouncerProvider>
   );
 }

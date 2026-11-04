@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { Providers } from './providers';
 import { symbolId } from '../domain/inventory/symbol-id';
 import { idsOf, wordFromIds } from '../domain/word/word';
-import { useEditor, useSettings } from '../state/hooks';
+import { useEditor, useServices, useSettings } from '../state/hooks';
 import { DEFAULT_SETTINGS } from '../state/settings';
 
 describe('<Providers>', () => {
@@ -37,5 +37,6 @@ describe('<Providers>', () => {
   it('refuses to work outside <Providers>', () => {
     expect(() => renderHook(() => useEditor())).toThrow('useEditor must be used inside');
     expect(() => renderHook(() => useSettings())).toThrow('useSettings must be used inside');
+    expect(() => renderHook(() => useServices())).toThrow('useServices must be used inside');
   });
 });
