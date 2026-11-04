@@ -1,0 +1,2 @@
+# pnpm >= 11 reads its settings from here, not from .npmrc (see ADR-0011).
+engineStrict: true

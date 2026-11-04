@@ -1,0 +1,21 @@
+/* Base element styles. Placeholder colours until semantic tokens land in M2.1. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+  background: var(--gb-dark0);
+  color: var(--gb-light1);
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  padding: 1.5rem;
+}

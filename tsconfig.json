@@ -1,0 +1,9 @@
+{
+  // Solution file: type-check with `tsc -b`. Each project picks its own files and ambient types.
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.test.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}
