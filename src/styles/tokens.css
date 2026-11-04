@@ -64,6 +64,7 @@
   --page-max-width: 75rem;
   --page-gutter: var(--space-4);
   --topbar-height: 3.5rem;
+  --key-size: 3rem; /* ≥ 44 px touch target (NFR-4) */
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,0 +1,93 @@
+/* Group cards flow into as many columns as fit; the consonant chart spans them all. */
+.palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+/* The vowel grid needs about two columns' width once there are three or more. */
+@media (width >= 1024px) {
+  .double {
+    grid-column: span 2;
+  }
+}
+
+.keyGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Charts scroll sideways on narrow screens rather than squashing keys below 44 px. */
+.scroll {
+  position: relative; /* contains the visually hidden labels inside the chart */
+  overflow-x: auto;
+  padding: 4px;
+  margin: -4px;
+}
+
+.chart {
+  border-collapse: separate;
+  border-spacing: 2px var(--space-1);
+}
+
+.chart th {
+  padding: 0 var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.chart th[scope='col'] {
+  text-align: center;
+  vertical-align: bottom;
+}
+
+.chart th[scope='row'] {
+  max-width: 6.5rem;
+  text-align: right;
+  white-space: normal;
+}
+
+.chart td {
+  padding: 0;
+  vertical-align: middle;
+}
+
+.cell {
+  display: flex;
+  gap: var(--space-1);
+  justify-content: center;
+}
+
+.slot {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.empty,
+.impossible {
+  position: relative;
+  display: block;
+  width: var(--key-size);
+  height: 3.25rem;
+  border-radius: var(--radius-sm);
+}
+
+.empty {
+  border: 1px dashed var(--color-border);
+}
+
+/* Shaded like the IPA chart's impossible cells. */
+.impossible {
+  background: repeating-linear-gradient(-45deg, var(--color-border) 0 2px, transparent 2px 8px);
+}

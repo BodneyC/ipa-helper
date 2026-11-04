@@ -18,8 +18,8 @@ interface TooltipProps {
 const GAP = 8;
 
 /**
- * A tooltip rendered into `document.body`, so that scroll containers such as the
- * consonant chart can't clip it. It sits above its anchor, or below when there is
+ * A tooltip in a portal with fixed positioning, so that scroll containers such as
+ * the consonant chart can't clip it. It sits above its anchor, or below when there is
  * no room above, and stays inside the viewport. It is always in the DOM (hidden
  * when closed), so `aria-describedby` can point into it.
  */
@@ -61,6 +61,7 @@ export function Tooltip({
     >
       {children}
     </div>,
-    document.body,
+    // Inside <main> when there is one, so the tooltip stays within a landmark (axe "region").
+    anchor?.closest('main') ?? document.body,
   );
 }

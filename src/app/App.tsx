@@ -1,6 +1,8 @@
 import styles from './App.module.css';
 import { TopBar } from './TopBar';
+import { DEFAULT_SETTINGS } from '../state/settings';
 import { Card } from '../ui/components/Card';
+import { Palette } from '../ui/features/palette/Palette';
 
 /**
  * Page layout (SPEC §6, ARCHITECTURE §6): the top bar, the workbench card with the
@@ -16,11 +18,11 @@ export function App() {
             <p className={styles['placeholder']}>/…/</p>
           </Card>
         </div>
-        <section aria-labelledby="palette-heading" className={styles['palette']}>
-          <h2 id="palette-heading" className="visuallyHidden">
-            Symbols
-          </h2>
-        </section>
+        <Palette
+          inventory={DEFAULT_SETTINGS.inventory}
+          rDisplay={DEFAULT_SETTINGS.rDisplay}
+          onActivate={() => undefined}
+        />
       </main>
     </>
   );

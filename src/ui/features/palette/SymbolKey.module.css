@@ -4,14 +4,15 @@
  * fill (contrast-pairs.ts).
  */
 .key {
+  position: relative;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
-  min-width: 3.25rem;
+  min-width: var(--key-size);
   min-height: 3.25rem;
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1) var(--space-1);
   color: var(--color-text);
   background: var(--color-surface);
   border: 1px solid var(--color-border);

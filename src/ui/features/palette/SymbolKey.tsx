@@ -18,12 +18,9 @@ export const LONG_PRESS_MS = 500;
 /** Grace period for moving the pointer from the key onto its tooltip. */
 const HOVER_CLOSE_MS = 120;
 
-/** "ʃ, voiceless postalveolar fricative, as in ship" (ARCHITECTURE §6). */
-const accessibleName = ({ name, example }: PhoneSymbol, { ipa }: SymbolLabels) =>
-  [ipa, name, ...(example ? [`as in ${example.word}`] : [])].join(', ');
-
 /**
- * A palette key (FR-2): the glyph with a small label under it. Hover, focus or a
+ * A palette key (FR-2): the glyph with a small label under it (the example word,
+ * or the name for marks with no example). Hover, focus or a
  * touch long-press shows a tooltip with the name, a highlighted example word and
  * the TIPA code. The tooltip stays open while hovered and closes on Escape
  * (WCAG 1.4.13). A long-press shows the tooltip without adding the symbol.
@@ -102,7 +99,6 @@ export function SymbolKey({ symbol, labels, onActivate }: SymbolKeyProps) {
         ref={setButton}
         type="button"
         className={styles['key']}
-        aria-label={accessibleName(symbol, labels)}
         aria-describedby={tipaId}
         onClick={() => {
           if (swallowClick.current) {
@@ -137,12 +133,18 @@ export function SymbolKey({ symbol, labels, onActivate }: SymbolKeyProps) {
           }
         }}
       >
-        <span className={styles['glyph']} aria-hidden="true">
+        {/*
+         * The accessible name is built from the content: "ʃ, voiceless
+         * postalveolar fricative, as in ship" (ARCHITECTURE §6). The hidden
+         * middle keeps the visible text in order inside it (WCAG 2.5.3). It
+         * sits inside the glyph's span, and ends in a space, because browsers
+         * add a space after each flex item; name computation collapses the two.
+         */}
+        <span className={styles['glyph']}>
           {labels.ipa}
+          <span className="visuallyHidden">{example ? `, ${symbol.name}, as in ` : ', '}</span>
         </span>
-        <span className={styles['micro']} aria-hidden="true">
-          {micro}
-        </span>
+        <span className={styles['micro']}>{micro}</span>
       </button>
       <Tooltip
         id={tooltipId}

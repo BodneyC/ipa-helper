@@ -56,6 +56,20 @@ describe('<Tooltip>', () => {
     expect(tip).toHaveAttribute('data-placement', 'below');
   });
 
+  it('renders inside the anchor’s <main> landmark when there is one', () => {
+    const main = document.createElement('main');
+    const anchor = document.createElement('button');
+    main.append(anchor);
+    document.body.append(main);
+    render(
+      <Tooltip id="t" anchor={anchor} open>
+        hint
+      </Tooltip>,
+    );
+    expect(main).toContainElement(screen.getByRole('tooltip'));
+    main.remove();
+  });
+
   it('keeps clear of the right edge', () => {
     const anchor = anchorAt(300, window.innerWidth - 20);
     mockTooltipSize();

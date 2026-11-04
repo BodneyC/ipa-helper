@@ -29,15 +29,16 @@ afterEach(() => {
 describe('<SymbolKey>', () => {
   it('FR-2: is a button named by glyph, name and example, described by its TIPA', () => {
     const { key } = renderKey();
-    expect(key).toHaveAccessibleName('ʃ, voiceless postalveolar fricative, as in ship');
+    // Engines differ on whitespace around the visually hidden span; the order is what matters.
+    expect(key).toHaveAccessibleName(/^ʃ\s?, voiceless postalveolar fricative, as in\s?ship$/);
     expect(key).toHaveAccessibleDescription('TIPA S');
-    expect(key).toHaveTextContent('ʃship');
+    expect(key).toHaveTextContent('ʃ, voiceless postalveolar fricative, as in ship');
   });
 
   it('FR-2: names a suprasegmental by its meaning and labels it with its name', () => {
     const { key } = renderKey(get('primary-stress'));
-    expect(key).toHaveAccessibleName('ˈ, primary stress');
-    expect(key).toHaveTextContent('ˈprimary stress');
+    expect(key).toHaveAccessibleName(/^ˈ\s?,\s?primary stress$/);
+    expect(key).toHaveTextContent('ˈ, primary stress');
   });
 
   it('FR-10: activates on click, Enter and Space', async () => {
