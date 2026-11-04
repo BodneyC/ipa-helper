@@ -1,0 +1,86 @@
+/*
+ * A palette key (SPEC §6). --accent is inherited from the group card. The focus
+ * ring uses outline-offset, so it sits on the card, never on the key's raised
+ * fill (contrast-pairs.ts).
+ */
+.key {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 3.25rem;
+  min-height: 3.25rem;
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-touch-callout: none;
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+.key:hover {
+  background: var(--color-surface-raised);
+  transform: translateY(-1px);
+}
+
+.key:active {
+  transform: scale(0.96);
+}
+
+.key:focus-visible {
+  outline: 2px solid var(--accent, var(--color-focus));
+  outline-offset: 2px;
+}
+
+.glyph {
+  font-family: var(--font-ipa);
+  font-size: 1.5rem;
+  line-height: 1.1;
+}
+
+.micro {
+  max-width: 5rem;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Muted text isn't a declared pair on the raised fill, so switch to body text. */
+.key:hover .micro {
+  color: var(--color-text);
+}
+
+.tipName,
+.tipExample,
+.tipTipa {
+  display: block;
+}
+
+.tipName {
+  font-weight: 600;
+}
+
+.tipExample strong {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+.tipTipa {
+  color: var(--color-text-muted);
+}
+
+.tipTipa code {
+  color: var(--color-text);
+  font-family: var(--font-mono);
+}
