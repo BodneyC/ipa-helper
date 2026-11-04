@@ -228,7 +228,9 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 ## 5. State management
 
 - `useReducer`-based **editor store** (`src/state/editor.ts`): `{ word, cursor,
-  past: Word[], future: Word[] }`. Actions: `insert`, `deleteBackward`,
+  past: CursorWord[], future: CursorWord[] }`. History holds `{ word, cursor }`
+  snapshots, so undo restores the cursor too. Edits that change nothing, and cursor
+  moves, leave no undo entry. History is capped at 100 steps. Actions: `insert`, `deleteBackward`,
   `deleteForward`, `moveCursor`, `setCursor`, `clear`, `undo`, `redo`,
   `replace` (from URL or paste). The reducer is pure and fully unit-tested, with
   exhaustive `switch` statements guarded by `assertNever`.
@@ -236,7 +238,11 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   collapsed groups, r-display, sound-on-select. Persisted through the
   `KeyValueStore` port under a versioned key (`ipa-helper:settings:v1`) and
   validated on load with a hand-written type guard. No `JSON.parse` result is
-  trusted without validation.
+  trusted without validation. `parseSettings` validates field by field: an invalid
+  or missing field falls back to its default (or, in the reducer, its current
+  value) without discarding the valid ones. Fields: `theme` (system|dark|light),
+  `contrast`, `inventory`, `macroName` (letters only), `ipaSlashes` (FR-20),
+  `tipaSlashes` (Q-2), `rDisplay`, `collapsedGroups` (categories), `soundOnSelect`.
 - **URL sync**: the editor word is mirrored to `location.hash`
   (`history.replaceState`, debounced). On load, the hash is decoded through
   `domain/codec/url.ts`.
