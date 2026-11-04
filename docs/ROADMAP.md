@@ -31,7 +31,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 ## M1: Domain core (pure TypeScript)
 
-- [ ] **M1.1** Inventory types (`PhoneSymbol` union, `TipaEncoding`, branded `SymbolId`) and the `Result` type. refs: ARCH §4
+- [x] **M1.1** Inventory types (`PhoneSymbol` union, `TipaEncoding`, branded `SymbolId`) and the `Result` type. refs: ARCH §4 (23548f2)
 - [ ] **M1.2** RP inventory data: consonants, affricates, vowels, diphthongs and
   suprasegmentals exactly as in SPEC §7. deps: M1.1 · refs: FR-1, FR-2
   - AC: invariant tests cover unique IDs/IPA, NFC normalisation, `ɡ` U+0261 (not `g`),
