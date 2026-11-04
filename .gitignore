@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+*.tsbuildinfo
+.vite/
+*.log
+.DS_Store
+# LaTeX test artefacts
+tests/tex/out/
+# Prevent stray lockfiles from other package managers
+package-lock.json
+yarn.lock
+bun.lockb
+.claude/settings.local.json
