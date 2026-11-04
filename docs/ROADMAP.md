@@ -108,9 +108,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 - More export formats: X-SAMPA, Kirshenbaum, espeak mnemonics, Markdown/HTML snippet.
 - Accent switch for audio (General American), e.g. a second Piper voice (ADR-0009).
-- Cori trailed off on final clusters such as /ˈmaʊzɛlt/ (maintainer, M4.1); a
-  terminal `.` fixes the erratic lengths (ADR-0009). Confirm by ear with
-  `spikes/m4.1-piper/out/endings/`, and log any other words she gets wrong.
+- Log any words Cori still gets wrong once the terminal `.` (ADR-0009) is in place.
 - int8 Cori is 19.5 MB vs 63.5 MB but ~60% slower on wasm (ADR-0009). Revisit
   if download size becomes the constraint (M7 PWA precache), or with WebGPU.
 - "Minimal braces" TIPA output mode.

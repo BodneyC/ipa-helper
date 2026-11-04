@@ -104,8 +104,9 @@ punctuation. Without it, words ending in a cluster such as /-ɛlt/ trail off
 audio length becomes erratic: over three runs each, `maʊzˈɛlt` gave
 1.17–3.04 s and `mˈaʊzɛlt` 0.35–0.78 s bare, against 0.71–0.86 s and
 0.82–0.85 s with a final `.`. Any of `.`, ` .`, `,`, `!` stabilised all six
-test words (`spikes/m4.1-piper/endings.mjs`). The serialiser (M5.1) must
-append `.` to every word and symbol clip.
+test words (`spikes/m4.1-piper/endings.mjs`), and the maintainer confirmed
+by ear that every punctuated variant sounds right. The serialiser (M5.1)
+must append `.` to everything sent to the voice, words and symbol clips alike.
 
 **Compressed model.** Dynamic int8 quantisation (`onnxruntime.quantization`,
 MatMul + Gemm + Conv weights) shrinks the model to **19.5 MB**, but session
