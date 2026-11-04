@@ -71,6 +71,7 @@ ipa-helper/
 │  ├─ domain/                 # PURE. No React, no DOM, no globals.
 │  │  ├─ inventory/
 │  │  │  ├─ types.ts          # PhoneSymbol, Category, articulatory features
+│  │  │  ├─ symbol-id.ts      # branded SymbolId: guard, Result parser, data constructor
 │  │  │  ├─ consonants.ts     # data (as const satisfies readonly PhoneSymbol[])
 │  │  │  ├─ vowels.ts
 │  │  │  ├─ diphthongs.ts
@@ -123,8 +124,14 @@ Unit tests sit next to the code they test (`foo.ts` + `foo.test.ts`).
 ## 4. Domain model
 
 ```ts
-// src/domain/inventory/types.ts (illustrative, binding in spirit)
+// src/domain/inventory/symbol-id.ts
 export type SymbolId = string & { readonly __brand: 'SymbolId' };
+// Lowercase ASCII words joined by hyphens (/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/), URL-safe.
+// isSymbolId (guard) · parseSymbolId → Result (untrusted input) · symbolId (static data; throws)
+
+// src/domain/inventory/types.ts (illustrative, binding in spirit)
+// Feature vocabularies are `as const` tuples in chart order (PLACES, MANNERS,
+// HEIGHTS, BACKNESSES, …); each union type is derived from its tuple.
 
 export type Category =
   | 'consonant' | 'affricate' | 'vowel' | 'diphthong'
@@ -150,14 +157,18 @@ interface BaseSymbol {
 export interface ConsonantSymbol extends BaseSymbol {
   readonly category: 'consonant' | 'affricate';
   readonly place: Place; readonly manner: Manner; readonly voiced: boolean;
+  readonly secondary?: SecondaryArticulation;   // e.g. ɫ = velarised l, keeps chart cells distinct
 }
 export interface VowelSymbol extends BaseSymbol {
   readonly category: 'vowel';
   readonly height: Height; readonly backness: Backness;
   readonly rounded: boolean; readonly long: boolean;
 }
-// … DiphthongSymbol, SuprasegmentalSymbol, DiacriticSymbol
-export type PhoneSymbol = ConsonantSymbol | VowelSymbol | /* … */;
+export interface DiphthongSymbol extends BaseSymbol { readonly category: 'diphthong'; readonly glide: 'closing' | 'centring' }
+export interface SuprasegmentalSymbol extends BaseSymbol { readonly category: 'suprasegmental'; readonly role: SuprasegmentalRole }
+export interface DiacriticSymbol extends BaseSymbol { readonly category: 'diacritic' }
+export type PhoneSymbol =
+  ConsonantSymbol | VowelSymbol | DiphthongSymbol | SuprasegmentalSymbol | DiacriticSymbol;
 
 export type TipaEncoding =
   | { readonly kind: 'literal'; readonly text: string }   // "S", "tS", "i:"
