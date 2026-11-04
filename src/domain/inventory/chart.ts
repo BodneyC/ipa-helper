@@ -62,33 +62,55 @@ export const consonantChart = (symbols: readonly ConsonantSymbol[]): ConsonantCh
   };
 };
 
-/** The three columns of the simplified vowel grid. */
-type VowelColumn = 'front' | 'central' | 'back';
-const VOWEL_COLUMNS: readonly VowelColumn[] = ['front', 'central', 'back'];
-const columnOf = (backness: Backness): VowelColumn =>
-  backness === 'central' ? 'central' : BACKNESSES.indexOf(backness) < 2 ? 'front' : 'back';
-
-/** A simplified vowel chart: heights × front/central/back (M2.5; M3.1 adds the trapezoid). */
-export interface VowelGrid {
-  readonly heights: readonly Height[];
-  readonly columns: readonly VowelColumn[];
-  /** Rows of cells, one row per height. A cell lists unrounded before rounded, short before long. */
-  readonly rows: readonly (readonly (readonly VowelSymbol[])[])[];
+/** A point on the vowel trapezoid, both axes from 0 to 1 (x: front → back, y: close → open). */
+export interface TrapezoidPoint {
+  readonly x: number;
+  readonly y: number;
 }
 
-/** Lays out monophthongs by height and frontness, pairing rounding and length (FR-1). */
-export const vowelGrid = (symbols: readonly VowelSymbol[]): VowelGrid => {
-  const heights = HEIGHTS.filter((h) => symbols.some((s) => s.height === h));
+/**
+ * The corners of the IPA vowel trapezoid, clockwise from close front. The open
+ * edge is half as wide as the close edge, as on the IPA chart.
+ */
+export const TRAPEZOID_OUTLINE: readonly TrapezoidPoint[] = [
+  { x: 0, y: 0 },
+  { x: 1, y: 0 },
+  { x: 1, y: 1 },
+  { x: 0.5, y: 1 },
+];
+
+/**
+ * Where a height × backness sits on the trapezoid. The front edge slants, so
+ * the front of an open vowel is further right than the front of a close one.
+ */
+export const trapezoidPoint = (height: Height, backness: Backness): TrapezoidPoint => {
+  const y = HEIGHTS.indexOf(height) / (HEIGHTS.length - 1);
+  const front = y / 2;
+  return { x: front + (BACKNESSES.indexOf(backness) / (BACKNESSES.length - 1)) * (1 - front), y };
+};
+
+/** Vowels that share a height and backness, drawn side by side at one point. */
+export interface VowelCluster extends TrapezoidPoint {
+  readonly height: Height;
+  readonly backness: Backness;
+  /** Unrounded before rounded, short before long (FR-1). */
+  readonly symbols: readonly VowelSymbol[];
+}
+
+/**
+ * Lays out monophthongs on the IPA vowel trapezoid (FR-1). Clusters come in
+ * reading order: close to open, then front to back.
+ */
+export const vowelTrapezoid = (symbols: readonly VowelSymbol[]): readonly VowelCluster[] => {
   const rank = (s: VowelSymbol) => (s.rounded ? 2 : 0) + (s.long ? 1 : 0);
-  return {
-    heights,
-    columns: VOWEL_COLUMNS,
-    rows: heights.map((height) =>
-      VOWEL_COLUMNS.map((column) =>
-        symbols
-          .filter((s) => s.height === height && columnOf(s.backness) === column)
-          .toSorted((a, b) => rank(a) - rank(b)),
-      ),
-    ),
-  };
+  return HEIGHTS.flatMap((height) =>
+    BACKNESSES.flatMap((backness) => {
+      const here = symbols
+        .filter((s) => s.height === height && s.backness === backness)
+        .toSorted((a, b) => rank(a) - rank(b));
+      return here.length === 0
+        ? []
+        : [{ height, backness, ...trapezoidPoint(height, backness), symbols: here }];
+    }),
+  );
 };

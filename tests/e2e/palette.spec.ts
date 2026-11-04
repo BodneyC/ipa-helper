@@ -45,6 +45,46 @@ test.describe('symbol palette (FR-1, FR-2)', () => {
     await expect(key).toBeFocused();
   });
 
+  test('FR-1: vowels sit on the trapezoid, close front top left and open back bottom right', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const chart = page
+      .getByRole('region', { name: 'Vowels' })
+      .getByRole('figure', { name: /^Vowel chart/ });
+    await expect(chart).toBeVisible();
+    const box = (name: RegExp) =>
+      chart.getByRole('button', { name }).evaluate((k) => {
+        const r = k.getBoundingClientRect();
+        return { x: r.x, y: r.y };
+      });
+    const closeFront = await box(/^i\s?, close front/);
+    const nearCloseFront = await box(/^ɪ\s?,/);
+    const openBack = await box(/^ɒ\s?,/);
+    const openMidFront = await box(/^ɛ\s?,/);
+    expect(closeFront.y).toBeLessThan(nearCloseFront.y);
+    expect(closeFront.x).toBeLessThan(openMidFront.x); // the front edge slants
+    expect(openBack.y).toBeGreaterThan(openMidFront.y);
+    expect(openBack.x).toBeGreaterThan(openMidFront.x);
+    // No two keys overlap.
+    const boxes = await chart.getByRole('button').evaluateAll((keys) =>
+      keys.map((k) => {
+        const r = k.getBoundingClientRect();
+        return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
+      }),
+    );
+    expect(boxes).toHaveLength(16);
+    const overlaps = boxes.flatMap((a, i) =>
+      boxes
+        .slice(i + 1)
+        .filter(
+          (b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom,
+        ),
+    );
+    expect(overlaps).toEqual([]);
+    await expectNoA11yViolations(page);
+  });
+
   test('NFR-4: keys are at least 44 × 44 px', async ({ page }) => {
     await page.goto('/');
     const sizes = await page

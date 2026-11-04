@@ -10,8 +10,8 @@
   grid-column: 1 / -1;
 }
 
-/* The vowel grid needs about two columns' width once there are three or more. */
-@media (width >= 1024px) {
+/* The vowel trapezoid needs about two columns' width once there are two. */
+@media (width >= 768px) {
   .double {
     grid-column: span 2;
   }
@@ -90,4 +90,59 @@
 /* Shaded like the IPA chart's impossible cells. */
 .impossible {
   background: repeating-linear-gradient(-45deg, var(--color-border) 0 2px, transparent 2px 8px);
+}
+
+/*
+ * The vowel trapezoid (FR-1). The plot box is inset by half the widest cluster
+ * so keys on the edges stay inside the card; the minimum size keeps each height
+ * at least a key's height apart.
+ */
+.trapezoid {
+  position: relative;
+  min-width: 30rem;
+  max-width: 44rem;
+  height: 26rem;
+  margin: 0 auto;
+}
+
+.plot {
+  position: absolute;
+  inset: 3rem 3.5rem 1.75rem;
+}
+
+.outline {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--color-border);
+  stroke-width: 1px;
+}
+
+.outline * {
+  vector-effect: non-scaling-stroke;
+}
+
+.axisLabel {
+  position: absolute;
+  top: -2.75rem;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  transform: translateX(-50%);
+}
+
+.clusters {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cluster {
+  position: absolute;
+  display: flex;
+  gap: var(--space-1);
+  transform: translate(-50%, -50%);
 }

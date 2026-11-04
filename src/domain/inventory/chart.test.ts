@@ -1,8 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
-import { consonantChart, isImpossible, vowelGrid } from './chart';
+import {
+  consonantChart,
+  isImpossible,
+  TRAPEZOID_OUTLINE,
+  trapezoidPoint,
+  vowelTrapezoid,
+} from './chart';
 import type { ChartSlot } from './chart';
 import { CONSONANTS } from './consonants';
+import { BACKNESSES, HEIGHTS } from './types';
 import { VOWELS } from './vowels';
 
 const ipa = (slot: ChartSlot | undefined): string =>
@@ -88,35 +95,56 @@ describe('consonant chart (FR-1)', () => {
   });
 });
 
-describe('vowel grid (FR-1)', () => {
-  const grid = vowelGrid(VOWELS);
-  const cell = (row: number, col: number) =>
-    (grid.rows[row]?.[col] ?? []).map((v) => v.ipa).join(' ');
+describe('vowel trapezoid (FR-1)', () => {
+  const clusters = vowelTrapezoid(VOWELS);
+  const at = (height: string, backness: string) =>
+    clusters
+      .find((c) => c.height === height && c.backness === backness)
+      ?.symbols.map((v) => v.ipa)
+      .join(' ');
 
-  it('has a row per height RP uses, close to open, and front/central/back columns', () => {
-    expect(grid.heights).toEqual([
-      'close',
-      'near-close',
-      'close-mid',
-      'mid',
-      'open-mid',
-      'near-open',
-      'open',
+  it('puts the corners of the trapezoid where the IPA chart does', () => {
+    expect(trapezoidPoint('close', 'front')).toEqual({ x: 0, y: 0 });
+    expect(trapezoidPoint('close', 'back')).toEqual({ x: 1, y: 0 });
+    expect(trapezoidPoint('open', 'back')).toEqual({ x: 1, y: 1 });
+    expect(trapezoidPoint('open', 'front')).toEqual({ x: 0.5, y: 1 });
+    expect(TRAPEZOID_OUTLINE).toEqual([
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 1, y: 1 },
+      { x: 0.5, y: 1 },
     ]);
-    expect(grid.columns).toEqual(['front', 'central', 'back']);
   });
 
-  it('pairs short with long, and unrounded with rounded, in each cell', () => {
-    expect(cell(0, 0)).toBe('i iː');
-    expect(cell(0, 2)).toBe('u uː');
-    expect(cell(1, 0)).toBe('ɪ');
-    expect(cell(1, 2)).toBe('ʊ');
-    expect(cell(4, 2)).toBe('ʌ ɔː');
-    expect(cell(6, 2)).toBe('ɑː ɒ');
-    expect(cell(3, 1)).toBe('ə');
+  it('keeps every point inside the trapezoid, with the front edge slanting', () => {
+    for (const height of HEIGHTS) {
+      const front = trapezoidPoint(height, 'front');
+      expect(front.x).toBeCloseTo(front.y / 2);
+      for (const backness of BACKNESSES) {
+        const { x, y } = trapezoidPoint(height, backness);
+        expect(x).toBeGreaterThanOrEqual(y / 2);
+        expect(x).toBeLessThanOrEqual(1);
+        expect(y).toBeGreaterThanOrEqual(0);
+        expect(y).toBeLessThanOrEqual(1);
+      }
+    }
+  });
+
+  it('pairs short with long, and unrounded with rounded, at each point', () => {
+    expect(at('close', 'front')).toBe('i iː');
+    expect(at('close', 'back')).toBe('u uː');
+    expect(at('near-close', 'near-front')).toBe('ɪ');
+    expect(at('open-mid', 'back')).toBe('ʌ ɔː');
+    expect(at('open', 'back')).toBe('ɑː ɒ');
+    expect(at('mid', 'central')).toBe('ə');
+  });
+
+  it('lists clusters close to open, then front to back', () => {
+    expect(clusters.map((c) => c.symbols[0]?.ipa).join(' ')).toBe('i u ɪ ʊ e ə ɛ ɜː ʌ æ ɐ ɑː');
   });
 
   it('places every vowel exactly once', () => {
-    expect(grid.rows.flat(2)).toHaveLength(VOWELS.length);
+    expect(clusters.flatMap((c) => c.symbols)).toHaveLength(VOWELS.length);
+    expect(vowelTrapezoid([])).toEqual([]);
   });
 });

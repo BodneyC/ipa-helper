@@ -65,14 +65,20 @@ describe('<Palette>', () => {
     expect(within(table).getAllByText(/judged impossible/).length).toBeGreaterThan(0);
   });
 
-  it('FR-1: lays vowels out by height and frontness', () => {
+  it('FR-1: lays vowels out on the trapezoid, close front at the top left', () => {
     renderPalette();
     const vowels = screen.getByRole('region', { name: 'Vowels' });
-    const columns = within(vowels)
-      .getAllByRole('columnheader')
-      .map((h) => h.textContent);
-    expect(columns).toEqual(['Front', 'Central', 'Back']);
-    expect(within(vowels).getAllByRole('rowheader')[0]).toHaveTextContent('Close');
+    const chart = within(vowels).getByRole('figure', { name: /^Vowel chart/ });
+    const clusters = within(chart).getAllByRole('listitem');
+    expect(clusters[0]).toHaveStyle({ left: '0%', top: '0%' });
+    expect(
+      within(clusters[0] ?? chart)
+        .getAllByRole('button')
+        .map((b) => b.textContent.charAt(0)),
+    ).toEqual(['i', 'i']);
+    const open = clusters.at(-1) ?? chart;
+    expect(open).toHaveStyle({ left: '100%', top: '100%' });
+    expect(within(open).getAllByRole('button')).toHaveLength(2);
   });
 
   it('FR-10: activating a key reports its symbol', async () => {

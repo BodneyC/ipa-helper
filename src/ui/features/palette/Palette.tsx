@@ -3,7 +3,7 @@ import { GROUPS } from './groups';
 import type { Group } from './groups';
 import { KeyGrid } from './KeyGrid';
 import styles from './Palette.module.css';
-import { VowelGrid } from './VowelGrid';
+import { VowelTrapezoid } from './VowelTrapezoid';
 import { symbolsIn } from '../../../domain/inventory';
 import type {
   ConsonantSymbol,
@@ -39,7 +39,7 @@ export function Palette({ inventory, rDisplay, onActivate }: PaletteProps) {
       case 'chart':
         return <ConsonantChart symbols={members.filter(isConsonant)} {...props} />;
       case 'vowels':
-        return <VowelGrid symbols={members.filter(isVowel)} {...props} />;
+        return <VowelTrapezoid symbols={members.filter(isVowel)} {...props} />;
       case 'grid':
         return <KeyGrid symbols={members} {...props} />;
       default:
