@@ -1,2 +1,9 @@
 # pnpm >= 11 reads its settings from here, not from .npmrc (see ADR-0011).
 engineStrict: true
+# eslint-plugin-react 7.37 and eslint-plugin-jsx-a11y 6.10 predate ESLint 10. They are
+# wrapped with @eslint/compat's fixupPluginRules in eslint.config.ts (see ADR-0011).
+# Remove these entries once both plugins declare ESLint 10 support.
+peerDependencyRules:
+  allowedVersions:
+    eslint-plugin-react>eslint: '10'
+    eslint-plugin-jsx-a11y>eslint: '10'

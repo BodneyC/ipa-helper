@@ -1,0 +1,10 @@
+pnpm-lock.yaml
+dist/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+LICENSE
+# Hand-authored Markdown (spec, ADRs, roadmap, commands) keeps its authors' layout;
+# Prettier would only re-pad tables and swap emphasis markers.
+*.md

@@ -3,8 +3,7 @@
  * (bad URL fragment, unknown pasted characters) instead of throwing.
  */
 export type Result<T, E> =
-  | { readonly ok: true; readonly value: T }
-  | { readonly ok: false; readonly error: E };
+  { readonly ok: true; readonly value: T } | { readonly ok: false; readonly error: E };
 
 /** Wraps a success value. */
 export const ok = <T>(value: T): Result<T, never> => ({ ok: true, value });
