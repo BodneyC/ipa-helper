@@ -12,11 +12,9 @@
   z-index: 10;
 }
 
-.placeholder {
-  margin: 0;
-  color: var(--color-text-subtle);
-  font-family: var(--font-ipa);
-  font-size: 2.5rem;
+.workbenchBody {
+  display: grid;
+  gap: var(--space-3);
 }
 
 /* Narrow screens: the word card stays in view while the palette scrolls (SPEC §6). */

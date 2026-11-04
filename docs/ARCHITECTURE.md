@@ -97,7 +97,7 @@ ipa-helper/
 │  ├─ state/
 │  │  ├─ editor.ts            # reducer: word, cursor, undo/redo stacks
 │  │  ├─ settings.ts          # reducer and schema for persisted settings
-│  │  └─ hooks.ts             # useEditor, useSettings, useServices
+│  │  └─ hooks.ts             # EditorContext/SettingsContext + useEditor, useSettings (providers in app/providers.tsx)
 │  ├─ adapters/
 │  │  ├─ clipboard.ts         # navigator.clipboard implementation of the Clipboard port
 │  │  ├─ local-storage.ts     # KeyValueStore over localStorage (with a versioned schema)
