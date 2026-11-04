@@ -73,6 +73,10 @@ pronounced in British English, at no cost and without signing up for anything.
   not just grey them out.
 - **FR-4** A filter box narrows the palette by symbol, name, example word or
   TIPA code (e.g. typing `fric` or `S` finds `ʃ`).
+  Glyphs and TIPA codes match as case-sensitive substrings (`S` finds `ʃ`, `s`
+  finds `s`). Name and example words match by word prefix, ignoring case, and
+  every query word must match (`voiceless fric`). The palette says how many
+  symbols match, and hides groups with none.
 - **FR-5** Users can collapse and expand palette groups. The app remembers which
   groups are collapsed across reloads.
 

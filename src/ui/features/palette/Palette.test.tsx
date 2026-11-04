@@ -7,9 +7,9 @@ import { Palette } from './Palette';
 import { symbolsIn } from '../../../domain/inventory';
 import type { PhoneSymbol } from '../../../domain/inventory/types';
 
-const renderPalette = (rDisplay: 'narrow' | 'broad' = 'narrow') => {
+const renderPalette = (rDisplay: 'narrow' | 'broad' = 'narrow', query = '') => {
   const onActivate = vi.fn<(s: PhoneSymbol) => void>();
-  render(<Palette inventory="rp" rDisplay={rDisplay} onActivate={onActivate} />);
+  render(<Palette inventory="rp" rDisplay={rDisplay} query={query} onActivate={onActivate} />);
   return { onActivate };
 };
 
@@ -95,6 +95,31 @@ describe('<Palette>', () => {
     expect(
       screen.getByRole('button', { name: /^r\s?, voiced alveolar approximant/ }),
     ).toBeVisible();
+  });
+
+  it('FR-4: shows only matching symbols, hides empty groups and says how many match', () => {
+    renderPalette('narrow', ' fric ');
+    const headings = screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent);
+    expect(headings).toEqual(['Consonants']);
+    expect(screen.getByRole('button', { name: /^ʃ\s?,/ })).toBeVisible();
+    expect(screen.queryByRole('button', { name: /^p\s?,/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('10 symbols match “fric”.');
+  });
+
+  it('FR-4: says so when nothing matches, and when one symbol does', () => {
+    const { unmount } = render(
+      <Palette inventory="rp" rDisplay="narrow" query="zzz" onActivate={vi.fn()} />,
+    );
+    expect(screen.queryAllByRole('heading', { level: 3 })).toEqual([]);
+    expect(screen.getByRole('status')).toHaveTextContent('No symbols match “zzz”.');
+    unmount();
+    renderPalette('narrow', '2');
+    expect(screen.getByRole('status')).toHaveTextContent('1 symbol matches “2”.');
+  });
+
+  it('keeps the status region quiet without a filter', () => {
+    renderPalette();
+    expect(screen.getByRole('status')).toBeEmptyDOMElement();
   });
 
   it('turns feature names into header labels', () => {

@@ -31,6 +31,7 @@
 }
 
 .tagline {
+  display: none;
   min-width: 0;
   margin: 0;
   overflow: hidden;
@@ -42,8 +43,40 @@
 
 .controls {
   display: flex;
+  flex: 1 1 auto;
   gap: var(--space-2);
-  margin-left: auto;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.field {
+  display: flex;
+  min-width: 0;
+}
+
+.select,
+.filter {
+  min-height: 2.75rem;
+  padding: 0 var(--space-2);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.select {
+  width: 5.5rem; /* fits "Full IPA"; the open list shows the full option text */
+}
+
+.filter {
+  width: 14rem;
+  min-width: 4.5rem;
+  max-width: 100%;
+}
+
+.filter::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
 }
 
 .iconButton {
@@ -58,4 +91,10 @@
 
 .iconButton:hover {
   background: var(--color-surface-raised);
+}
+
+@media (width >= 1024px) {
+  .tagline {
+    display: block;
+  }
 }

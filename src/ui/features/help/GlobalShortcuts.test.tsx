@@ -100,6 +100,26 @@ describe('global shortcuts (FR-51)', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
+  it('/ focuses the filter, which then narrows the palette (FR-4)', async () => {
+    const { user, word } = setup();
+    await user.click(screen.getByRole('heading', { level: 1 }));
+    await user.keyboard('/');
+    const filter = screen.getByRole('searchbox', { name: 'Filter symbols' });
+    expect(filter).toHaveFocus();
+    await user.keyboard('ship{Backspace}');
+    expect(filter).toHaveValue('shi');
+    expect(word).toHaveTextContent('/sip/');
+    expect(screen.getAllByRole('button', { name: /, as in\s?ship$/ })).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: /^p\s?,/ })).not.toBeInTheDocument();
+  });
+
+  it('FR-3: the inventory switch offers RP, with Full IPA not yet available', () => {
+    setup();
+    const inventory = screen.getByRole('combobox', { name: 'Inventory' });
+    expect(inventory).toHaveValue('rp');
+    expect(screen.getByRole('option', { name: 'Full IPA (coming soon)' })).toBeDisabled();
+  });
+
   it('the top bar button opens the same dialog', async () => {
     const { user } = setup();
     await user.click(screen.getByRole('button', { name: 'Keyboard shortcuts' }));

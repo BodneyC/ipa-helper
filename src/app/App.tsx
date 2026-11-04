@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import styles from './App.module.css';
 import { TopBar } from './TopBar';
@@ -21,13 +21,20 @@ export function App() {
   const { dispatch } = useEditor();
   const { settings } = useSettings();
   const [helpOpen, setHelpOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const filterRef = useRef<HTMLInputElement>(null);
   const openHelp = () => {
     setHelpOpen(true);
   };
   return (
     <AnnouncerProvider>
-      <GlobalShortcuts onHelp={openHelp} />
-      <TopBar onHelp={openHelp} />
+      <GlobalShortcuts
+        onHelp={openHelp}
+        onFilter={() => {
+          filterRef.current?.focus();
+        }}
+      />
+      <TopBar query={query} onQueryChange={setQuery} filterRef={filterRef} onHelp={openHelp} />
       <main className={styles['main']}>
         <div className={styles['workbench']}>
           <Card title="Word" headingLevel={2} hideTitle>
@@ -41,6 +48,7 @@ export function App() {
         </div>
         <Palette
           inventory={settings.inventory}
+          query={query}
           rDisplay={settings.rDisplay}
           onActivate={(symbol) => {
             dispatch({ type: 'insert', symbolId: symbol.id });

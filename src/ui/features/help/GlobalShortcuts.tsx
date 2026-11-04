@@ -9,6 +9,8 @@ import { useOutputs } from '../output/outputs';
 interface GlobalShortcutsProps {
   /** `?` was pressed. */
   readonly onHelp: () => void;
+  /** `/` was pressed. */
+  readonly onFilter: () => void;
 }
 
 /** Input types that take typed text, where single keys must stay theirs. */
@@ -43,16 +45,16 @@ const WORD_KEYS: ReadonlyMap<string, EditorAction> = new Map<string, EditorActio
  * the word display and the palette's arrow keys). Nothing fires from inside a
  * dialog. Renders nothing.
  */
-export function GlobalShortcuts({ onHelp }: GlobalShortcutsProps) {
+export function GlobalShortcuts({ onHelp, onFilter }: GlobalShortcutsProps) {
   const { dispatch } = useEditor();
   const outputs = useOutputs();
   const copy = useCopy();
   const announce = useAnnounce();
 
   // The listener is attached once; it reads the latest values through this ref.
-  const latest = useRef({ dispatch, outputs, copy, announce, onHelp });
+  const latest = useRef({ dispatch, outputs, copy, announce, onHelp, onFilter });
   useEffect(() => {
-    latest.current = { dispatch, outputs, copy, announce, onHelp };
+    latest.current = { dispatch, outputs, copy, announce, onHelp, onFilter };
   });
 
   useEffect(() => {
@@ -60,7 +62,7 @@ export function GlobalShortcuts({ onHelp }: GlobalShortcutsProps) {
       const { target } = event;
       if (event.defaultPrevented || !(target instanceof Element)) return;
       if (typesText(target) || target.closest('dialog') !== null) return;
-      const { dispatch, outputs, copy, announce, onHelp } = latest.current;
+      const { dispatch, outputs, copy, announce, onHelp, onFilter } = latest.current;
       const mod = event.ctrlKey || event.metaKey;
       const key = event.key.toLowerCase();
 
@@ -79,6 +81,11 @@ export function GlobalShortcuts({ onHelp }: GlobalShortcutsProps) {
       if (event.key === '?') {
         event.preventDefault();
         onHelp();
+        return;
+      }
+      if (event.key === '/') {
+        event.preventDefault();
+        onFilter();
         return;
       }
       const action = event.shiftKey ? undefined : WORD_KEYS.get(event.key);

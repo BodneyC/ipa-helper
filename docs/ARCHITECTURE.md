@@ -87,7 +87,9 @@ ipa-helper/
 │  │  ├─ serialise/
 │  │  │  ├─ serialiser.ts     # interface Serialiser { serialise(word): string }
 │  │  │  ├─ ipa.ts
-│  │  │  └─ tipa.ts           # boundary-safe joining (FR-22)
+│  │  │  ├─ tipa.ts           # boundary-safe joining (FR-22)
+│  │  │  ├─ labels.ts         # a key's glyph and TIPA code (FR-2, Q-3)
+│  │  │  └─ filter.ts         # matchesFilter: the palette filter's matching rule (FR-4)
 │  │  ├─ parse/
 │  │  │  └─ ipa-tokeniser.ts  # M6: greedy longest-match IPA → Word
 │  │  ├─ codec/

@@ -14,6 +14,7 @@ import type {
   VowelSymbol,
 } from '../../../domain/inventory/types';
 import { assertNever } from '../../../domain/result';
+import { matchesFilter } from '../../../domain/serialise/filter';
 import type { RDisplay } from '../../../domain/serialise/serialiser';
 import { Card } from '../../components/Card';
 import { useRovingFocus } from '../../components/roving-focus';
@@ -21,6 +22,8 @@ import { useRovingFocus } from '../../components/roving-focus';
 interface PaletteProps {
   readonly inventory: InventoryId;
   readonly rDisplay: RDisplay;
+  /** FR-4: the filter text; blank shows everything. */
+  readonly query: string;
   /** FR-10: a key was activated. */
   readonly onActivate: (symbol: PhoneSymbol) => void;
 }
@@ -30,11 +33,12 @@ const isConsonant = (s: PhoneSymbol): s is ConsonantSymbol =>
 const isVowel = (s: PhoneSymbol): s is VowelSymbol => s.category === 'vowel';
 
 /**
- * FR-1, FR-3: the symbol palette. One card per group that has symbols in the
- * chosen inventory, in display order.
+ * FR-1, FR-3, FR-4: the symbol palette. One card per group that has symbols in
+ * the chosen inventory matching the filter, in display order.
  */
-export function Palette({ inventory, rDisplay, onActivate }: PaletteProps) {
-  const symbols = symbolsIn(inventory);
+export function Palette({ inventory, rDisplay, query, onActivate }: PaletteProps) {
+  const symbols = symbolsIn(inventory).filter((s) => matchesFilter(s, query, rDisplay));
+  const filtering = query.trim() !== '';
 
   const body = (group: Group, members: readonly PhoneSymbol[]) => {
     const props = { rDisplay, onActivate };
@@ -55,6 +59,10 @@ export function Palette({ inventory, rDisplay, onActivate }: PaletteProps) {
       <h2 id="palette-heading" className="visuallyHidden">
         Symbols
       </h2>
+      {/* FR-4: how many symbols the filter leaves, read out as it changes. */}
+      <p role="status" className={filtering ? styles['matches'] : 'visuallyHidden'}>
+        {filtering && matchCount(symbols.length, query.trim())}
+      </p>
       {GROUPS.map((group) => {
         const members = symbols.filter((s) => s.category === group.category);
         if (members.length === 0) return null;
@@ -84,3 +92,8 @@ export function Palette({ inventory, rDisplay, onActivate }: PaletteProps) {
 function RovingGroup({ children }: { readonly children: ReactNode }) {
   return <div ref={useRovingFocus<HTMLDivElement>()}>{children}</div>;
 }
+
+const matchCount = (n: number, query: string): string =>
+  n === 0
+    ? `No symbols match “${query}”.`
+    : `${String(n)} ${n === 1 ? 'symbol matches' : 'symbols match'} “${query}”.`;
