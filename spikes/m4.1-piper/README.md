@@ -28,5 +28,6 @@ spikes/m4.1-piper/.venv/bin/python -I spikes/m4.1-piper/quantise.py
 
 - `index.html`, `spike.js`: listening page (dictionary vs nucleus stress placement).
 - `bench.mjs`: Playwright bench, served without COOP/COEP like GitHub Pages.
+- `endings.mjs`: final-cluster words with and without terminal punctuation; WAVs in `out/endings/`.
 - `quantise.py`: int8 dynamic quantisation.
 - `fetch-model.sh`: downloads the voice and its model card.

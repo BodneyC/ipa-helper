@@ -98,6 +98,15 @@ model sometimes misbehaves: `/ˈmaʊzɛlt/` produced 3.1 s of audio against
 0.68 s with nucleus placement. The synthesis serialiser (M5.1) must move each
 stress mark rightwards past consonants to the next vowel.
 
+**Terminal punctuation.** Piper's training utterances always end in
+punctuation. Without it, words ending in a cluster such as /-ɛlt/ trail off
+(the maintainer heard Cori "bouncing on the e and l" in /ˈmaʊzɛlt/), and
+audio length becomes erratic: over three runs each, `maʊzˈɛlt` gave
+1.17–3.04 s and `mˈaʊzɛlt` 0.35–0.78 s bare, against 0.71–0.86 s and
+0.82–0.85 s with a final `.`. Any of `.`, ` .`, `,`, `!` stabilised all six
+test words (`spikes/m4.1-piper/endings.mjs`). The serialiser (M5.1) must
+append `.` to every word and symbol clip.
+
 **Compressed model.** Dynamic int8 quantisation (`onnxruntime.quantization`,
 MatMul + Gemm + Conv weights) shrinks the model to **19.5 MB**, but session
 creation is no faster (1.57–1.65 s) and warm synthesis is about 60% slower

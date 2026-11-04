@@ -328,7 +328,8 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 - Word synthesis takes the Word through `piperPhonemeSerialiser` (domain, pure)
   so stress and length carry through. It emits Piper phoneme IDs and moves each
   stress mark from the syllable onset to just before the stressed vowel, which is
-  how the voice was trained (ADR-0009 findings). The UI never handles raw
+  how the voice was trained, and appends a terminal `.` so the voice stops
+  cleanly (ADR-0009 findings). The UI never handles raw
   synthesis strings.
 - The worker creates the onnxruntime session on the first audio request (or
   when "Sound on select" is switched on) and reports a loading status; creation
