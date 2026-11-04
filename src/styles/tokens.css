@@ -57,6 +57,7 @@
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', menlo, consolas, monospace;
   --duration-fast: 120ms;
   --duration-medium: 240ms;
+  --duration-pulse: 480ms; /* not zeroed for reduced motion: it only fades there */
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --shadow-popover: 0 8px 24px -8px var(--gb-dark0-hard);
 

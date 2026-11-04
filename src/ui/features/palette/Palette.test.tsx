@@ -6,6 +6,7 @@ import { headerLabel } from './groups';
 import { Palette } from './Palette';
 import { symbolsIn } from '../../../domain/inventory';
 import type { Category, PhoneSymbol } from '../../../domain/inventory/types';
+import { AnnouncerProvider } from '../../components/Announcer';
 
 const renderPalette = (rDisplay: 'narrow' | 'broad' = 'narrow', query = '') => {
   const onActivate = vi.fn<(s: PhoneSymbol) => void>();
@@ -99,6 +100,24 @@ describe('<Palette>', () => {
     await user.click(screen.getByRole('button', { name: /^eɪ\s?,/ }));
     await user.click(screen.getByRole('button', { name: /^ˈ\s?,/ }));
     expect(onActivate.mock.calls.map(([s]) => s.ipa)).toEqual(['ʃ', 'eɪ', 'ˈ']);
+  });
+
+  it('announces each added symbol', async () => {
+    const user = userEvent.setup();
+    render(
+      <AnnouncerProvider>
+        <Palette
+          inventory="rp"
+          rDisplay="broad"
+          query=""
+          collapsedGroups={[]}
+          onToggleGroup={vi.fn()}
+          onActivate={vi.fn()}
+        />
+      </AnnouncerProvider>,
+    );
+    await user.click(screen.getByRole('button', { name: /^r\s?,/ }));
+    expect(await screen.findByText('Added r')).toBeInTheDocument();
   });
 
   it('Q-3: shows the broad r on the key when asked', () => {

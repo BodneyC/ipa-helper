@@ -17,10 +17,23 @@ interface TooltipProps {
 
 const GAP = 8;
 
+/** Marks sticky chrome (the top bar, the word card) that a tooltip must not cover. */
+export const TOOLTIP_CEILING = 'data-tooltip-ceiling';
+
+/** The lowest bottom edge of marked chrome above `top`, or 0. */
+const ceilingAbove = (top: number): number =>
+  Math.max(
+    0,
+    ...[...document.querySelectorAll(`[${TOOLTIP_CEILING}]`)]
+      .map((el) => el.getBoundingClientRect().bottom)
+      .filter((bottom) => bottom <= top),
+  );
+
 /**
  * A tooltip in a portal with fixed positioning, so that scroll containers such as
  * the consonant chart can't clip it. It sits above its anchor, or below when there is
- * no room above, and stays inside the viewport. It is always in the DOM (hidden
+ * no room above (below the viewport top and any {@link TOOLTIP_CEILING} chrome),
+ * and stays inside the viewport. It is always in the DOM (hidden
  * when closed), so `aria-describedby` can point into it.
  */
 export function Tooltip({
@@ -39,7 +52,7 @@ export function Tooltip({
     const a = anchor.getBoundingClientRect();
     const t = el.getBoundingClientRect();
     const above = a.top - t.height - GAP;
-    const below = above < GAP;
+    const below = above < ceilingAbove(a.top) + GAP;
     const left = Math.min(
       Math.max(a.left + a.width / 2 - t.width / 2, GAP),
       window.innerWidth - t.width - GAP,

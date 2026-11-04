@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Tooltip } from './Tooltip';
+import { Tooltip, TOOLTIP_CEILING } from './Tooltip';
 
 const anchorAt = (top: number, left = 100) => {
   const anchor = document.createElement('button');
@@ -54,6 +54,30 @@ describe('<Tooltip>', () => {
     expect(tip.style.top).toBe('58px'); // 10 + 40 + 8
     expect(tip.style.left).toBe('8px');
     expect(tip).toHaveAttribute('data-placement', 'below');
+  });
+
+  it('flips below rather than cover sticky chrome above the anchor', () => {
+    const ceiling = (bottom: number) => {
+      const el = document.createElement('header');
+      el.setAttribute(TOOLTIP_CEILING, '');
+      document.body.append(el);
+      vi.spyOn(el, 'getBoundingClientRect').mockReturnValue(
+        DOMRect.fromRect({ y: bottom - 56, height: 56, width: 1000 }),
+      );
+      return el;
+    };
+    const bar = ceiling(260);
+    const below = ceiling(900); // under the anchor: irrelevant
+    const anchor = anchorAt(300);
+    mockTooltipSize();
+    render(
+      <Tooltip id="t" anchor={anchor} open>
+        hint
+      </Tooltip>,
+    );
+    expect(screen.getByRole('tooltip')).toHaveAttribute('data-placement', 'below');
+    bar.remove();
+    below.remove();
   });
 
   it('renders inside the anchor’s <main> landmark when there is one', () => {

@@ -34,6 +34,8 @@ export function SymbolKey({ symbol, labels, onActivate }: SymbolKeyProps) {
   const [focused, setFocused] = useState(false);
   const [longPressed, setLongPressed] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  /** Counts activations; each new value remounts the pulse, restarting its animation. */
+  const [pulses, setPulses] = useState(0);
   const hoverTimer = useRef<number | undefined>(undefined);
   const pressTimer = useRef<number | undefined>(undefined);
   const swallowClick = useRef(false);
@@ -108,6 +110,7 @@ export function SymbolKey({ symbol, labels, onActivate }: SymbolKeyProps) {
             return;
           }
           onActivate(symbol);
+          setPulses((n) => n + 1);
         }}
         onPointerEnter={(event) => {
           if (event.pointerType !== 'touch') enter();
@@ -147,6 +150,8 @@ export function SymbolKey({ symbol, labels, onActivate }: SymbolKeyProps) {
           <span className="visuallyHidden">{example ? `, ${symbol.name}, as in ` : ', '}</span>
         </span>
         <span className={styles['micro']}>{micro}</span>
+        {/* SPEC §6: a brief accent pulse says "just added". */}
+        {pulses > 0 && <span key={pulses} className={styles['pulse']} aria-hidden="true" />}
       </button>
       <Tooltip
         id={tooltipId}

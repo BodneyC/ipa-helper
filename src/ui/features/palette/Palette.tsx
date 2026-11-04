@@ -16,7 +16,9 @@ import type {
 } from '../../../domain/inventory/types';
 import { assertNever } from '../../../domain/result';
 import { matchesFilter } from '../../../domain/serialise/filter';
+import { labelsOf } from '../../../domain/serialise/labels';
 import type { RDisplay } from '../../../domain/serialise/serialiser';
+import { useAnnounce } from '../../components/Announcer';
 import { Card } from '../../components/Card';
 import { useRovingFocus } from '../../components/roving-focus';
 
@@ -50,9 +52,15 @@ export function Palette({
 }: PaletteProps) {
   const symbols = symbolsIn(inventory).filter((s) => matchesFilter(s, query, rDisplay));
   const filtering = query.trim() !== '';
+  const announce = useAnnounce();
+  // The word display isn't focused while keys are pressed, so say what changed.
+  const activate = (symbol: PhoneSymbol) => {
+    onActivate(symbol);
+    announce(`Added ${labelsOf(symbol, rDisplay).ipa}`);
+  };
 
   const body = (group: Group, members: readonly PhoneSymbol[]) => {
-    const props = { rDisplay, onActivate };
+    const props = { rDisplay, onActivate: activate };
     switch (group.layout) {
       case 'chart':
         return <ConsonantChart symbols={members.filter(isConsonant)} {...props} />;

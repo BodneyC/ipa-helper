@@ -2,6 +2,7 @@ import type { RefObject } from 'react';
 
 import styles from './TopBar.module.css';
 import { useSettings } from '../state/hooks';
+import { TOOLTIP_CEILING } from '../ui/components/Tooltip';
 
 interface TopBarProps {
   /** The palette filter text (FR-4). */
@@ -23,7 +24,7 @@ interface TopBarProps {
 export function TopBar({ query, onQueryChange, filterRef, onHelp, onSettings }: TopBarProps) {
   const { settings, dispatch } = useSettings();
   return (
-    <header className={styles['bar']}>
+    <header className={styles['bar']} {...{ [TOOLTIP_CEILING]: '' }}>
       <div className={styles['inner']}>
         <h1 className={styles['title']}>
           ipa<span className={styles['dash']}>-</span>helper

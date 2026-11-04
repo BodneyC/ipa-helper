@@ -27,6 +27,18 @@ afterEach(() => {
 });
 
 describe('<SymbolKey>', () => {
+  it('SPEC §6: pulses on each activation, restarting the pulse each time', async () => {
+    const user = userEvent.setup();
+    const { key } = renderKey();
+    expect(key.querySelector('[aria-hidden="true"]')).toBeNull();
+    await user.click(key);
+    const first = key.lastElementChild;
+    expect(first).toHaveAttribute('aria-hidden', 'true');
+    await user.click(key);
+    expect(key.lastElementChild).not.toBe(first);
+    expect(key).toHaveAccessibleName(/^ʃ\s?, voiceless postalveolar fricative, as in\s?ship$/);
+  });
+
   it('FR-2: is a button named by glyph, name and example, described by its TIPA', () => {
     const { key } = renderKey();
     // Engines differ on whitespace around the visually hidden span; the order is what matters.

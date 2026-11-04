@@ -32,12 +32,58 @@
 }
 
 .key:active {
+  border-color: var(--accent, var(--color-focus));
   transform: scale(0.96);
 }
 
 .key:focus-visible {
   outline: 2px solid var(--accent, var(--color-focus));
   outline-offset: 2px;
+}
+
+/* "Just added" (SPEC §6): an accent ring that grows and fades. */
+.pulse {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 2px var(--accent, var(--color-focus));
+  opacity: 0;
+  pointer-events: none;
+  animation: pulse var(--duration-pulse) var(--ease-out);
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes pulse-fade {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: nothing moves. The pulse only fades; press shows by its border. */
+@media (prefers-reduced-motion: reduce) {
+  .key:hover,
+  .key:active {
+    transform: none;
+  }
+
+  .pulse {
+    animation-name: pulse-fade;
+  }
 }
 
 .glyph {

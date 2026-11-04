@@ -307,6 +307,11 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   rule plus a unit test that scans CSS modules) bans hex/rgb literals outside `tokens.css`.
 - A contrast test computes WCAG ratios for every (text token, surface token)
   pair declared in `src/styles/contrast-pairs.ts`, in both themes.
+- Motion (SPEC §6): durations are tokens, and `prefers-reduced-motion` zeroes
+  `--duration-fast`/`--duration-medium`. Nothing moves under reduced motion: no
+  hover lift or press scale (press shows by border), a steady cursor, and the
+  "just added" pulse only fades (`--duration-pulse` stays, as fading isn't motion).
+  Tooltips keep clear of sticky chrome marked `data-tooltip-ceiling`.
 - Theme is applied with `data-theme="dark|light"` and `data-contrast="soft|medium|hard"`
   on `<html>`, set before first paint by a tiny inline script to avoid a flash.
   After that, `<SettingsSync>` (`app/`) applies settings through the

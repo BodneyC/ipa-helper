@@ -6,6 +6,7 @@ import { TopBar } from './TopBar';
 import { useEditor, useSettings } from '../state/hooks';
 import { AnnouncerProvider } from '../ui/components/Announcer';
 import { Card } from '../ui/components/Card';
+import { TOOLTIP_CEILING } from '../ui/components/Tooltip';
 import { GlobalShortcuts } from '../ui/features/help/GlobalShortcuts';
 import { HelpDialog } from '../ui/features/help/HelpDialog';
 import { OutputPanel } from '../ui/features/output/OutputPanel';
@@ -50,7 +51,7 @@ export function App() {
         }}
       />
       <main className={styles['main']}>
-        <div className={styles['workbench']}>
+        <div className={styles['workbench']} {...{ [TOOLTIP_CEILING]: '' }}>
           <Card title="Word" headingLevel={2} hideTitle>
             <div className={styles['workbenchBody']}>
               <UrlSync />
