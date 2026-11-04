@@ -54,10 +54,10 @@ describe('IPA serialiser', () => {
     expect(() => narrow.serialise(ids('no-such-symbol'))).toThrow('unknown symbol ID');
   });
 
-  it('accepts an injected lookup', () => {
-    const custom = createIpaSerialiser({ slashes: false, rDisplay: 'narrow' }, (id) =>
-      id === symbolId('esh') ? symbolById(symbolId('ezh')) : undefined,
-    );
-    expect(custom.serialise(ids('esh'))).toBe('ʒ');
+  it('accepts its own symbol set', () => {
+    const ezh = symbolById(symbolId('ezh'));
+    const custom = createIpaSerialiser({ slashes: false, rDisplay: 'narrow' }, ezh ? [ezh] : []);
+    expect(custom.serialise(ids('ezh'))).toBe('ʒ');
+    expect(() => custom.serialise(ids('esh'))).toThrow('unknown symbol ID: esh');
   });
 });

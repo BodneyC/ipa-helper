@@ -1,6 +1,6 @@
-import { symbolById } from '../inventory';
-import { rendering, resolve, withSlashes } from './serialiser';
-import type { DisplayOptions, Serialiser, SymbolLookup } from './serialiser';
+import { createResolver, rendering, withSlashes } from './serialiser';
+import type { DisplayOptions, Serialiser } from './serialiser';
+import type { PhoneSymbol } from '../inventory/types';
 
 /**
  * FR-11, FR-20: the IPA transcription, e.g. `/ˈθɔːnɪk/`. Each token's IPA text is
@@ -9,14 +9,17 @@ import type { DisplayOptions, Serialiser, SymbolLookup } from './serialiser';
  */
 export const createIpaSerialiser = (
   { slashes, rDisplay }: DisplayOptions,
-  lookup: SymbolLookup = symbolById,
-): Serialiser => ({
-  id: 'ipa',
-  serialise: (word) =>
-    withSlashes(
-      resolve(word, lookup)
-        .map((symbol) => rendering(symbol, rDisplay).ipa)
-        .join(''),
-      slashes,
-    ),
-});
+  symbols?: readonly PhoneSymbol[],
+): Serialiser => {
+  const resolve = createResolver(symbols);
+  return {
+    id: 'ipa',
+    serialise: (word) =>
+      withSlashes(
+        resolve(word)
+          .map((symbol) => rendering(symbol, rDisplay).ipa)
+          .join(''),
+        slashes,
+      ),
+  };
+};

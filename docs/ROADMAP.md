@@ -12,7 +12,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 ## M0: Toolchain and scaffold
 
-- [ ] **M0.1** Toolchain install script works end to end. refs: ADR-0003
+- [x] **M0.1** Toolchain install script works end to end. refs: ADR-0003
   - AC: `./scripts/install-toolchain.sh` on a clean Ubuntu 24.04 leaves
     `node -v` matching `.node-version` and `pnpm -v` working in a new shell. Re-running it is a no-op.
 - [x] **M0.2** Scaffold the Vite + React + TS project (`/bootstrap`). deps: M0.1 · refs: ADR-0002, 0004 (6519917)

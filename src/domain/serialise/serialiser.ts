@@ -1,7 +1,6 @@
-import { symbolById } from '../inventory';
+import { SYMBOLS } from '../inventory';
 import { lit } from '../inventory/encoding';
 import { symbolId } from '../inventory/symbol-id';
-import type { SymbolId } from '../inventory/symbol-id';
 import type { PhoneSymbol, TipaEncoding } from '../inventory/types';
 import type { Word } from '../word/word';
 
@@ -25,9 +24,6 @@ export interface DisplayOptions {
   readonly rDisplay: RDisplay;
 }
 
-/** Finds a symbol by ID. Injected so tests can use their own fixtures. */
-export type SymbolLookup = (id: SymbolId) => PhoneSymbol | undefined;
-
 /** What a serialiser writes for one token. */
 export interface Rendering {
   readonly ipa: string;
@@ -35,19 +31,28 @@ export interface Rendering {
 }
 
 const TURNED_R = symbolId('turned-r');
-const BROAD_R: Rendering = { ipa: 'r', tipa: lit('r') };
+
+/** How the broad r (Q-3) is written. */
+export const BROAD_R: Rendering = { ipa: 'r', tipa: lit('r') };
 
 /**
- * Looks up each token's symbol. A word only ever holds known IDs (the URL codec
- * and the palette both validate them), so an unknown ID is a programming error
- * and throws.
+ * Returns a function that maps a word to its symbols. A word only ever holds
+ * known IDs (the URL codec and the palette both validate them), so an unknown
+ * ID is a programming error and throws.
+ *
+ * `symbols` defaults to the whole registry. Tests pass their own fixtures.
  */
-export const resolve = (word: Word, lookup: SymbolLookup = symbolById): readonly PhoneSymbol[] =>
-  word.map(({ symbolId: id }) => {
-    const symbol = lookup(id);
-    if (symbol === undefined) throw new Error(`Word holds an unknown symbol ID: ${id}`);
-    return symbol;
-  });
+export const createResolver = (
+  symbols: readonly PhoneSymbol[] = SYMBOLS,
+): ((word: Word) => readonly PhoneSymbol[]) => {
+  const byId = new Map(symbols.map((s) => [s.id, s]));
+  return (word) =>
+    word.map(({ symbolId: id }) => {
+      const symbol = byId.get(id);
+      if (symbol === undefined) throw new Error(`Word holds an unknown symbol ID: ${id}`);
+      return symbol;
+    });
+};
 
 /** How `symbol` is written under the display options (Q-3 r-display). */
 export const rendering = (symbol: PhoneSymbol, rDisplay: RDisplay): Rendering =>

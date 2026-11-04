@@ -30,3 +30,8 @@ macros (`\textturnr`, `\ae`). Naive concatenation breaks in two ways:
 ## Consequences
 - Output can include `{}` that a human wouldn't write. That is acceptable and
   correct. An optional "minimal braces" mode can come later if users ask.
+- Separate tokens whose literals would read as one symbol are kept apart too:
+  `t`+`ʃ` is `t{}S` (the affricate `tʃ` is `tS`), `i`+`ː` is `i{}:`. The
+  glyphs are the same, but the TIPA round-trips to the same tokens (ADR-0007).
+  The check (`needsSeparator`) is conservative: it also separates when a
+  literal could run past the next token.

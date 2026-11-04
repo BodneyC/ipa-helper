@@ -205,6 +205,12 @@ Key points:
 export interface Serialiser { readonly id: string; serialise(word: Word): string }
 ```
 
+Serialisers are built by factories that take the display options
+(`{ slashes, rDisplay }`) and, optionally, the symbol set (defaults to the
+registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
+`createTipaSerialiser(options, symbols?)`. Q-3's broad `r` is a rendering of the
+`turned-r` symbol, applied in both serialisers so the TIPA row shows the same glyphs (FR-22).
+
 - `ipaSerialiser`: concatenates `symbol.ipa`. A slashes option adds `/…/`.
 - `tipaSerialiser`: concatenates encodings and applies a **boundary-safety
   rule**: after a control word (`\ae`, `\textturnr`) emit `{}` whenever the
