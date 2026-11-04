@@ -15,19 +15,19 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 - [ ] **M0.1** Toolchain install script works end to end. refs: ADR-0003
   - AC: `./scripts/install-toolchain.sh` on a clean Ubuntu 24.04 leaves
     `node -v` matching `.node-version` and `pnpm -v` working in a new shell. Re-running it is a no-op.
-- [ ] **M0.2** Scaffold the Vite + React + TS project (`/bootstrap`). deps: M0.1 · refs: ADR-0002, 0004
+- [x] **M0.2** Scaffold the Vite + React + TS project (`/bootstrap`). deps: M0.1 · refs: ADR-0002, 0004 (6519917)
   - AC: `package.json` has the `packageManager`, `engines` and `scripts` from ARCHITECTURE §10.
     tsconfig flags match ADR-0002 exactly. `pnpm dev` serves a placeholder page.
-- [ ] **M0.3** Lint, format, Stylelint and knip configured. deps: M0.2 · refs: ADR-0005
+- [x] **M0.3** Lint, format, Stylelint and knip configured. deps: M0.2 · refs: ADR-0005 (803d6f5)
   - AC: a deliberately bad fixture (any, enum, hex colour in a module, domain
     importing React) fails lint, and is then removed. `pnpm lint` passes with zero warnings.
-- [ ] **M0.4** Vitest (unit and component) and Playwright (e2e + axe) configured with
-  coverage thresholds. deps: M0.2 · refs: ADR-0005
+- [x] **M0.4** Vitest (unit and component) and Playwright (e2e + axe) configured with
+  coverage thresholds. deps: M0.2 · refs: ADR-0005 (8dfbf8b)
   - AC: one sample unit test, one component test and one e2e test with an axe scan pass. Coverage thresholds are enforced.
-- [ ] **M0.5** `pnpm check` aggregate script, lefthook hooks, size-limit budget. deps: M0.3, M0.4
-- [ ] **M0.6** GitHub Actions CI (check + e2e matrix) and Pages deploy workflow. deps: M0.5 · refs: ADR-0010
-- [ ] **M0.7** `README.md` (usage, dev setup), `LICENSE` (maintainer to choose; see
-  ADR-0009 licence note), `THIRD_PARTY_NOTICES.md`. deps: M0.2
+- [x] **M0.5** `pnpm check` aggregate script, lefthook hooks, size-limit budget. deps: M0.3, M0.4 (b5e8ba8)
+- [x] **M0.6** GitHub Actions CI (check + e2e matrix) and Pages deploy workflow. deps: M0.5 · refs: ADR-0010 (a21b7f5)
+- [x] **M0.7** `README.md` (usage, dev setup), `LICENSE` (maintainer to choose; see
+  ADR-0009 licence note), `THIRD_PARTY_NOTICES.md`. deps: M0.2 (6d8b936)
 
 ## M1: Domain core (pure TypeScript)
 
