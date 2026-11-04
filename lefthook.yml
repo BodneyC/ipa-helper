@@ -1,0 +1,24 @@
+# Git hooks (ADR-0005). Install with `pnpm install` (runs `lefthook install` via "prepare").
+pre-commit:
+  parallel: true
+  jobs:
+    - name: eslint
+      glob: '*.{ts,tsx,js,mjs,cjs}'
+      run: pnpm exec eslint --max-warnings=0 --no-warn-ignored {staged_files}
+    - name: stylelint
+      glob: '*.css'
+      run: pnpm exec stylelint --max-warnings=0 {staged_files}
+    - name: prettier
+      run: pnpm exec prettier --check --ignore-unknown {staged_files}
+
+pre-push:
+  jobs:
+    - name: check
+      run: pnpm check
+
+commit-msg:
+  jobs:
+    - name: conventional-commit
+      run: |
+        head -n1 {1} | grep -qE '^(feat|fix|test|docs|refactor|chore|perf|build|ci|style|revert)(\([a-z0-9./-]+\))?!?: .+' \
+          || { echo 'Commit subject must follow Conventional Commits, e.g. "feat(palette): grouped consonant grid [M2.3]"'; exit 1; }

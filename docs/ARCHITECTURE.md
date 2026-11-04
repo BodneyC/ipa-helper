@@ -288,12 +288,14 @@ Test names cite requirement IDs where applicable: `it('FR-13: Backspace deletes 
 | `pnpm build` | `tsc -b && vite build` |
 | `pnpm preview` | Serve the production build |
 | `pnpm typecheck` | `tsc -b --noEmit` (or `tsc -p … --noEmit` for each project) |
-| `pnpm lint` / `lint:fix` | ESLint with zero warnings allowed (`--max-warnings=0`) |
+| `pnpm lint` / `lint:fix` | ESLint, then Stylelint on `src/**/*.css`, with zero warnings allowed (`--max-warnings=0`) |
 | `pnpm format` / `format:check` | Prettier |
 | `pnpm test` / `test:watch` / `test:coverage` | Vitest |
 | `pnpm test:e2e` | Playwright |
 | `pnpm knip` | Unused files, exports and dependencies |
-| `pnpm check` | typecheck → lint → format:check → knip → test:coverage → build |
+| `pnpm size` | size-limit: initial JS ≤ 100 kB gzipped (NFR-3), measured on `dist/` |
+| `pnpm check` | typecheck → lint → format:check → knip → test:coverage → build → size |
+| `pnpm prepare` | Installs the lefthook git hooks (runs automatically on `pnpm install`) |
 
 ## 11. Conventions
 

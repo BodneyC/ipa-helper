@@ -7,3 +7,7 @@ peerDependencyRules:
   allowedVersions:
     eslint-plugin-react>eslint: '10'
     eslint-plugin-jsx-a11y>eslint: '10'
+# Dependency install scripts stay off. lefthook's hooks are installed by the
+# root "prepare" script instead.
+allowBuilds:
+  lefthook: false
