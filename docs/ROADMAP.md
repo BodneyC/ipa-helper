@@ -62,16 +62,16 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 ## M3: Polish and usability
 
-- [ ] **M3.1** `VowelTrapezoid` layout replaces the vowel grid (responsive SVG trapezoid). refs: FR-1
-- [ ] **M3.2** Roving-tabindex keyboard navigation per group, global shortcuts, and a `?` help dialog. refs: FR-50, FR-51
-- [ ] **M3.3** Inventory switch (RP/Full) and filter box. refs: FR-3, FR-4 (the Full inventory is only populated in M6, so ship the switch disabled until then)
-- [ ] **M3.4** Settings dialog: theme, contrast, macro name, slash option, r-display,
-  suggested `\newcommand` snippet. refs: FR-21, FR-40–FR-42, Q-2, Q-3
-- [ ] **M3.5** Collapsible groups, remembered across reloads. refs: FR-5
-- [ ] **M3.6** Saved words list (local storage, with gloss). refs: FR-16
-- [ ] **M3.7** Micro-interactions: just-added pulse, pressed state, reduced-motion support. refs: SPEC §6
-- [ ] **M3.8** Visual regression screenshots (themes × 360/768/1280 px). refs: ADR-0005
-- [ ] **M3.9** Lighthouse CI budget (perf ≥ 95, a11y = 100). refs: NFR-3
+- [x] **M3.1** `VowelTrapezoid` layout replaces the vowel grid (responsive SVG trapezoid). refs: FR-1 (56cf825)
+- [x] **M3.2** Roving-tabindex keyboard navigation per group, global shortcuts, and a `?` help dialog. refs: FR-50, FR-51 (1733f8b)
+- [x] **M3.3** Inventory switch (RP/Full) and filter box. refs: FR-3, FR-4 (the Full inventory is only populated in M6, so ship the switch disabled until then) (e2d9eac)
+- [x] **M3.4** Settings dialog: theme, contrast, macro name, slash option, r-display,
+  suggested `\newcommand` snippet. refs: FR-21, FR-40–FR-42, Q-2, Q-3 (8f24c67)
+- [x] **M3.5** Collapsible groups, remembered across reloads. refs: FR-5 (cf1aaaf)
+- [x] **M3.6** Saved words list (local storage, with gloss). refs: FR-16 (b8cdbec)
+- [x] **M3.7** Micro-interactions: just-added pulse, pressed state, reduced-motion support. refs: SPEC §6 (1f87d73)
+- [x] **M3.8** Visual regression screenshots (themes × 360/768/1280 px). refs: ADR-0005 (7f322a6)
+- [x] **M3.9** Lighthouse CI budget (perf ≥ 95, a11y = 100). refs: NFR-3 (0c2fe82)
 
 ## M4: Symbol audio
 
@@ -116,3 +116,12 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
   output rows or un-stick below a height threshold.
 - Run WebKit e2e locally on WSL: install its system libraries
   (`sudo pnpm exec playwright install-deps webkit`). CI already does this.
+- Real favicon/app icon (index.html has an empty `data:,` icon to stop the
+  `/favicon.ico` 404); pairs with the M7 PWA icons.
+- Visual baselines were made on WSL with pinned fonts. If CI's first `visual`
+  run shows anti-aliasing diffs above 1 %, regenerate the baselines from CI's
+  uploaded actuals (or in the Playwright Docker image) and commit them.
+- Multi-tab sync for settings and saved words (`storage` event); today the last
+  tab to write wins.
+- Inventory switch: enable "Full IPA" when M6 populates it, and check that the
+  5.5 rem select still fits its label.
