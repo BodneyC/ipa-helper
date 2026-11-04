@@ -72,7 +72,9 @@ ipa-helper/
 │  │  ├─ inventory/
 │  │  │  ├─ types.ts          # PhoneSymbol, Category, articulatory features
 │  │  │  ├─ symbol-id.ts      # branded SymbolId: guard, Result parser, data constructor
-│  │  │  ├─ consonants.ts     # data (as const satisfies readonly PhoneSymbol[])
+│  │  │  ├─ consonants.ts     # data incl. affricates (as const satisfies readonly ConsonantSymbol[])
+│  │  │  ├─ example.ts        # example('**sh**ip') → { word, highlight } (SPEC §7 notation)
+│  │  │  ├─ encoding.ts       # lit('S') / macro('ae') TipaEncoding helpers
 │  │  │  ├─ vowels.ts
 │  │  │  ├─ diphthongs.ts
 │  │  │  ├─ suprasegmentals.ts
@@ -187,8 +189,9 @@ Key points:
   `tʃ` removes it in one step).
 - **Inventory data is `as const satisfies readonly PhoneSymbol[]`**, so the data is
   type-checked and stays literal. Unit tests enforce invariants: unique IDs,
-  unique IPA strings, NFC-normalised strings, every RP symbol has an example, and
-  consonant chart cells don't collide.
+  unique IPA strings, NFC-normalised strings, every RP sound has an example
+  (suprasegmentals are marks, not sounds, so they have none), and neither
+  consonant chart cells nor vowel trapezoid points collide.
 - **Diacritics** (M6) are tokens with `category: 'diacritic'` that the serialisers
   attach to the *preceding* base token: combining characters in IPA, a
   wrapping macro in TIPA.

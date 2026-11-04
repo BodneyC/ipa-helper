@@ -267,6 +267,9 @@ The tie-bar forms (`t͡ʃ` → `\t{tS}`) are offered as a setting in M6.
 | ˑ | `;` | half-long |
 | . | `.` | syllable break |
 
+Suprasegmentals are marks, not sounds, so they have no example word. Their
+tooltip shows the meaning instead.
+
 ### 7.6 Extended inventory (M6)
 
 This adds the rest of the IPA pulmonic consonants, the remaining cardinal

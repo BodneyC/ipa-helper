@@ -1,0 +1,28 @@
+/**
+ * The symbol registry. This is the only barrel file in src/ (ARCHITECTURE §11):
+ * everything outside the inventory looks symbols up through it.
+ */
+import { AFFRICATES, CONSONANTS } from './consonants';
+import { DIPHTHONGS } from './diphthongs';
+import { SUPRASEGMENTALS } from './suprasegmentals';
+import type { SymbolId } from './symbol-id';
+import type { InventoryId, PhoneSymbol } from './types';
+import { VOWELS } from './vowels';
+
+/** Every known symbol, in palette group order (FR-1). */
+export const SYMBOLS: readonly PhoneSymbol[] = [
+  ...CONSONANTS,
+  ...AFFRICATES,
+  ...VOWELS,
+  ...DIPHTHONGS,
+  ...SUPRASEGMENTALS,
+];
+
+const byId: ReadonlyMap<SymbolId, PhoneSymbol> = new Map(SYMBOLS.map((s) => [s.id, s]));
+
+/** Looks a symbol up by ID. Returns `undefined` for an ID no inventory defines. */
+export const symbolById = (id: SymbolId): PhoneSymbol | undefined => byId.get(id);
+
+/** The symbols in one inventory, in palette group order (FR-3). */
+export const symbolsIn = (inventory: InventoryId): readonly PhoneSymbol[] =>
+  SYMBOLS.filter((s) => s.inventories.includes(inventory));
