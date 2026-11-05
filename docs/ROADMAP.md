@@ -100,7 +100,11 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 - [x] **M7.1** PWA: manifest, service worker (precache the app shell and fonts), offline e2e. refs: NFR-5, FR-60–62, ADR-0013
 - [ ] **M7.2** Cross-browser manual QA checklist run (Safari iOS touch, Firefox). refs: NFR-4
-- [ ] **M7.3** v1.0.0 tag, changelog generated from Conventional Commits.
+  - Checklist written: `docs/qa/CHECKLIST.md`. Still to do: a person runs it on iOS
+    Safari and desktop Firefox and records the results there.
+- [ ] **M7.3** v1.0.0 tag, changelog generated from Conventional Commits. deps: M7.2
+  - `pnpm changelog` and `RELEASING.md` are in. Still to do: follow RELEASING.md for
+    v1.0.0 once M7.2 passes.
 
 ---
 
