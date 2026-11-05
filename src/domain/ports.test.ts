@@ -39,6 +39,7 @@ describe('NULL_THEME', () => {
 describe('NULL_AUDIO', () => {
   it('is unsupported on both channels and never plays', async () => {
     expect(NULL_AUDIO.status).toEqual({ symbols: 'unsupported', words: 'unsupported' });
+    expect(NULL_AUDIO.progress).toEqual({ symbols: undefined, words: undefined });
     expect(NULL_AUDIO.subscribe(() => undefined)).not.toThrow();
     const unsupported = err({ kind: 'audio-unsupported' });
     await expect(NULL_AUDIO.playSymbol(symbolId('esh'))).resolves.toEqual(unsupported);

@@ -7,29 +7,14 @@ import { join } from 'node:path';
 
 import * as ort from 'onnxruntime-web';
 
+import { parseVoiceConfig, VOICE } from '../../src/adapters/audio/voice';
+import type { VoiceConfig } from '../../src/adapters/audio/voice';
 import { piperPhonemeIds } from '../../src/domain/serialise/piper';
-import type { PhonemeIdMap } from '../../src/domain/serialise/piper';
 
 /** The repository root. */
 export const ROOT = join(import.meta.dirname, '..', '..');
 /** Downloads and renders that are never committed. */
 export const CACHE = join(ROOT, '.cache');
-
-/** The voice pinned in ADR-0009, at a fixed revision of rhasspy/piper-voices. */
-export const VOICE = {
-  name: 'en_GB-cori-medium',
-  revision: 'e7229f7d33a10e145e109b886d661984201ac3c4',
-  files: {
-    model: {
-      name: 'en_GB-cori-medium.onnx',
-      sha256: '1899f98e5fb8310154f3c2973f4b8a929ba7245e722b3d3a85680b833d95f10d',
-    },
-    config: {
-      name: 'en_GB-cori-medium.onnx.json',
-      sha256: 'e262c16d7f192f69d4edd6b4ef8a5915379e67495fcc402f1ab15eeb33da3d36',
-    },
-  },
-} as const;
 
 /** The runtime the clips are rendered with; the same one the browser uses for words (M5.2). */
 export const RUNTIME = `onnxruntime-web ${ort.env.versions.web ?? 'unknown'}, wasm, 1 thread`;
@@ -44,7 +29,8 @@ export const ENCODING = {
 
 const sha256 = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
 
-const fetchVerified = async (file: { readonly name: string; readonly sha256: string }) => {
+/** Downloads a pinned voice file into .cache/ (or reuses it), checking its SHA-256. */
+export const fetchVerified = async (file: { readonly name: string; readonly sha256: string }) => {
   const dir = join(CACHE, 'piper', VOICE.revision);
   const path = join(dir, file.name);
   if (existsSync(path) && sha256(readFileSync(path)) === file.sha256) return path;
@@ -62,40 +48,6 @@ const fetchVerified = async (file: { readonly name: string; readonly sha256: str
   return path;
 };
 
-interface VoiceConfig {
-  readonly sampleRate: number;
-  readonly scales: readonly [noise: number, length: number, noiseW: number];
-  readonly idMap: PhonemeIdMap;
-}
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-const isIdMap = (value: unknown): value is PhonemeIdMap =>
-  isRecord(value) &&
-  Object.values(value).every(
-    (ids) => Array.isArray(ids) && ids.every((id) => typeof id === 'number'),
-  );
-
-const parseConfig = (json: unknown): VoiceConfig => {
-  if (!isRecord(json) || !isRecord(json['audio']) || !isRecord(json['inference'])) {
-    throw new Error('voice config: missing audio or inference section');
-  }
-  const { sample_rate: rate } = json['audio'];
-  const { noise_scale: noise, length_scale: length, noise_w: noiseW } = json['inference'];
-  const map = json['phoneme_id_map'];
-  if (
-    typeof rate !== 'number' ||
-    typeof noise !== 'number' ||
-    typeof length !== 'number' ||
-    typeof noiseW !== 'number' ||
-    !isIdMap(map)
-  ) {
-    throw new Error('voice config: unexpected shape');
-  }
-  return { sampleRate: rate, scales: [noise, length, noiseW], idMap: map };
-};
-
 /** Turns voice text into PCM samples. */
 export interface Synthesiser {
   readonly sampleRate: number;
@@ -106,9 +58,11 @@ export interface Synthesiser {
 
 /** Fetches (or reuses) the verified voice and starts an onnxruntime session for it. */
 export const loadVoice = async (): Promise<Synthesiser> => {
-  const modelPath = await fetchVerified(VOICE.files.model);
-  const configPath = await fetchVerified(VOICE.files.config);
-  const config = parseConfig(JSON.parse(readFileSync(configPath, 'utf8')));
+  const modelPath = await fetchVerified(VOICE.model);
+  const configPath = await fetchVerified(VOICE.config);
+  const parsed = parseVoiceConfig(JSON.parse(readFileSync(configPath, 'utf8')));
+  if (!parsed.ok) throw new Error(parsed.error);
+  const config = parsed.value;
   ort.env.wasm.numThreads = 1;
   const session = await ort.InferenceSession.create(readFileSync(modelPath), {
     executionProviders: ['wasm'],
@@ -192,3 +146,6 @@ export const encodeOpus = (samples: Float32Array, sampleRate: number): Promise<B
 
 /** Hex SHA-256 of some bytes. */
 export { sha256 };
+
+/** Re-exported for the entry scripts. */
+export { VOICE };

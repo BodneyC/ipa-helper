@@ -62,7 +62,7 @@ ipa-helper/
 ├─ scripts/
 │  ├─ install-toolchain.sh    # Installs fnm, Node, pnpm, deps, browsers
 │  ├─ subset-fonts.sh         # Rebuilds public/fonts (pinned downloads + fontTools in a temp venv)
-│  └─ audio/                  # Symbol clip generator (M4.3, ADR-0009): clips.ts (pure: frames, phoneme IDs, picks),
+│  └─ audio/                  # Symbol clips (M4.3) and voice:fetch (M5.2), ADR-0009: clips.ts (pure: frames, picks),
 │                             #   voice.ts (pinned Cori download + onnxruntime-web + ffmpeg-static Opus),
 │                             #   candidates.ts / select.ts (entry points), listen-page.ts
 ├─ public/
@@ -110,7 +110,8 @@ ipa-helper/
 │  │  ├─ document-theme.ts    # DocumentTheme: <html data-theme data-contrast>, follows the system live
 │  │  ├─ url-hash.ts          # sync editor ↔ location.hash
 │  │  └─ audio/               # web-audio-output (AudioContext playback), audio-player (port over clip sources),
-│  │                          #   symbol-clips (lazy fetch + Cache API); M5: Web Worker entry
+│  │                          #   symbol-clips (lazy fetch + Cache API), cache, voice (pin + config parser),
+│  │                          #   word-source + synth-protocol + synth-engine + synth.worker (M5.2)
 │  ├─ ui/
 │  │  ├─ components/          # Generic: Button, IconButton, Tooltip, Dialog, Toggle…
 │  │  └─ features/
@@ -122,6 +123,7 @@ ipa-helper/
 │  │     ├─ saved/            # SavedWordsDialog (FR-16)
 │  │     └─ help/
 │  ├─ assets/audio/symbols/   # <symbol id>.opus clips + manifest.json, written by `pnpm audio:select`
+│  ├─ assets/voice/           # the pinned Cori .onnx.json (byte for byte; the model itself is fetched)
 │  └─ styles/
 │     ├─ tokens.css           # THE ONLY place hex colours may appear
 │     ├─ themes.css           # [data-theme] → semantic tokens
@@ -373,9 +375,33 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `piperPhonemeIds(text, phoneme_id_map)` turns that text into the voice's
   input IDs; the clip scripts and the synthesis worker share it. The UI never
   handles raw synthesis strings.
-- The worker creates the onnxruntime session on the first audio request (or
-  when "Sound on select" is switched on) and reports a loading status; creation
-  takes about 1.2–1.6 s on a fast desktop.
+- **Word synthesis (M5.2).** These pieces live in `src/adapters/audio/`:
+  - `word-source.ts` is the main-thread `ClipSource<Word>`. It serialises the
+    word and starts `synth.worker.ts` on the first word (a module worker,
+    bundled as its own chunk). It matches each reply to its request by ID. If
+    the worker crashes, every waiting word fails and the next word starts a
+    new worker.
+  - `synth-protocol.ts` defines the messages and validates them on both sides.
+  - `synth-engine.ts` is the worker-side logic, with its dependencies injected
+    so it can be unit-tested. On the first request it fetches the committed
+    voice config (`src/assets/voice/`, bundled as a `?url` asset). It reads the
+    model from the Cache API, or streams it from
+    `<base>voice/en_GB-cori-medium.<sha8>.onnx` while reporting progress
+    against the model's known size, then stores it in the cache. A failed load
+    is forgotten, so the next word retries.
+  - `synth.worker.ts` is the thin wrapper that connects onnxruntime-web
+    (`ort.bundle.min.mjs`, with the glue code inlined, one thread) to the
+    engine. The wasm binary is self-hosted through the `onnxruntime-web-dist`
+    alias in `vite.config.ts`.
+  - The model is never committed: `pnpm voice:fetch` puts the SHA-256-checked
+    file into `public/voice/` (gitignored), and the deploy workflow runs it
+    with an `actions/cache` cache.
+  - Cold start, measured on a local build in Chromium and Firefox: about
+    2.75 s for the first word, including fetching the model from localhost,
+    creating the session and synthesising. Warm words take 96–123 ms.
+- **Progress.** `AudioPlayer.progress` holds a per-channel 0–1 snapshot while
+  a channel loads. A `ClipSource` reports it through an optional `onProgress`
+  callback, and the player clamps it and clears it once the channel is ready.
 - `NULL_AUDIO` (the null player, named like the other null ports) is the
   default in `<Providers>` and tests.
 
@@ -418,6 +444,7 @@ Test names cite requirement IDs where applicable: `it('FR-13: Backspace deletes 
 | `pnpm size` | size-limit: initial JS ≤ 100 kB gzipped (NFR-3), measured on `dist/` |
 | `pnpm audio:candidates [--only id,…]` | Renders candidate symbol clips and a listening page into `.cache/symbol-clips/` (M4.3) |
 | `pnpm audio:select <picks.json>` | Copies the picked renders to `src/assets/audio/symbols/` and writes `manifest.json` |
+| `pnpm voice:fetch` | Downloads the pinned voice model (SHA-256 checked) into `public/voice/` for word synthesis (M5.2); the deploy runs it |
 | `pnpm check` | typecheck → lint → format:check → knip → test:coverage → build → size |
 | `pnpm prepare` | Installs the lefthook git hooks (runs automatically on `pnpm install`) |
 

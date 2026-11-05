@@ -89,6 +89,9 @@ export default defineConfig(
           'ts-expect-error': true,
         },
       ],
+      // `onnxruntime-web-dist/…` is a Vite alias (vite.config.ts, M5.2) that the
+      // Node resolver can't see; Vite and tsc both resolve it.
+      'import-x/no-unresolved': ['error', { ignore: ['^onnxruntime-web-dist/'] }],
       'import-x/no-cycle': 'error',
       'import-x/no-self-import': 'error',
       'import-x/no-useless-path-segments': 'error',

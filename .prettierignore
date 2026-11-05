@@ -10,3 +10,5 @@ LICENSE
 *.md
 # Throwaway spike code, never merged into src/ (ADR-0009, roadmap M4.1).
 spikes/
+# The pinned voice config is byte-for-byte the upstream file (SHA-256 in ADR-0009).
+src/assets/voice/

@@ -166,6 +166,9 @@ importers:
 
   .:
     dependencies:
+      onnxruntime-web:
+        specifier: 1.20.1
+        version: 1.20.1
       react:
         specifier: 19.3.1
         version: 19.3.1
@@ -263,9 +266,6 @@ importers:
       lefthook:
         specifier: 2.2.2
         version: 2.2.2
-      onnxruntime-web:
-        specifier: 1.20.1
-        version: 1.20.1
       prettier:
         specifier: 3.9.10
         version: 3.9.10

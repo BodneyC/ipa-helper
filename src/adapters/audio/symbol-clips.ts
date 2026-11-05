@@ -1,4 +1,6 @@
 import type { ClipSource } from './audio-player';
+import { openAudioCache } from './cache';
+import type { AudioCache } from './cache';
 import type { AudioClip } from './web-audio-output';
 import { parseSymbolId } from '../../domain/inventory/symbol-id';
 import type { SymbolId } from '../../domain/inventory/symbol-id';
@@ -30,29 +32,10 @@ const SYMBOL_CLIP_URLS = clipUrls(
   }),
 );
 
-/** The slice of the Cache API the loader uses. */
-interface ClipCache {
-  match(url: string): Promise<Response | undefined>;
-  put(url: string, response: Response): Promise<void>;
-}
-
-/** The Cache API store for clips. Fingerprinted URLs never go stale, so entries need no expiry. */
-const CACHE_NAME = 'ipa-helper-audio-v1';
-
-const openBrowserCache = async (): Promise<ClipCache | undefined> => {
-  // `caches` is missing on insecure origins, and opening can fail in private modes.
-  if (typeof caches === 'undefined') return undefined;
-  try {
-    return await caches.open(CACHE_NAME);
-  } catch {
-    return undefined;
-  }
-};
-
 interface SymbolClipOptions {
   readonly urls?: ReadonlyMap<SymbolId, string>;
   readonly fetchClip?: (url: string) => Promise<Response>;
-  readonly openCache?: () => Promise<ClipCache | undefined>;
+  readonly openCache?: () => Promise<AudioCache | undefined>;
 }
 
 /**
@@ -64,10 +47,10 @@ interface SymbolClipOptions {
 export const createSymbolClipSource = ({
   urls = SYMBOL_CLIP_URLS,
   fetchClip = (url) => fetch(url),
-  openCache = openBrowserCache,
+  openCache = openAudioCache,
 }: SymbolClipOptions = {}): ClipSource<SymbolId> => {
   const loaded = new Map<SymbolId, Promise<Result<AudioClip, AudioError>>>();
-  let cache: Promise<ClipCache | undefined> | undefined;
+  let cache: Promise<AudioCache | undefined> | undefined;
 
   const load = async (url: string): Promise<Result<AudioClip, AudioError>> => {
     const store = await (cache ??= openCache());

@@ -21,3 +21,5 @@ bun.lockb
 /C:*
 # Voice model downloads and candidate symbol clips (scripts/audio, M4.3)
 .cache/
+# The voice model (63.5 MB) is fetched by `pnpm voice:fetch`, never committed (ADR-0009).
+/public/voice/

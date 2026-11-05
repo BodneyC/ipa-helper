@@ -81,7 +81,13 @@ export type AudioStatus = 'unsupported' | 'idle' | 'loading' | 'ready';
 export interface AudioPlayer {
   /** A snapshot, replaced (never mutated) when a channel's status changes. */
   readonly status: Readonly<Record<AudioChannel, AudioStatus>>;
-  /** Calls `listener` after `status` changes. Returns an unsubscribe function. */
+  /**
+   * How much of a loading channel's download has arrived, from 0 to 1, or
+   * `undefined` when the channel isn't loading or its source can't tell (FR-33).
+   * A snapshot, replaced when it changes.
+   */
+  readonly progress: Readonly<Record<AudioChannel, number | undefined>>;
+  /** Calls `listener` after `status` or `progress` changes. Returns an unsubscribe function. */
   subscribe(listener: () => void): () => void;
   /** Resolves when the sound ends or a newer one cuts it off. */
   playSymbol(id: SymbolId): Promise<Result<void, AudioError>>;
@@ -92,6 +98,7 @@ export interface AudioPlayer {
 /** A player with no audio, for tests and environments without Web Audio. */
 export const NULL_AUDIO: AudioPlayer = {
   status: { symbols: 'unsupported', words: 'unsupported' },
+  progress: { symbols: undefined, words: undefined },
   subscribe: () => () => undefined,
   playSymbol: () => Promise.resolve(err({ kind: 'audio-unsupported' })),
   playWord: () => Promise.resolve(err({ kind: 'audio-unsupported' })),

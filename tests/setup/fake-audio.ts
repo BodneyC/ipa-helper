@@ -12,6 +12,7 @@ export const fakeAudio = (
   const playSymbol = vi.fn<AudioPlayer['playSymbol']>(() => Promise.resolve(result));
   const audio: AudioPlayer = {
     status: { symbols, words: 'unsupported' },
+    progress: { symbols: undefined, words: undefined },
     subscribe: () => () => undefined,
     playSymbol,
     playWord: () => Promise.resolve(ok(undefined)),

@@ -51,8 +51,8 @@ const manifest = {
   voice: {
     name: VOICE.name,
     source: `rhasspy/piper-voices@${VOICE.revision}`,
-    modelSha256: VOICE.files.model.sha256,
-    configSha256: VOICE.files.config.sha256,
+    modelSha256: VOICE.model.sha256,
+    configSha256: VOICE.config.sha256,
   },
   runtime: RUNTIME,
   encoding: `Ogg Opus (${ENCODING.codec}), mono, ${String(ENCODING.sampleRate)} Hz, ${ENCODING.bitrate}bit/s`,

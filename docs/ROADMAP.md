@@ -85,7 +85,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 ## M5: Word audio
 
 - [x] **M5.1** `piperPhonemeSerialiser`: Word → Piper phoneme IDs, stress moved to the vowel nucleus and a terminal `!` (1–4 sounds) or ` ….` (5+) appended (ADR-0009 "Word endings"), with fast-check tests. deps: M4.1
-- [ ] **M5.2** Worker-based synthesis adapter: lazy model fetch, Cache API, progress UI. deps: M5.1, M4.2 · refs: FR-31, FR-33
+- [x] **M5.2** Worker-based synthesis adapter: lazy model fetch, Cache API, progress UI (progress reported through the port; shown by M5.3's button). deps: M5.1, M4.2 · refs: FR-31, FR-33
 - [ ] **M5.3** "Play word" button, loading/error states, and an e2e test with a mocked worker. deps: M5.2
 
 ## M6: Extended IPA
@@ -109,8 +109,6 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 - More export formats: X-SAMPA, Kirshenbaum, espeak mnemonics, Markdown/HTML snippet.
 - Accent switch for audio (General American), e.g. a second Piper voice (ADR-0009).
 - Log any words Cori still gets wrong once the terminal `.` (ADR-0009) is in place.
-- M5.2: when onnxruntime-web moves to `dependencies`, re-run
-  `pnpm licenses list --prod` and add whatever it bundles to `THIRD_PARTY_NOTICES.md`.
 - int8 Cori is 19.5 MB vs 63.5 MB but ~60% slower on wasm (ADR-0009). Revisit
   if download size becomes the constraint (M7 PWA precache), or with WebGPU.
 - "Minimal braces" TIPA output mode.

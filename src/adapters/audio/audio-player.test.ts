@@ -8,6 +8,7 @@ import type { AudioError } from '../../domain/ports';
 import { err, ok } from '../../domain/result';
 import type { Result } from '../../domain/result';
 import { wordFromIds } from '../../domain/word/word';
+import type { Word } from '../../domain/word/word';
 
 const CLIP: AudioClip = { kind: 'encoded', data: new ArrayBuffer(1) };
 const ESH = symbolId('esh');
@@ -39,7 +40,7 @@ describe('audio player', () => {
     const symbols = vi.fn<ClipSource<typeof ESH>>(() => Promise.resolve(ok(CLIP)));
     const player = createAudioPlayer({ output, symbols });
     await expect(player.playSymbol(ESH)).resolves.toEqual(ok(undefined));
-    expect(symbols).toHaveBeenCalledWith(ESH);
+    expect(symbols).toHaveBeenCalledWith(ESH, expect.any(Function));
     expect(play).toHaveBeenCalledWith(CLIP);
   });
 
@@ -49,7 +50,7 @@ describe('audio player', () => {
     const words = vi.fn<ClipSource<typeof word>>(() => Promise.resolve(ok(CLIP)));
     const player = createAudioPlayer({ output, words });
     await expect(player.playWord(word)).resolves.toEqual(ok(undefined));
-    expect(words).toHaveBeenCalledWith(word);
+    expect(words).toHaveBeenCalledWith(word, expect.any(Function));
     expect(play).toHaveBeenCalledWith(CLIP);
   });
 
@@ -135,5 +136,43 @@ describe('audio player', () => {
     const symbols = vi.fn<ClipSource<typeof ESH>>(() => Promise.resolve(ok(CLIP)));
     const player = createAudioPlayer({ output, symbols });
     await expect(player.playSymbol(ESH)).resolves.toEqual(failed);
+  });
+
+  it('FR-33: reports a loading channel’s download progress, clamped, and clears it once ready', async () => {
+    let report: (fraction: number) => void = () => undefined;
+    let finish: (result: Result<AudioClip, AudioError>) => void = () => undefined;
+    const words = vi.fn<ClipSource<Word>>(
+      (_word, onProgress) =>
+        new Promise((resolve) => {
+          report = onProgress ?? (() => undefined);
+          finish = resolve;
+        }),
+    );
+    const player = createAudioPlayer({ output: fakeOutput().output, words });
+    const listener = vi.fn();
+    player.subscribe(listener);
+    expect(player.progress.words).toBeUndefined();
+
+    const playing = player.playWord(wordFromIds([ESH]));
+    report(0.25);
+    expect(player.progress).toEqual({ symbols: undefined, words: 0.25 });
+    report(0.25);
+    report(1.4);
+    expect(player.progress.words).toBe(1);
+    report(-1);
+    expect(player.progress.words).toBe(0);
+    finish(ok(CLIP));
+    await playing;
+    expect(player.status.words).toBe('ready');
+    expect(player.progress.words).toBeUndefined();
+    // loading, 0.25, 1, 0, ready: the repeated 0.25 changed nothing.
+    expect(listener).toHaveBeenCalledTimes(5);
+
+    // Once ready, progress from a later load is ignored.
+    const again = player.playWord(wordFromIds([ESH]));
+    report(0.5);
+    expect(player.progress.words).toBeUndefined();
+    finish(ok(CLIP));
+    await again;
   });
 });

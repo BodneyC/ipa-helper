@@ -34,6 +34,14 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # The 63.5 MB voice model is never committed (ADR-0009, M5.2). It is fetched
+      # from a pinned revision, checked against its SHA-256, and served from Pages.
+      - name: Cache the voice model
+        uses: actions/cache@v6
+        with:
+          path: .cache/piper
+          key: piper-voice-${{ hashFiles('src/adapters/audio/voice.ts') }}
+      - run: pnpm voice:fetch
       - id: pages
         uses: actions/configure-pages@v6
       - run: pnpm build

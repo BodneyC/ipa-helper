@@ -5,8 +5,15 @@ import { err } from '../../domain/result';
 import type { Result } from '../../domain/result';
 import type { Word } from '../../domain/word/word';
 
-/** Fetches (and caches, if it wants) the sound for a key. Must not reject: failures are `Result`s. */
-export type ClipSource<K> = (key: K) => Promise<Result<AudioClip, AudioError>>;
+/**
+ * Fetches (and caches, if it wants) the sound for a key. Must not reject:
+ * failures are `Result`s. A source with a slow first load (the word voice)
+ * reports how much has arrived, from 0 to 1, through `onProgress`.
+ */
+export type ClipSource<K> = (
+  key: K,
+  onProgress?: (fraction: number) => void,
+) => Promise<Result<AudioClip, AudioError>>;
 
 interface AudioPlayerOptions {
   readonly output: AudioOutput;
@@ -28,13 +35,28 @@ export const createAudioPlayer = ({ output, symbols, words }: AudioPlayerOptions
     symbols: initial(symbols),
     words: initial(words),
   };
+  let progress: Readonly<Record<AudioChannel, number | undefined>> = {
+    symbols: undefined,
+    words: undefined,
+  };
   const inFlight: Record<AudioChannel, number> = { symbols: 0, words: 0 };
   const listeners = new Set<() => void>();
+  const notify = () => {
+    for (const listener of listeners) listener();
+  };
+
+  const setProgress = (channel: AudioChannel, next: number | undefined) => {
+    if (progress[channel] === next) return;
+    progress = { ...progress, [channel]: next };
+    notify();
+  };
 
   const setStatus = (channel: AudioChannel, next: AudioStatus) => {
     if (status[channel] === next) return;
     status = { ...status, [channel]: next };
-    for (const listener of listeners) listener();
+    // Progress only means something while a channel is loading.
+    if (next !== 'loading') progress = { ...progress, [channel]: undefined };
+    notify();
   };
 
   const play = async <K>(
@@ -47,7 +69,9 @@ export const createAudioPlayer = ({ output, symbols, words }: AudioPlayerOptions
     }
     if (status[channel] === 'idle') setStatus(channel, 'loading');
     inFlight[channel] += 1;
-    const clip = await source(key);
+    const clip = await source(key, (fraction) => {
+      if (status[channel] === 'loading') setProgress(channel, Math.min(1, Math.max(0, fraction)));
+    });
     inFlight[channel] -= 1;
     if (!clip.ok) {
       if (status[channel] === 'loading' && inFlight[channel] === 0) setStatus(channel, 'idle');
@@ -60,6 +84,9 @@ export const createAudioPlayer = ({ output, symbols, words }: AudioPlayerOptions
   return {
     get status() {
       return status;
+    },
+    get progress() {
+      return progress;
     },
     subscribe: (listener) => {
       listeners.add(listener);

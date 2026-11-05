@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { createAudioPlayer } from './adapters/audio/audio-player';
 import { createSymbolClipSource } from './adapters/audio/symbol-clips';
 import { createBrowserAudioOutput } from './adapters/audio/web-audio-output';
+import { createWordSource } from './adapters/audio/word-source';
 import { createBrowserClipboard } from './adapters/clipboard';
 import { createDocumentTheme } from './adapters/document-theme';
 import { createLocalStore } from './adapters/local-storage';
@@ -23,10 +24,11 @@ if (container === null) {
 }
 
 const services = {
-  // Word synthesis (M5.2) adds a `words` source.
   audio: createAudioPlayer({
     output: createBrowserAudioOutput(),
     symbols: createSymbolClipSource(),
+    // Word synthesis runs in a worker (M5.2); without workers there's no word audio.
+    words: typeof Worker === 'undefined' ? undefined : createWordSource(),
   }),
   clipboard: createBrowserClipboard(),
   fragments: createUrlFragmentStore(),
