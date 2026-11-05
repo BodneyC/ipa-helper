@@ -122,10 +122,10 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
   (word, actions, both output rows) covers about 70% of the viewport. Collapse the
   output rows or un-stick below a height threshold.
 - Run WebKit e2e locally on WSL: install its system libraries
-  (`sudo pnpm exec playwright install-deps webkit`). CI already does this.
-- Visual baselines were made on WSL with pinned fonts. If CI's first `visual`
-  run shows anti-aliasing diffs above 1 %, regenerate the baselines from CI's
-  uploaded actuals (or in the Playwright Docker image) and commit them.
+  (`sudo pnpm exec playwright install-deps webkit`). CI's Playwright image has them.
+- Visual baselines were made on WSL with pinned fonts; CI's `visual` job now
+  runs in the Playwright Docker image. Regenerate the baselines in that image
+  (or from CI's uploaded actuals) and commit them, so local and CI agree.
 - `theme-color` follows `prefers-color-scheme` only (M7.1). Have
   `document-theme.ts` update it when the user overrides the theme, so the
   browser UI matches.

@@ -78,6 +78,7 @@ ipa-helper/
 │  ├─ install-toolchain.sh    # Installs fnm, Node, pnpm, deps, browsers
 │  ├─ subset-fonts.sh         # Rebuilds public/fonts (pinned downloads + fontTools in a temp venv)
 │  ├─ tex/                    # M6.4: symbols-tex.ts (pure: the compile fixture), write-tex.ts (entry point)
+│  ├─ ci/                     # images.test.ts: CI's Playwright image matches @playwright/test
 │  ├─ release/                # M7.3: changelog.ts (pure: Conventional Commits → release notes), write-changelog.ts
 │  ├─ pwa/                    # M7.1, ADR-0013: plugin.ts (Vite: emits sw.js, writes the manifest, injects the
 │  │                          #   precache list; a preview-only "next deploy" hook for e2e), palette.ts (reads
@@ -468,6 +469,14 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 | E2E | Playwright (Chromium, Firefox, WebKit) | each spec FR, keyboard flows, URL sharing, offline and updates (service workers blocked except in `pwa.spec.ts`) | all green |
 | A11y | @axe-core/playwright | every page state in e2e | 0 violations |
 | Visual | Playwright screenshots, `visual` project (`tests/visual`, Chromium) | dark/light × 360/768/1280 px | reviewed diffs (non-blocking CI job) |
+
+In CI, the e2e, visual and Lighthouse jobs run in Playwright's Docker image
+(`mcr.microsoft.com/playwright`), which already has the browsers and their
+system packages; the TeX job runs in `texlive/texlive:latest-small`. Neither
+depends on Ubuntu's apt mirror, which once stalled jobs for 20 minutes. The
+image tag must equal `@playwright/test`'s version; `scripts/ci/images.test.ts`
+fails `pnpm check` until it does. The Firefox job adds a PulseAudio null sink,
+since Firefox's `AudioContext` never starts without an output device.
 | Performance | Lighthouse CI (`lighthouserc.json`), median of 3 runs | NFR-3 on simulated Fast 4G (60 ms RTT, 9 Mbps down, 1.5 Mbps up, 4× CPU) | perf ≥ 95, a11y = 100, LCP ≤ 1.5 s |
 | TeX | `pdflatex` + `tipa` in CI (M6.4), `tex` job | every symbol, the broad r, every diacritic on a base and stacked, every ordered pair of symbols, both macro forms (Q-2); the PDF is uploaded | compiles with `-halt-on-error` |
 

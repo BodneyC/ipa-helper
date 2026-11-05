@@ -45,27 +45,37 @@ jobs:
     needs: check
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    # Playwright's image has the browsers and their system packages, so the
+    # job doesn't depend on Ubuntu's apt mirror, which once stalled for 20
+    # minutes. Its tag must match @playwright/test (scripts/ci/images.test.ts).
+    container: mcr.microsoft.com/playwright:v1.64.1-noble
+    env:
+      HOME: /root # Firefox won't start as root with someone else's HOME
     strategy:
       fail-fast: false
       matrix:
         browser: [chromium, firefox, webkit]
     steps:
       - uses: actions/checkout@v7
+      - name: Trust the checkout
+        # The container runs as root but the workspace belongs to the runner
+        # user, so git (and the prepare script's lefthook) would refuse it.
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Install Playwright browser and OS dependencies
-        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
       - name: Start a silent audio device
         # Runners have no sound card. Without one, Firefox's AudioContext.resume()
         # never settles, so nothing plays and the audio specs time out. A
-        # PulseAudio null sink gives the browsers somewhere to play to.
+        # PulseAudio null sink gives it somewhere to play to. Chromium and
+        # WebKit play without one. (ALSA's null device doesn't satisfy Firefox.)
+        if: matrix.browser == 'firefox'
         run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends pulseaudio
+          apt-get update
+          apt-get install --yes --no-install-recommends pulseaudio
           pulseaudio --start --exit-idle-time=-1
           pactl load-module module-null-sink sink_name=ci
           pactl set-default-sink ci
@@ -124,22 +134,22 @@ jobs:
     needs: check
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    container: mcr.microsoft.com/playwright:v1.64.1-noble
     steps:
       - uses: actions/checkout@v7
+      - name: Trust the checkout
+        # The container runs as root but the workspace belongs to the runner
+        # user, so git (and the prepare script's lefthook) would refuse it.
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Install Playwright Chromium and OS dependencies
-        run: pnpm exec playwright install --with-deps chromium
-      - name: Let Chrome use its sandbox
-        # Ubuntu 24.04's AppArmor blocks unprivileged user namespaces, so Chrome
-        # aborts with "No usable sandbox!". Lift that rather than run Lighthouse
-        # with --no-sandbox, so it measures Chrome as users run it.
-        run: sudo sysctl --write kernel.apparmor_restrict_unprivileged_userns=0
-      - run: pnpm lighthouse
+      # Chrome won't sandbox itself as root in a container. The sandbox doesn't
+      # change what Lighthouse measures, and the page is our own build.
+      - run: pnpm lighthouse '--collect.settings.chromeFlags=--headless=new --no-sandbox'
       - name: Upload Lighthouse reports
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
@@ -158,16 +168,19 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     continue-on-error: true
+    container: mcr.microsoft.com/playwright:v1.64.1-noble
     steps:
       - uses: actions/checkout@v7
+      - name: Trust the checkout
+        # The container runs as root but the workspace belongs to the runner
+        # user, so git (and the prepare script's lefthook) would refuse it.
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Install Playwright Chromium and OS dependencies
-        run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:visual
       - name: Upload visual diffs
         if: ${{ !cancelled() }}
