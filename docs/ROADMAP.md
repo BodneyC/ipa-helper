@@ -80,7 +80,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 - [x] **M4.2** `AudioPlayer` port, `NullAudioPlayer`, and a Web Audio playback adapter. deps: M4.1 · refs: ARCH §8
 - [ ] **M4.3** Build-time generation of per-symbol clips (Node script, CI-reproducible), with lazy loading and caching. deps: M4.2 · refs: FR-30, FR-33
 - [ ] **M4.4** Play affordance on keys, plus the "Sound on select" toggle. deps: M4.3 · refs: FR-30, FR-34
-- [ ] **M4.5** Licence notices for engine, voice and runtime. refs: NFR-8
+- [x] **M4.5** Licence notices for engine, voice and runtime. refs: NFR-8
 
 ## M5: Word audio
 
@@ -109,6 +109,8 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 - More export formats: X-SAMPA, Kirshenbaum, espeak mnemonics, Markdown/HTML snippet.
 - Accent switch for audio (General American), e.g. a second Piper voice (ADR-0009).
 - Log any words Cori still gets wrong once the terminal `.` (ADR-0009) is in place.
+- M5.2: when onnxruntime-web moves to `dependencies`, re-run
+  `pnpm licenses list --prod` and add whatever it bundles to `THIRD_PARTY_NOTICES.md`.
 - int8 Cori is 19.5 MB vs 63.5 MB but ~60% slower on wasm (ADR-0009). Revisit
   if download size becomes the constraint (M7 PWA precache), or with WebGPU.
 - "Minimal braces" TIPA output mode.

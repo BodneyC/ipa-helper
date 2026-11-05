@@ -43,7 +43,19 @@ under the OFL.
 
 ## Audio and voice models
 
-*None yet.* See ADR-0009 and roadmap tasks M4.5 and M5.
+The app's voice is the Piper voice **Cori (medium)** (ADR-0009). Its audio
+reaches the app in two ways: as symbol clips rendered ahead of time (M4.3),
+and from M5 as the model itself, run in the browser to speak whole words.
+
+| Work | Use | Licence | Copyright |
+| --- | --- | --- | --- |
+| [Cori (medium)](https://brycebeattie.com/files/tts/), `en_GB-cori-medium` from [rhasspy/piper-voices](https://huggingface.co/rhasspy/piper-voices) at revision `e7229f7d33a1` | Rendered the symbol clips in `src/assets/audio/symbols/*.opus`. From M5.2 the model is served from the same host and run in the browser | Public domain, as declared by its author; it was trained from scratch on LibriVox recordings. The piper-voices repository is MIT | Voice trained by Bryce Beattie; recordings by LibriVox volunteers (public domain) |
+| Symbol clips, `src/assets/audio/symbols/*.opus` | Played for each symbol (FR-30) | Output of the public-domain voice above. Distributed with this project under GPL-3.0-or-later | ipa-helper contributors |
+| [Piper](https://github.com/rhasspy/piper) (engine) | Defines the voice's model format and the phoneme-ID input encoding the app follows. No Piper code is distributed | MIT | Michael Hansen |
+| [onnxruntime-web](https://github.com/microsoft/onnxruntime) (runtime) | 1.20.1, wasm. Runs the voice: today only at build time to render the clips, and from M5.2 in the browser for words | MIT | Microsoft Corporation |
+
+When onnxruntime-web becomes a runtime dependency (M5.2), re-run
+`pnpm licenses list --prod` and list any packages it bundles alongside it.
 
 ---
 
