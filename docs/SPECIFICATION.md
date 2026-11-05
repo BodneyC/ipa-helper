@@ -136,7 +136,10 @@ pronounced in British English, at no cost and without signing up for anything.
   `pdflatex` with `\usepackage{tipa}` and renders the same glyphs as the IPA row.
   Where the encoding is ambiguous, the serialiser emits braces or a separating
   space (e.g. `\ae{}` before a letter, or `\textturnr{}`) so that adjacent tokens
-  can't merge into a different macro or shortcut.
+  can't merge into a different macro or shortcut. *As built (M6.4): the CI
+  `tex` job compiles every symbol, every diacritic and every ordered pair of
+  symbols (`pnpm tex:check`), and uploads the PDF so the glyphs can be checked
+  by eye.*
 - **FR-23** Copy actions show transient feedback ("Copied") that screen
   readers also announce (ARIA live region).
 

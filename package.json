@@ -29,6 +29,8 @@
     "audio:candidates": "node --import jiti/register scripts/audio/candidates.ts",
     "audio:select": "node --import jiti/register scripts/audio/select.ts",
     "voice:fetch": "node --import jiti/register scripts/audio/fetch-voice.ts",
+    "tex:generate": "node --import jiti/register scripts/tex/write-tex.ts",
+    "tex:check": "pnpm tex:generate && pdflatex -interaction=nonstopmode -halt-on-error -output-directory=tests/tex/out tests/tex/out/symbols.tex",
     "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm knip && pnpm test:coverage && pnpm build && pnpm size",
     "prepare": "lefthook install"
   },

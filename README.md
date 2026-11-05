@@ -49,6 +49,7 @@ Run `./scripts/install-toolchain.sh --help` for the options (`--with-tex`, `--no
 | `pnpm format` | Prettier |
 | `pnpm knip` | Unused files, exports and dependencies |
 | `pnpm size` | Initial JS bundle budget (≤ 100 kB gzipped) |
+| `pnpm tex:check` | Compiles every symbol's TIPA with pdflatex + tipa (install with `--with-tex`) |
 
 Git hooks (lefthook) are installed by `pnpm install`. They lint staged files on commit,
 enforce [Conventional Commits](https://www.conventionalcommits.org/), and run

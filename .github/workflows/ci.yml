@@ -71,6 +71,38 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
+  tex:
+    # M6.4 / FR-22 / ADR-0008: every symbol's TIPA, every diacritic and every
+    # pair of symbols must compile under pdflatex + tipa. The PDF is uploaded
+    # so the glyphs can be checked by eye.
+    name: TeX compile (pdflatex + tipa)
+    needs: check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install pdflatex and tipa
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends texlive-latex-base tipa
+      - run: pnpm tex:check
+      - name: Upload the compiled symbols
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: tex-symbols
+          path: |
+            tests/tex/out/symbols.pdf
+            tests/tex/out/symbols.log
+          retention-days: 14
+          if-no-files-found: ignore
+
   lighthouse:
     # NFR-3 budget (M3.9): performance >= 95, accessibility = 100, LCP < 1.5 s on
     # simulated Fast 4G. Reports stay in the run's artifacts (no public upload, NFR-6).

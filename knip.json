@@ -1,6 +1,8 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "project": ["src/**/*.{ts,tsx}", "tests/**/*.ts", "scripts/**/*.ts"],
+  // A system tool from TeX Live (install-toolchain.sh --with-tex; apt in CI), not an npm package.
+  "ignoreBinaries": ["pdflatex"],
   "ignoreDependencies": [
     // Loaded with createRequire in scripts/audio/voice.ts, which knip cannot follow.
     "ffmpeg-static"

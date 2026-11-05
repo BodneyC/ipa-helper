@@ -62,6 +62,7 @@ ipa-helper/
 ├─ scripts/
 │  ├─ install-toolchain.sh    # Installs fnm, Node, pnpm, deps, browsers
 │  ├─ subset-fonts.sh         # Rebuilds public/fonts (pinned downloads + fontTools in a temp venv)
+│  ├─ tex/                    # M6.4: symbols-tex.ts (pure: the compile fixture), write-tex.ts (entry point)
 │  └─ audio/                  # Symbol clips (M4.3) and voice:fetch (M5.2), ADR-0009: clips.ts (pure: frames, picks),
 │                             #   voice.ts (pinned Cori download + onnxruntime-web + ffmpeg-static Opus),
 │                             #   candidates.ts / select.ts (entry points), listen-page.ts
@@ -131,7 +132,7 @@ ipa-helper/
 │     └─ global.css
 ├─ tests/
 │  ├─ e2e/                    # Playwright specs, one per spec section
-│  └─ tex/                    # M6: LaTeX compile fixtures for TIPA output
+│  └─ tex/out/                # M6.4: generated symbols.tex/.pdf (gitignored), compiled by `pnpm tex:check`
 └─ (config files: tsconfig*.json, vite.config.ts, vitest.config.ts,
     playwright.config.ts, eslint.config.ts, .prettierrc, knip.json, lefthook.yml)
 ```
@@ -433,7 +434,7 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 | A11y | @axe-core/playwright | every page state in e2e | 0 violations |
 | Visual | Playwright screenshots, `visual` project (`tests/visual`, Chromium) | dark/light × 360/768/1280 px | reviewed diffs (non-blocking CI job) |
 | Performance | Lighthouse CI (`lighthouserc.json`), median of 3 runs | NFR-3 on simulated Fast 4G (60 ms RTT, 9 Mbps down, 1.5 Mbps up, 4× CPU) | perf ≥ 95, a11y = 100, LCP ≤ 1.5 s |
-| TeX | `pdflatex` in CI (M6.4) | TIPA output for every symbol compiles | all compile |
+| TeX | `pdflatex` + `tipa` in CI (M6.4), `tex` job | every symbol, the broad r, every diacritic on a base and stacked, every ordered pair of symbols, both macro forms (Q-2); the PDF is uploaded | compiles with `-halt-on-error` |
 
 Visual baselines live in `tests/visual/__screenshots__/` with no OS suffix. To
 keep them machine-independent, the visual tests pin the UI font to the
@@ -461,6 +462,8 @@ Test names cite requirement IDs where applicable: `it('FR-13: Backspace deletes 
 | `pnpm size` | size-limit: initial JS ≤ 100 kB gzipped (NFR-3), measured on `dist/` |
 | `pnpm audio:candidates [--only id,…]` | Renders candidate symbol clips and a listening page into `.cache/symbol-clips/` (M4.3) |
 | `pnpm audio:select <picks.json>` | Copies the picked renders to `src/assets/audio/symbols/` and writes `manifest.json` |
+| `pnpm tex:generate` | Writes `tests/tex/out/symbols.tex` from the inventory and the TIPA serialiser (M6.4) |
+| `pnpm tex:check` | Generates the fixture, then compiles it with `pdflatex` (needs TeX Live with `tipa`; CI installs `texlive-latex-base tipa`) |
 | `pnpm voice:fetch` | Downloads the pinned voice model (SHA-256 checked) into `public/voice/` for word synthesis (M5.2); the deploy runs it |
 | `pnpm check` | typecheck → lint → format:check → knip → test:coverage → build → size |
 | `pnpm prepare` | Installs the lefthook git hooks (runs automatically on `pnpm install`) |
