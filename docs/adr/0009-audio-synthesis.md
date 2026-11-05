@@ -106,7 +106,8 @@ audio length becomes erratic: over three runs each, `maʊzˈɛlt` gave
 0.82–0.85 s with a final `.`. Any of `.`, ` .`, `,`, `!` stabilised all six
 test words (`spikes/m4.1-piper/endings.mjs`), and the maintainer confirmed
 by ear that every punctuated variant sounds right. The serialiser (M5.1)
-must append `.` to everything sent to the voice, words and symbol clips alike.
+must append `.` to every word sent to the voice. (Symbol clips end in `!`
+instead; see "Symbol clips (M4.3)" below.)
 
 **Compressed model.** Dynamic int8 quantisation (`onnxruntime.quantization`,
 MatMul + Gemm + Conv weights) shrinks the model to **19.5 MB**, but session
@@ -127,13 +128,56 @@ config: 0.667, 1, 0.8). Output: float32 PCM at 22 050 Hz.
 - `en_GB-cori-medium.onnx`: `1899f98e5fb8310154f3c2973f4b8a929ba7245e722b3d3a85680b833d95f10d`
 - `en_GB-cori-medium.onnx.json`: `e262c16d7f192f69d4edd6b4ef8a5915379e67495fcc402f1ab15eeb33da3d36`
 
+## Symbol clips (M4.3)
+
+Amended 2026-11-05 while implementing M4.3. The maintainer chose all three
+decisions below.
+
+- **A single sound must end in `!`, not `.`.** With only one or two phonemes,
+  a final `.` makes Cori's duration predictor run on for 2–5 s of babble
+  (`æ.`: 3.4–5.0 s). This is not noise: with `noise_w` at 0 the output is
+  fixed, and still long (`æ.` is always 3.87 s). Ending in `!` gives stable,
+  natural lengths (`æ!` 0.14–0.31 s, `pə!` 0.46–0.58 s, `aɪ!` 0.51–0.77 s).
+  The probe compared `.`, ` .`, `,` and `!` over three to four takes each.
+- **Frames are chosen by ear.** `pnpm audio:candidates` renders each RP sound
+  in several frames and builds a listening page:
+  - vowels and diphthongs as `ˈV!`, as `ˈV!` slowed (`length_scale` 1.8),
+    and as `V!`;
+  - consonants as `C!`, `Cə!`, `əC!` and `əCˈə!`.
+
+  The maintainer picks one per symbol. `pnpm audio:select picks.json` then
+  copies the chosen renders, byte for byte, into `src/assets/audio/symbols/`.
+  `manifest.json` records each clip's frame, input text, `length_scale` and
+  SHA-256, along with the voice revision, the runtime and the encoding.
+- **Reproducible by procedure, not by bytes.** Piper samples noise on every
+  run, so a re-render never gives identical audio. The clips the maintainer
+  approved are committed, and CI does not re-render them. Instead a unit test
+  checks that every sounding RP symbol has exactly one clip, that no other
+  clips exist, and that each file matches its manifest hash. Anyone can re-run
+  the two scripts to regenerate the clips; the voice is fetched from a pinned
+  `rhasspy/piper-voices` revision (`e7229f7d33a10e145e109b886d661984201ac3c4`)
+  and checked against the SHA-256 hashes above.
+- **Format: Ogg Opus, mono, 48 kHz, 32 kbit/s**, at about 3–8 kB per clip.
+  The clips are encoded with the pinned `ffmpeg-static` devDependency, which
+  `pnpm install` fetches, so no system ffmpeg or `sudo` is needed. ffmpeg is
+  used only on development machines: browsers decode the clips natively with
+  `decodeAudioData`. The `+bitexact` flags make encoding deterministic, so the
+  same samples always give the same bytes. The clips are rendered with
+  onnxruntime-web (wasm, one thread), the runtime that M5.2 runs in the
+  browser.
+- **Consequence for M5.1:** a word with only one or two sounds can run away
+  just as a symbol does. Before fixing the terminal `.` for words, the
+  serialiser's tests must try very short words, and may need to use `!` for
+  them.
+
 ## Consequences
 - The model and the onnxruntime-web wasm files are **self-hosted** on the
   same static host, so audio makes no third-party requests (NFR-6). The 63.5 MB
   model is not committed to git: the build fetches it from the pinned
   Hugging Face URL and verifies the SHA-256 above (M4.3/M5.2).
-- Symbol clips (M4.3) are generated with the same voice and serialiser
-  rules, so symbols and words sound alike.
+- Symbol clips (M4.3) are generated with the same voice and runtime as words,
+  so symbols and words sound alike. Clips end in `!` and words in `.`
+  (see "Symbol clips (M4.3)").
 - Introduces a large lazy asset and a Worker. Neither affects NFR-3, because
   they aren't part of the initial bundle.
 - Licence notices are needed for the engine, the runtime and the voice (NFR-8).
