@@ -26,3 +26,9 @@ export const symbolById = (id: SymbolId): PhoneSymbol | undefined => byId.get(id
 /** The symbols in one inventory, in palette group order (FR-3). */
 export const symbolsIn = (inventory: InventoryId): readonly PhoneSymbol[] =>
   SYMBOLS.filter((s) => s.inventories.includes(inventory));
+
+/**
+ * True when a symbol makes a sound of its own and so can be played (FR-30).
+ * Suprasegmentals are marks on other sounds, so they have no clip.
+ */
+export const isSounding = (symbol: PhoneSymbol): boolean => symbol.category !== 'suprasegmental';

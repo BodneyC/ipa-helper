@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 
 import { clipUrls, createSymbolClipSource } from './symbol-clips';
-import { symbolsIn } from '../../domain/inventory/index';
+import { isSounding, symbolsIn } from '../../domain/inventory/index';
 import { symbolId } from '../../domain/inventory/symbol-id';
 import { err, ok } from '../../domain/result';
 
@@ -147,7 +147,7 @@ describe('committed symbol clips', () => {
   const entries: [string, unknown][] =
     typeof clips === 'object' && clips !== null ? Object.entries(clips) : [];
   const sounding = symbolsIn('rp')
-    .filter((s) => s.category !== 'suprasegmental')
+    .filter(isSounding)
     .map((s) => s.id);
 
   it('FR-30: has exactly one clip per sounding RP symbol, and no others', () => {

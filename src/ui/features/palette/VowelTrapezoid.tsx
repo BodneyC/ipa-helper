@@ -12,6 +12,8 @@ interface VowelTrapezoidProps {
   readonly symbols: readonly VowelSymbol[];
   readonly rDisplay: RDisplay;
   readonly onActivate: (symbol: PhoneSymbol) => void;
+  /** FR-30: plays a symbol; left out when audio is unavailable. */
+  readonly onPlay?: ((symbol: PhoneSymbol) => void) | undefined;
 }
 
 const percent = (n: number) => `${String(n * 100)}%`;
@@ -37,7 +39,7 @@ const COLUMN_LABELS = (['front', 'central', 'back'] as const).map((backness) => 
  * Keys are in reading order (close to open, front to back) for keyboard users,
  * and each key's name says where it sits.
  */
-export function VowelTrapezoid({ symbols, rDisplay, onActivate }: VowelTrapezoidProps) {
+export function VowelTrapezoid({ symbols, rDisplay, onActivate, onPlay }: VowelTrapezoidProps) {
   const captionId = useId();
   return (
     <div className={styles['scroll']}>
@@ -88,6 +90,7 @@ export function VowelTrapezoid({ symbols, rDisplay, onActivate }: VowelTrapezoid
                     symbol={symbol}
                     labels={labelsOf(symbol, rDisplay)}
                     onActivate={onActivate}
+                    onPlay={onPlay}
                   />
                 ))}
               </li>

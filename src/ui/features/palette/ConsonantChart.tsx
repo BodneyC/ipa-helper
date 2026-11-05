@@ -11,6 +11,8 @@ interface ConsonantChartProps {
   readonly symbols: readonly ConsonantSymbol[];
   readonly rDisplay: RDisplay;
   readonly onActivate: (symbol: PhoneSymbol) => void;
+  /** FR-30: plays a symbol; left out when audio is unavailable. */
+  readonly onPlay?: ((symbol: PhoneSymbol) => void) | undefined;
 }
 
 /**
@@ -18,7 +20,7 @@ interface ConsonantChartProps {
  * down; voiceless left and voiced right in each cell. Empty and impossible cells
  * look different. It's a real table, so screen readers announce the headers.
  */
-export function ConsonantChart({ symbols, rDisplay, onActivate }: ConsonantChartProps) {
+export function ConsonantChart({ symbols, rDisplay, onActivate, onPlay }: ConsonantChartProps) {
   const { places, manners, rows } = consonantChart(symbols);
 
   const renderSlot = (slot: ChartSlot, voicing: string) => {
@@ -32,6 +34,7 @@ export function ConsonantChart({ symbols, rDisplay, onActivate }: ConsonantChart
                 symbol={symbol}
                 labels={labelsOf(symbol, rDisplay)}
                 onActivate={onActivate}
+                onPlay={onPlay}
               />
             ))}
           </span>

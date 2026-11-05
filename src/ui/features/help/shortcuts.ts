@@ -11,6 +11,7 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { keys: ['Tab'], join: 'any', does: 'Move between the word, its buttons and each symbol group' },
   { keys: ['←', '→', '↑', '↓'], join: 'any', does: 'Move between symbols in a group' },
   { keys: ['Enter'], join: 'any', does: 'Add the focused symbol at the cursor' },
+  { keys: ['Alt', 'Enter'], join: 'chord', does: 'Listen to the focused symbol' },
   { keys: ['←', '→'], join: 'any', does: 'Move the word cursor (outside the symbol groups)' },
   { keys: ['Backspace'], join: 'any', does: 'Delete the symbol before the cursor' },
   { keys: ['Delete'], join: 'any', does: 'Delete the symbol after the cursor' },

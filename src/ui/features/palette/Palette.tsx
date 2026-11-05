@@ -22,7 +22,7 @@ import { useAnnounce } from '../../components/Announcer';
 import { Card } from '../../components/Card';
 import { useRovingFocus } from '../../components/roving-focus';
 
-interface PaletteProps {
+export interface PaletteProps {
   readonly inventory: InventoryId;
   readonly rDisplay: RDisplay;
   /** FR-4: the filter text; blank shows everything. */
@@ -32,6 +32,8 @@ interface PaletteProps {
   readonly onToggleGroup: (group: Category) => void;
   /** FR-10: a key was activated. */
   readonly onActivate: (symbol: PhoneSymbol) => void;
+  /** FR-30: plays a symbol; left out when audio is unavailable. */
+  readonly onPlay?: ((symbol: PhoneSymbol) => void) | undefined;
 }
 
 const isConsonant = (s: PhoneSymbol): s is ConsonantSymbol =>
@@ -49,6 +51,7 @@ export function Palette({
   collapsedGroups,
   onToggleGroup,
   onActivate,
+  onPlay,
 }: PaletteProps) {
   const symbols = symbolsIn(inventory).filter((s) => matchesFilter(s, query, rDisplay));
   const filtering = query.trim() !== '';
@@ -60,7 +63,7 @@ export function Palette({
   };
 
   const body = (group: Group, members: readonly PhoneSymbol[]) => {
-    const props = { rDisplay, onActivate: activate };
+    const props = { rDisplay, onActivate: activate, onPlay };
     switch (group.layout) {
       case 'chart':
         return <ConsonantChart symbols={members.filter(isConsonant)} {...props} />;

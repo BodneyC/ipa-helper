@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { newCommandFor, SettingsDialog } from './SettingsDialog';
+import { fakeAudio } from '../../../../tests/setup/fake-audio';
 import { Providers } from '../../../app/providers';
 import type { KeyValueStore } from '../../../domain/ports';
 import { ok } from '../../../domain/result';
@@ -21,7 +22,7 @@ const current = (): Settings => {
   return { ...DEFAULT_SETTINGS, ...(typeof parsed === 'object' ? parsed : {}) };
 };
 
-const setup = (settings: Partial<Settings> = {}) => {
+const setup = (settings: Partial<Settings> = {}, audio = fakeAudio('unsupported').audio) => {
   const onClose = vi.fn();
   const onHelp = vi.fn();
   const writeText = vi.fn(() => Promise.resolve(ok(undefined)));
@@ -29,7 +30,7 @@ const setup = (settings: Partial<Settings> = {}) => {
   render(
     <Providers
       initialSettings={{ ...DEFAULT_SETTINGS, ...settings }}
-      services={{ clipboard: { writeText }, store: { get: () => undefined, set } }}
+      services={{ audio, clipboard: { writeText }, store: { get: () => undefined, set } }}
     >
       <AnnouncerProvider>
         <SettingsDialog open onClose={onClose} onHelp={onHelp} />
@@ -105,5 +106,22 @@ describe('<SettingsDialog> (FR-42)', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Keyboard shortcuts' }));
     expect(onClose).toHaveBeenCalled();
     expect(onHelp).toHaveBeenCalled();
+  });
+
+  it('FR-34: turns Sound on select on and off', async () => {
+    const { dialog, user } = setup({}, fakeAudio('idle').audio);
+    const toggle = within(dialog).getByRole('checkbox', { name: /Sound on select/ });
+    expect(toggle).not.toBeChecked();
+    await user.click(toggle);
+    expect(current().soundOnSelect).toBe(true);
+    await user.click(toggle);
+    expect(current().soundOnSelect).toBe(false);
+  });
+
+  it('FR-34: disables Sound on select, and says why, when the browser has no audio', () => {
+    const { dialog } = setup();
+    const toggle = within(dialog).getByRole('checkbox', { name: /Sound on select/ });
+    expect(toggle).toBeDisabled();
+    expect(toggle).toHaveAccessibleDescription('This browser can’t play audio.');
   });
 });

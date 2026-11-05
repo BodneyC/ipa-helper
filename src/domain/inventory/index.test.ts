@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { SYMBOLS, symbolById, symbolsIn } from '.';
+import { isSounding, SYMBOLS, symbolById, symbolsIn } from '.';
 import { AFFRICATES, CONSONANTS } from './consonants';
 import { DIPHTHONGS } from './diphthongs';
 import { SUPRASEGMENTALS } from './suprasegmentals';
@@ -148,3 +148,14 @@ describe('registry', () => {
 });
 
 const categoryOrder = ['consonant', 'affricate', 'vowel', 'diphthong', 'suprasegmental'];
+
+describe('isSounding', () => {
+  it('FR-30: every RP sound can be played, and no suprasegmental mark', () => {
+    const sounding = rp.filter(isSounding);
+    expect(sounding).toHaveLength(51);
+    expect(sounding.every((s) => s.category !== 'suprasegmental')).toBe(true);
+    expect(rp.filter((s) => !isSounding(s)).map((s) => s.category)).toEqual(
+      Array.from({ length: 5 }, () => 'suprasegmental'),
+    );
+  });
+});

@@ -1,3 +1,9 @@
+/* Holds the key and its speaker button, so the speaker can sit on the key's corner. */
+.wrap {
+  position: relative;
+  display: inline-flex;
+}
+
 /*
  * A palette key (SPEC §6). --accent is inherited from the group card. The focus
  * ring uses outline-offset, so it sits on the card, never on the key's raised
@@ -128,6 +134,60 @@
 }
 
 .tipTipa code {
+  color: var(--color-text);
+  font-family: var(--font-mono);
+}
+
+/*
+ * FR-30: the speaker button, on the key's top-right corner. Hidden until the
+ * key is hovered or focused (on touch, a tap focuses the key and reveals it).
+ * 24 px meets WCAG 2.5.8's minimum target size.
+ */
+.play {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--accent, var(--color-focus));
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.wrap:hover .play,
+.wrap:focus-within .play {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.speaker {
+  width: 14px;
+  height: 14px;
+  fill: currentcolor;
+}
+
+.waves {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.tipHint {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+}
+
+.tipHint kbd {
   color: var(--color-text);
   font-family: var(--font-mono);
 }

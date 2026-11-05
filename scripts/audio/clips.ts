@@ -1,6 +1,6 @@
 // Pure logic for the symbol clip generator (M4.3, ADR-0009): which texts to
 // render, how Piper encodes them, and the picks → manifest step. No I/O here.
-import { symbolsIn } from '../../src/domain/inventory/index';
+import { isSounding, symbolsIn } from '../../src/domain/inventory/index';
 import type { PhoneSymbol } from '../../src/domain/inventory/types';
 
 /**
@@ -32,8 +32,7 @@ export interface Candidate {
 }
 
 /** The RP symbols that make a sound: everything except the suprasegmental marks. */
-export const soundingSymbols = (): readonly PhoneSymbol[] =>
-  symbolsIn('rp').filter((symbol) => symbol.category !== 'suprasegmental');
+export const soundingSymbols = (): readonly PhoneSymbol[] => symbolsIn('rp').filter(isSounding);
 
 const framesFor = (symbol: PhoneSymbol): readonly Frame[] =>
   symbol.category === 'vowel' || symbol.category === 'diphthong'

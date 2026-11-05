@@ -7,6 +7,7 @@ import { CONTRASTS, isMacroName, THEMES } from '../../../state/settings';
 import type { Settings } from '../../../state/settings';
 import { CopyButton } from '../../components/CopyButton';
 import { Dialog } from '../../components/Dialog';
+import { useAudioStatus } from '../audio/use-audio';
 
 interface SettingsDialogProps {
   readonly open: boolean;
@@ -91,7 +92,15 @@ export function SettingsDialog({ open, onClose, onHelp }: SettingsDialogProps) {
   const update = (patch: Partial<Settings>) => {
     dispatch({ type: 'update', patch });
   };
-  const ids = { macro: useId(), macroHint: useId(), macroError: useId(), name: useId() };
+  const ids = {
+    macro: useId(),
+    macroHint: useId(),
+    macroError: useId(),
+    name: useId(),
+    soundHint: useId(),
+  };
+  // FR-34: symbol audio needs Web Audio; without it the toggle can do nothing.
+  const canPlay = useAudioStatus().symbols !== 'unsupported';
   const [macroDraft, setMacroDraft] = useState(settings.macroName);
   const macroValid = isMacroName(macroDraft);
   const snippet = newCommandFor(settings.macroName, settings.tipaSlashes);
@@ -129,6 +138,29 @@ export function SettingsDialog({ open, onClose, onHelp }: SettingsDialogProps) {
             update({ rDisplay });
           }}
         />
+
+        <fieldset className={styles['fieldset']}>
+          <legend className={styles['legend']}>Sound</legend>
+          <label className={styles['option']}>
+            <input
+              type="checkbox"
+              checked={settings.soundOnSelect}
+              disabled={!canPlay}
+              aria-describedby={canPlay ? undefined : ids.soundHint}
+              onChange={(event) => {
+                update({ soundOnSelect: event.target.checked });
+              }}
+            />
+            <span className={styles['optionText']}>
+              Sound on select: play each symbol as it is added
+            </span>
+          </label>
+          {!canPlay && (
+            <p id={ids.soundHint} className={styles['hint']}>
+              This browser can’t play audio.
+            </p>
+          )}
+        </fieldset>
 
         <fieldset className={styles['fieldset']}>
           <legend className={styles['legend']}>Copying</legend>

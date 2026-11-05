@@ -117,7 +117,8 @@ ipa-helper/
 │  │     ├─ palette/          # SymbolKey, ConsonantChart, VowelTrapezoid (domain: chart.ts vowelTrapezoid), KeyGrid…
 │  │     ├─ word/             # WordDisplay, TokenCursor
 │  │     ├─ output/           # OutputPanel, CopyRow
-│  │     ├─ settings/         # SettingsDialog (FR-42), suggested \newcommand
+│  │     ├─ audio/            # use-audio: useAudioStatus, usePlaySymbol (FR-30, FR-34)
+│     ├─ settings/         # SettingsDialog (FR-42), suggested \newcommand
 │  │     ├─ saved/            # SavedWordsDialog (FR-16)
 │  │     └─ help/
 │  ├─ assets/audio/symbols/   # <symbol id>.opus clips + manifest.json, written by `pnpm audio:select`
@@ -285,6 +286,18 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   managed per group by `useRovingFocus` (`ui/components/roving-focus.ts`):
   ←/→ follow DOM order, ↑/↓ follow the rendered layout, and navigation keys are
   always `preventDefault`ed inside a group.
+- Symbol audio (FR-30, FR-34, M4.4): `<PaletteWithAudio>` sits inside the
+  announcer and wires `<Palette>` to the audio player via `usePlaySymbol`
+  (`ui/features/audio/use-audio.ts`). That hook returns `undefined` when the
+  symbol channel is unsupported, so no play affordance renders, and it
+  announces any failed play. A sounding key (`isSounding` in the domain
+  registry) plays on Alt+click, Alt+Enter or a touch long-press. It also has a
+  24 px speaker button on its corner, shown while the key is hovered or
+  focused. The speaker is a pointer convenience only (`tabIndex=-1`,
+  `aria-hidden`); keyboard and screen reader users get Alt+Enter, which is
+  listed in the tooltip and the help dialog. "Sound on select" plays after
+  each insert, and its checkbox in Settings is disabled when Web Audio is
+  missing.
 - `<GlobalShortcuts>` (`ui/features/help/`) listens on `document` for FR-51 and
   skips events a widget already handled (`defaultPrevented`), text inputs and
   anything inside a `<dialog>`. Copy shortcuts share `useOutputs` and `useCopy`

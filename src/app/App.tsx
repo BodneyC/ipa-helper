@@ -10,7 +10,7 @@ import { TOOLTIP_CEILING } from '../ui/components/Tooltip';
 import { GlobalShortcuts } from '../ui/features/help/GlobalShortcuts';
 import { HelpDialog } from '../ui/features/help/HelpDialog';
 import { OutputPanel } from '../ui/features/output/OutputPanel';
-import { Palette } from '../ui/features/palette/Palette';
+import { PaletteWithAudio } from '../ui/features/palette/PaletteWithAudio';
 import { SavedWordsDialog } from '../ui/features/saved/SavedWordsDialog';
 import { SettingsDialog } from '../ui/features/settings/SettingsDialog';
 import { UrlSync } from '../ui/features/word/UrlSync';
@@ -65,7 +65,7 @@ export function App() {
             </div>
           </Card>
         </div>
-        <Palette
+        <PaletteWithAudio
           inventory={settings.inventory}
           query={query}
           collapsedGroups={settings.collapsedGroups}
@@ -73,6 +73,7 @@ export function App() {
             settingsDispatch({ type: 'toggleGroup', group });
           }}
           rDisplay={settings.rDisplay}
+          soundOnSelect={settings.soundOnSelect}
           onActivate={(symbol) => {
             dispatch({ type: 'insert', symbolId: symbol.id });
           }}

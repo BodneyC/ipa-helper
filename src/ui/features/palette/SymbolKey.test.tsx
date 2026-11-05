@@ -16,10 +16,20 @@ const get = (id: string): PhoneSymbol => {
 
 const esh = get('esh');
 
-const renderKey = (symbol: PhoneSymbol = esh) => {
+const renderKey = (symbol: PhoneSymbol = esh, withPlay = false) => {
   const onActivate = vi.fn<(s: PhoneSymbol) => void>();
-  render(<SymbolKey symbol={symbol} labels={labelsOf(symbol, 'narrow')} onActivate={onActivate} />);
-  return { onActivate, key: screen.getByRole('button') };
+  const onPlay = vi.fn<(s: PhoneSymbol) => void>();
+  const { container } = render(
+    <SymbolKey
+      symbol={symbol}
+      labels={labelsOf(symbol, 'narrow')}
+      onActivate={onActivate}
+      onPlay={withPlay ? onPlay : undefined}
+    />,
+  );
+  // The speaker is hidden from assistive technology, so find it by its title.
+  const speaker = () => container.querySelector('button[title^="Listen"]');
+  return { onActivate, onPlay, speaker, key: screen.getByRole('button') };
 };
 
 afterEach(() => {
@@ -174,5 +184,68 @@ describe('<SymbolKey>', () => {
     const { key } = renderKey();
     fireEvent.pointerDown(key, { pointerType: 'mouse' });
     expect(fireEvent.contextMenu(key)).toBe(true);
+  });
+
+  describe('FR-30: play affordance', () => {
+    it('plays from the speaker button, without adding the symbol', async () => {
+      const user = userEvent.setup();
+      const { onActivate, onPlay, speaker } = renderKey(esh, true);
+      const button = speaker();
+      expect(button).toHaveAttribute('tabindex', '-1');
+      expect(button).toHaveAttribute('aria-hidden', 'true');
+      if (!(button instanceof HTMLElement)) throw new Error('no speaker');
+      await user.click(button);
+      expect(onPlay).toHaveBeenCalledWith(esh);
+      expect(onActivate).not.toHaveBeenCalled();
+    });
+
+    it('plays on Alt+click and Alt+Enter instead of adding', async () => {
+      const user = userEvent.setup();
+      const { key, onActivate, onPlay } = renderKey(esh, true);
+      await user.keyboard('{Alt>}');
+      await user.click(key);
+      await user.keyboard('{Enter}{/Alt}');
+      expect(onPlay).toHaveBeenCalledTimes(2);
+      expect(onActivate).not.toHaveBeenCalled();
+      await user.keyboard('{Enter}');
+      expect(onActivate).toHaveBeenCalledTimes(1);
+    });
+
+    it('plays on a touch long-press', () => {
+      vi.useFakeTimers();
+      const { key, onPlay } = renderKey(esh, true);
+      fireEvent.pointerDown(key, { pointerType: 'touch' });
+      act(() => {
+        vi.advanceTimersByTime(LONG_PRESS_MS);
+      });
+      expect(onPlay).toHaveBeenCalledWith(esh);
+    });
+
+    it('says how to listen in the tooltip', () => {
+      const { key } = renderKey(esh, true);
+      fireEvent.focus(key);
+      expect(screen.getByRole('tooltip')).toHaveTextContent('Listen: Alt+click or Alt+Enter');
+    });
+
+    it('offers nothing to play for a mark with no sound of its own', async () => {
+      const user = userEvent.setup();
+      const { key, onActivate, onPlay, speaker } = renderKey(get('primary-stress'), true);
+      expect(speaker()).toBeNull();
+      await user.keyboard('{Alt>}');
+      await user.click(key);
+      await user.keyboard('{/Alt}');
+      expect(onPlay).not.toHaveBeenCalled();
+      expect(onActivate).toHaveBeenCalledTimes(1);
+    });
+
+    it('offers nothing to play without audio, and Alt+click still adds', async () => {
+      const user = userEvent.setup();
+      const { key, onActivate, speaker } = renderKey(esh, false);
+      expect(speaker()).toBeNull();
+      await user.keyboard('{Alt>}');
+      await user.click(key);
+      await user.keyboard('{/Alt}');
+      expect(onActivate).toHaveBeenCalledTimes(1);
+    });
   });
 });

@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
 
 import styles from './SymbolKey.module.css';
+import { isSounding } from '../../../domain/inventory/index';
 import type { PhoneSymbol } from '../../../domain/inventory/types';
 import type { SymbolLabels } from '../../../domain/serialise/labels';
 import { ROVING_ITEM } from '../../components/roving-focus';
@@ -12,6 +13,11 @@ interface SymbolKeyProps {
   readonly labels: SymbolLabels;
   /** FR-10: called on click, tap, Enter or Space. */
   readonly onActivate: (symbol: PhoneSymbol) => void;
+  /**
+   * FR-30: plays the symbol. Left out when audio is unavailable; marks with no
+   * sound of their own get no play affordance either way.
+   */
+  readonly onPlay?: ((symbol: PhoneSymbol) => void) | undefined;
 }
 
 /** How long a touch must last to count as a long-press (FR-2). */
@@ -25,8 +31,20 @@ const HOVER_CLOSE_MS = 120;
  * touch long-press shows a tooltip with the name, a highlighted example word and
  * the TIPA code. The tooltip stays open while hovered and closes on Escape
  * (WCAG 1.4.13). A long-press shows the tooltip without adding the symbol.
+ *
+ * FR-30: a sounding key plays on Alt+click, Alt+Enter or long-press, and from
+ * a small speaker button that appears while the key is hovered or focused. The
+ * speaker is a pointer shortcut only: it is out of the tab order and hidden
+ * from assistive technology, whose path is Alt+Enter (shown in the tooltip and
+ * the help dialog).
  */
-export function SymbolKey({ symbol, labels, onActivate }: SymbolKeyProps) {
+export function SymbolKey({ symbol, labels, onActivate, onPlay }: SymbolKeyProps) {
+  const play =
+    onPlay !== undefined && isSounding(symbol)
+      ? () => {
+          onPlay(symbol);
+        }
+      : undefined;
   const tooltipId = useId();
   const tipaId = useId();
   const [button, setButton] = useState<HTMLButtonElement | null>(null);
@@ -87,6 +105,7 @@ export function SymbolKey({ symbol, labels, onActivate }: SymbolKeyProps) {
       swallowClick.current = true;
       setDismissed(false);
       setLongPressed(true);
+      play?.();
     }, LONG_PRESS_MS);
   };
   const pointerEnd = () => {
@@ -97,16 +116,20 @@ export function SymbolKey({ symbol, labels, onActivate }: SymbolKeyProps) {
   const micro = example?.word ?? symbol.name;
 
   return (
-    <>
+    <span className={styles['wrap']}>
       <button
         ref={setButton}
         type="button"
         className={styles['key']}
         aria-describedby={tipaId}
         {...{ [ROVING_ITEM]: '' }}
-        onClick={() => {
+        onClick={(event) => {
           if (swallowClick.current) {
             swallowClick.current = false;
+            return;
+          }
+          if (event.altKey && play !== undefined) {
+            play();
             return;
           }
           onActivate(symbol);
@@ -132,6 +155,12 @@ export function SymbolKey({ symbol, labels, onActivate }: SymbolKeyProps) {
           setLongPressed(false);
         }}
         onKeyDown={(event) => {
+          if (event.key === 'Enter' && event.altKey && play !== undefined) {
+            // Without this the browser would also click, adding the symbol.
+            event.preventDefault();
+            play();
+            return;
+          }
           if (event.key === 'Escape' && open) {
             event.stopPropagation();
             setDismissed(true);
@@ -153,6 +182,24 @@ export function SymbolKey({ symbol, labels, onActivate }: SymbolKeyProps) {
         {/* SPEC §6: a brief accent pulse says "just added". */}
         {pulses > 0 && <span key={pulses} className={styles['pulse']} aria-hidden="true" />}
       </button>
+      {play !== undefined && (
+        <button
+          type="button"
+          className={styles['play']}
+          tabIndex={-1}
+          aria-hidden="true"
+          title={`Listen to ${labels.ipa}`}
+          onClick={play}
+        >
+          <svg viewBox="0 0 16 16" className={styles['speaker']}>
+            <path d="M2 6h3l4-3v10l-4-3H2z" />
+            <path
+              d="M11 5.5a3.5 3.5 0 0 1 0 5M12.5 3.5a6 6 0 0 1 0 9"
+              className={styles['waves']}
+            />
+          </svg>
+        </button>
+      )}
       <Tooltip
         id={tooltipId}
         anchor={button}
@@ -171,7 +218,12 @@ export function SymbolKey({ symbol, labels, onActivate }: SymbolKeyProps) {
         <span id={tipaId} className={styles['tipTipa']}>
           TIPA <code>{labels.tipa}</code>
         </span>
+        {play !== undefined && (
+          <span className={styles['tipHint']}>
+            Listen: <kbd>Alt</kbd>+click or <kbd>Alt</kbd>+<kbd>Enter</kbd>
+          </span>
+        )}
       </Tooltip>
-    </>
+    </span>
   );
 }
