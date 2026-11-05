@@ -59,6 +59,16 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Install Playwright browser and OS dependencies
         run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+      - name: Start a silent audio device
+        # Runners have no sound card. Without one, Firefox's AudioContext.resume()
+        # never settles, so nothing plays and the audio specs time out. A
+        # PulseAudio null sink gives the browsers somewhere to play to.
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends pulseaudio
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=ci
+          pactl set-default-sink ci
       - run: pnpm test:e2e --project=${{ matrix.browser }}
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
@@ -120,6 +130,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Install Playwright Chromium and OS dependencies
         run: pnpm exec playwright install --with-deps chromium
+      - name: Let Chrome use its sandbox
+        # Ubuntu 24.04's AppArmor blocks unprivileged user namespaces, so Chrome
+        # aborts with "No usable sandbox!". Lift that rather than run Lighthouse
+        # with --no-sandbox, so it measures Chrome as users run it.
+        run: sudo sysctl --write kernel.apparmor_restrict_unprivileged_userns=0
       - run: pnpm lighthouse
       - name: Upload Lighthouse reports
         if: ${{ !cancelled() }}

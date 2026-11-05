@@ -129,14 +129,15 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 - `theme-color` follows `prefers-color-scheme` only (M7.1). Have
   `document-theme.ts` update it when the user overrides the theme, so the
   browser UI matches.
-- `tests/e2e/pwa.spec.ts` has only run locally on Chromium and Firefox; its first
-  WebKit run is in CI. If WebKit can't do offline with a service worker under
-  Playwright, keep it out of that project with `testIgnore` and cover it in
-  the M7.2 manual check.
 - An installed app left open for days only picks up updates on its next launch
   (ADR-0013). Consider calling `registration.update()` on `visibilitychange`.
-- `pnpm test:visual` fails locally on the two 360 px page shots, before and after
-  M7.1. Regenerate them or explain the difference.
+- `pnpm test:visual` fails on the two 360 px page shots, locally and in CI
+  (run 42062459282), before and after M7.1. Regenerate them or explain the
+  difference.
+- With no audio output device, Firefox's `AudioContext.resume()` never settles,
+  so a play silently does nothing (found when CI had no sound card). Give
+  `web-audio-output.ts` a timeout on `resume()` that returns
+  `audio-playback-failed`, so the user is told instead (FR-33).
 - Multi-tab sync for settings and saved words (`storage` event); today the last
   tab to write wins.
 - Symbol clips for the full-IPA sounds (M6.1 ships them without a play
