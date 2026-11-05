@@ -95,6 +95,10 @@ jobs:
     container: texlive/texlive:latest-small
     steps:
       - uses: actions/checkout@v7
+      - name: Trust the checkout
+        # The container runs as root but the workspace belongs to the runner
+        # user, so git (and the prepare script's lefthook) would refuse it.
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
