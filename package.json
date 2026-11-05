@@ -32,6 +32,7 @@
     "tex:generate": "node --import jiti/register scripts/tex/write-tex.ts",
     "icons:render": "node --import jiti/register scripts/pwa/render-icons.ts",
     "tex:check": "pnpm tex:generate && pdflatex -interaction=nonstopmode -halt-on-error -output-directory=tests/tex/out tests/tex/out/symbols.tex",
+    "changelog": "node --import jiti/register scripts/release/write-changelog.ts",
     "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm knip && pnpm test:coverage && pnpm build && pnpm size",
     "prepare": "lefthook install"
   },

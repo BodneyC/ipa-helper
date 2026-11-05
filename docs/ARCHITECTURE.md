@@ -73,11 +73,12 @@ classic-script worker couldn't load. The build fails if `sw.js` contains
 ```
 ipa-helper/
 ├─ .claude/commands/          # Slash commands for working on this repo
-├─ docs/                      # Spec, architecture, ADRs, roadmap
+├─ docs/                      # Spec, architecture, ADRs, roadmap; qa/CHECKLIST.md (manual cross-browser QA, M7.2)
 ├─ scripts/
 │  ├─ install-toolchain.sh    # Installs fnm, Node, pnpm, deps, browsers
 │  ├─ subset-fonts.sh         # Rebuilds public/fonts (pinned downloads + fontTools in a temp venv)
 │  ├─ tex/                    # M6.4: symbols-tex.ts (pure: the compile fixture), write-tex.ts (entry point)
+│  ├─ release/                # M7.3: changelog.ts (pure: Conventional Commits → release notes), write-changelog.ts
 │  ├─ pwa/                    # M7.1, ADR-0013: plugin.ts (Vite: emits sw.js, writes the manifest, injects the
 │  │                          #   precache list; a preview-only "next deploy" hook for e2e), palette.ts (reads
 │  │                          #   tokens.css), render-icons.ts (draws public/icons with Playwright's Chromium)
@@ -490,6 +491,7 @@ Test names cite requirement IDs where applicable: `it('FR-13: Backspace deletes 
 | `pnpm audio:select <picks.json>` | Copies the picked renders to `src/assets/audio/symbols/` and writes `manifest.json` |
 | `pnpm tex:generate` | Writes `tests/tex/out/symbols.tex` from the inventory and the TIPA serialiser (M6.4) |
 | `pnpm tex:check` | Generates the fixture, then compiles it with `pdflatex` (needs TeX Live with `tipa`; CI installs `texlive-latex-base tipa`) |
+| `pnpm changelog <version> [--dry-run]` | Prepends release notes built from Conventional Commits since the last `v*` tag to `CHANGELOG.md` (M7.3; see `RELEASING.md`) |
 | `pnpm icons:render` | Draws the PWA icons into `public/icons/` from the IPA font and tokens.css (M7.1); commit the PNGs |
 | `pnpm voice:fetch` | Downloads the pinned voice model (SHA-256 checked) into `public/voice/` for word synthesis (M5.2); the deploy runs it |
 | `pnpm check` | typecheck → lint → format:check → knip → test:coverage → build → size |
