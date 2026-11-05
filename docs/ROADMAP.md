@@ -77,7 +77,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 - [x] **M4.1** **Spike**: evaluate Piper (ONNX Web) and espeak-ng WASM against the ADR-0009 criteria.
   Write findings into ADR-0009 and set its status to Accepted (or supersede it). Throwaway code lives in `spikes/`, and is not merged into `src/`.
-- [ ] **M4.2** `AudioPlayer` port, `NullAudioPlayer`, and a Web Audio playback adapter. deps: M4.1 · refs: ARCH §8
+- [x] **M4.2** `AudioPlayer` port, `NullAudioPlayer`, and a Web Audio playback adapter. deps: M4.1 · refs: ARCH §8
 - [ ] **M4.3** Build-time generation of per-symbol clips (Node script, CI-reproducible), with lazy loading and caching. deps: M4.2 · refs: FR-30, FR-33
 - [ ] **M4.4** Play affordance on keys, plus the "Sound on select" toggle. deps: M4.3 · refs: FR-30, FR-34
 - [ ] **M4.5** Licence notices for engine, voice and runtime. refs: NFR-8

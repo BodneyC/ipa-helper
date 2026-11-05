@@ -1,5 +1,7 @@
+import type { SymbolId } from './inventory/symbol-id';
 import { err } from './result';
 import type { Result } from './result';
+import type { Word } from './word/word';
 
 /** Why a clipboard write failed. */
 interface ClipboardError {
@@ -54,3 +56,43 @@ export interface DocumentTheme {
 
 /** A theme target that does nothing, for tests. */
 export const NULL_THEME: DocumentTheme = { apply: () => undefined };
+
+/** Why a sound could not be played (FR-30, FR-31). */
+export interface AudioError {
+  /**
+   * `audio-unsupported`: no Web Audio, or no source for that channel yet.
+   * `audio-load-failed`: the clip or model could not be fetched or decoded.
+   * `audio-playback-failed`: the audio device refused to play.
+   */
+  readonly kind: 'audio-unsupported' | 'audio-load-failed' | 'audio-playback-failed';
+}
+
+/** The two kinds of sound, which load independently (ADR-0009): symbol clips and the word voice. */
+export type AudioChannel = 'symbols' | 'words';
+
+/**
+ * Where a channel is in its lazy start-up (FR-33): `idle` until first asked,
+ * `loading` until its first sound has loaded, then `ready`. A failed first load
+ * returns to `idle` so the next request retries. `unsupported` never changes.
+ */
+export type AudioStatus = 'unsupported' | 'idle' | 'loading' | 'ready';
+
+/** Speaks symbols and words in a British voice (FR-30, FR-31, ARCHITECTURE §8). Implemented in src/adapters. */
+export interface AudioPlayer {
+  /** A snapshot, replaced (never mutated) when a channel's status changes. */
+  readonly status: Readonly<Record<AudioChannel, AudioStatus>>;
+  /** Calls `listener` after `status` changes. Returns an unsubscribe function. */
+  subscribe(listener: () => void): () => void;
+  /** Resolves when the sound ends or a newer one cuts it off. */
+  playSymbol(id: SymbolId): Promise<Result<void, AudioError>>;
+  /** Resolves when the sound ends or a newer one cuts it off. */
+  playWord(word: Word): Promise<Result<void, AudioError>>;
+}
+
+/** A player with no audio, for tests and environments without Web Audio. */
+export const NULL_AUDIO: AudioPlayer = {
+  status: { symbols: 'unsupported', words: 'unsupported' },
+  subscribe: () => () => undefined,
+  playSymbol: () => Promise.resolve(err({ kind: 'audio-unsupported' })),
+  playWord: () => Promise.resolve(err({ kind: 'audio-unsupported' })),
+};

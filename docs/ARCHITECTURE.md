@@ -106,7 +106,7 @@ ipa-helper/
 │  │  ├─ local-storage.ts     # KeyValueStore over localStorage; blocked storage reads as empty
 │  │  ├─ document-theme.ts    # DocumentTheme: <html data-theme data-contrast>, follows the system live
 │  │  ├─ url-hash.ts          # sync editor ↔ location.hash
-│  │  └─ audio/               # M4+: AudioPlayer implementations, Web Worker entry
+│  │  └─ audio/               # web-audio-output (AudioContext playback), audio-player (port over clip sources); M5: Web Worker entry
 │  ├─ ui/
 │  │  ├─ components/          # Generic: Button, IconButton, Tooltip, Dialog, Toggle…
 │  │  └─ features/
@@ -320,8 +320,23 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 
 ## 8. Audio (M4–M5, ADR-0009)
 
-- Port: `interface AudioPlayer { playSymbol(id): Promise<Result<void, AudioError>>;
-  playWord(word): Promise<Result<void, AudioError>>; readonly status: … }`.
+- Port (`src/domain/ports.ts`): `interface AudioPlayer { readonly status:
+  Record<'symbols' | 'words', AudioStatus>; subscribe(listener): unsubscribe;
+  playSymbol(id): Promise<Result<void, AudioError>>; playWord(word): … }`.
+  Each channel has its own status (`unsupported | idle | loading | ready`),
+  because symbol clips and the word voice load independently. `status` is an
+  immutable snapshot that is replaced on change, so the UI can read it with
+  `useSyncExternalStore`. A failed first load goes back to `idle` so that the
+  next request retries. `AudioError.kind` is one of `audio-unsupported`,
+  `audio-load-failed` or `audio-playback-failed`.
+- Adapters (`src/adapters/audio/`): `createWebAudioOutput` plays one
+  `AudioClip` (encoded bytes, or PCM samples) at a time, and a new clip cuts
+  off the old one. It creates the `AudioContext` on the first play (inside a
+  user gesture, which satisfies autoplay policy), resumes it if the browser
+  suspended it, and decodes a copy of encoded data so that cached clips stay
+  playable. `createAudioPlayer({ output, symbols?, words? })` combines the
+  output with one `ClipSource` per channel: the M4.3 clip loader and the M5.2
+  worker. A channel without a source reports `unsupported`.
 - The adapter runs synthesis in a **Web Worker** so the UI thread never blocks,
   lazy-loads its model/WASM on first use, caches it with the Cache API, and plays
   through Web Audio (`AudioContext`).
@@ -334,7 +349,8 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 - The worker creates the onnxruntime session on the first audio request (or
   when "Sound on select" is switched on) and reports a loading status; creation
   takes about 1.2–1.6 s on a fast desktop.
-- A `NullAudioPlayer` is used in tests and when audio is unsupported.
+- `NULL_AUDIO` (the null player, named like the other null ports) is the
+  default in `<Providers>` and tests.
 
 ## 9. Testing strategy (ADR-0005)
 

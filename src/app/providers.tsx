@@ -1,7 +1,13 @@
 import { useMemo, useReducer } from 'react';
 import type { ReactNode } from 'react';
 
-import { NULL_CLIPBOARD, NULL_FRAGMENTS, NULL_STORE, NULL_THEME } from '../domain/ports';
+import {
+  NULL_AUDIO,
+  NULL_CLIPBOARD,
+  NULL_FRAGMENTS,
+  NULL_STORE,
+  NULL_THEME,
+} from '../domain/ports';
 import { EMPTY_WORD } from '../domain/word/word';
 import type { Word } from '../domain/word/word';
 import { editorReducer, initialEditorState } from '../state/editor';
@@ -11,6 +17,7 @@ import { DEFAULT_SETTINGS, settingsReducer } from '../state/settings';
 import type { Settings } from '../state/settings';
 
 const NULL_SERVICES: Services = {
+  audio: NULL_AUDIO,
   clipboard: NULL_CLIPBOARD,
   fragments: NULL_FRAGMENTS,
   store: NULL_STORE,
@@ -36,10 +43,10 @@ export function Providers({
   services = NULL_SERVICES,
   children,
 }: ProvidersProps) {
-  const { clipboard, fragments, store, theme } = { ...NULL_SERVICES, ...services };
+  const { audio, clipboard, fragments, store, theme } = { ...NULL_SERVICES, ...services };
   const allServices = useMemo(
-    () => ({ clipboard, fragments, store, theme }),
-    [clipboard, fragments, store, theme],
+    () => ({ audio, clipboard, fragments, store, theme }),
+    [audio, clipboard, fragments, store, theme],
   );
   const [state, dispatch] = useReducer(editorReducer, initialWord, initialEditorState);
   const [settings, settingsDispatch] = useReducer(settingsReducer, initialSettings);

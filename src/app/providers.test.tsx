@@ -34,6 +34,11 @@ describe('<Providers>', () => {
     expect(result.current.state.cursor).toBe(2);
   });
 
+  it('defaults to a silent audio player', () => {
+    const { result } = renderHook(() => useServices(), { wrapper: Providers });
+    expect(result.current.audio.status).toEqual({ symbols: 'unsupported', words: 'unsupported' });
+  });
+
   it('refuses to work outside <Providers>', () => {
     expect(() => renderHook(() => useEditor())).toThrow('useEditor must be used inside');
     expect(() => renderHook(() => useSettings())).toThrow('useSettings must be used inside');

@@ -1,6 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import { createAudioPlayer } from './adapters/audio/audio-player';
+import { createBrowserAudioOutput } from './adapters/audio/web-audio-output';
 import { createBrowserClipboard } from './adapters/clipboard';
 import { createDocumentTheme } from './adapters/document-theme';
 import { createLocalStore } from './adapters/local-storage';
@@ -20,6 +22,8 @@ if (container === null) {
 }
 
 const services = {
+  // Sources arrive with M4.3 (symbol clips) and M5.2 (word synthesis).
+  audio: createAudioPlayer({ output: createBrowserAudioOutput() }),
   clipboard: createBrowserClipboard(),
   fragments: createUrlFragmentStore(),
   store: createLocalStore(),
