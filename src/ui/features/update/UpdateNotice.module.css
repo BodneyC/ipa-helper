@@ -1,0 +1,43 @@
+/* FR-62: a quiet notice at the foot of the viewport. It never covers the top bar or dialogs. */
+.notice {
+  position: fixed;
+  z-index: 30;
+  right: var(--page-gutter);
+  bottom: var(--space-4);
+  left: var(--page-gutter);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.text {
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.button {
+  min-height: 2.75rem;
+  padding: 0 var(--space-4);
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--color-surface-raised);
+}

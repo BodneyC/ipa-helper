@@ -188,6 +188,22 @@ pronounced in British English, at no cost and without signing up for anything.
   cursor; Backspace and Delete still edit the word. No shortcut fires while a
   dialog is open.
 
+### 4.7 Install and offline (M7, ADR-0013)
+
+- **FR-60** The app can be installed as a PWA. It has a web app manifest with its
+  name, standalone display, Gruvbox theme and background colours, and icons at
+  192 and 512 px (one maskable). This works whether it is served from the root
+  or from a sub-path.
+- **FR-61** After one online visit, the app works offline, including after a
+  reload: the page, scripts, styles, fonts and icons. Nothing else downloads
+  ahead of time. Sounds and the word voice are cached the first time they're
+  used (FR-33), so anything played once also plays offline.
+- **FR-62** When a new version has been deployed, the open app keeps running the
+  version it started with and shows a notice: "A new version of ipa-helper is
+  ready" with **Reload** and **Later**. Reload switches to the new version.
+  Later hides the notice for this visit. The new version also takes over by
+  itself once every tab running the old one has closed.
+
 ## 5. Non-functional requirements
 
 - **NFR-1 Quality**: TypeScript strict (ADR-0002); lint, format, tests and
@@ -201,7 +217,8 @@ pronounced in British English, at no cost and without signing up for anything.
 - **NFR-4 Compatibility**: the latest two versions of Chrome, Firefox, Safari and Edge.
   Responsive from 360 px wide upwards. Touch-friendly targets (≥ 44×44 CSS px).
 - **NFR-5 Offline / hosting**: a fully static build that deploys to any static host
-  (GitHub Pages by default, ADR-0010). *(M7)* Installable PWA that works offline.
+  (GitHub Pages by default, ADR-0010). *(M7)* Installable PWA that works offline
+  (FR-60 to FR-62, ADR-0013).
 - **NFR-6 Privacy**: no analytics, no cookies, no third-party requests at runtime.
   Audio models and runtime files are served from the app's own host (ADR-0009).
   All state stays on the device.

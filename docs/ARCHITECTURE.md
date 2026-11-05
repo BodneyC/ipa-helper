@@ -36,6 +36,21 @@ itself. `ui` reaches adapters only through the composition root
 (`src/main.tsx` / `src/app/providers.tsx`). Lint enforces this with
 `eslint-plugin-boundaries` (or `import/no-restricted-paths`).
 
+### Offline and install (M7.1, ADR-0013)
+
+The build emits a hand-written service worker, `sw.js`, at the root of the base
+path, plus `manifest.webmanifest`. On install the worker precaches the app shell:
+`index.html`, the entry JS and CSS, fonts, icons and the manifest. It caches
+other fingerprinted `assets/` files (the synthesis worker, the `.wasm` and the
+voice config) the first time they are fetched, and leaves the rest to the
+browser. Symbol clips and the voice model stay in the audio adapters' own
+`ipa-helper-audio-v1` cache (§8). A new version waits until the user chooses
+**Reload** in the update notice (FR-62). `src/sw` is a separate entry: it and the
+app never import each other, so Rolldown can't split a shared chunk that a
+classic-script worker couldn't load. The build fails if `sw.js` contains
+`import` or `export`. Playwright blocks service workers by default, and
+`tests/e2e/pwa.spec.ts` opts back in.
+
 ## 2. Technology stack
 
 | Concern | Choice | ADR |
@@ -63,10 +78,14 @@ ipa-helper/
 │  ├─ install-toolchain.sh    # Installs fnm, Node, pnpm, deps, browsers
 │  ├─ subset-fonts.sh         # Rebuilds public/fonts (pinned downloads + fontTools in a temp venv)
 │  ├─ tex/                    # M6.4: symbols-tex.ts (pure: the compile fixture), write-tex.ts (entry point)
+│  ├─ pwa/                    # M7.1, ADR-0013: plugin.ts (Vite: emits sw.js, writes the manifest, injects the
+│  │                          #   precache list; a preview-only "next deploy" hook for e2e), palette.ts (reads
+│  │                          #   tokens.css), render-icons.ts (draws public/icons with Playwright's Chromium)
 │  └─ audio/                  # Symbol clips (M4.3) and voice:fetch (M5.2), ADR-0009: clips.ts (pure: frames, picks),
 │                             #   voice.ts (pinned Cori download + onnxruntime-web + ffmpeg-static Opus),
 │                             #   candidates.ts / select.ts (entry points), listen-page.ts
 ├─ public/
+│  ├─ icons/                  # PWA icons (FR-60), written by `pnpm icons:render`; committed
 │  └─ fonts/                  # Charis SIL subset renamed "ipa-helper IPA" (OFL RFN), JetBrains Mono subset; built by scripts/subset-fonts.sh
 ├─ src/
 │  ├─ main.tsx                # Composition root: wires adapters → providers → <App/>
@@ -99,7 +118,7 @@ ipa-helper/
 │  │  │  └─ ipa-tokeniser.ts  # M6.3: NFD + greedy longest-match IPA → Result<Word, UnknownCharacter[]>
 │  │  ├─ codec/
 │  │  │  └─ url.ts            # Word ↔ URL fragment: `w=1:id.id.id`, decode → Result
-│  │  ├─ ports.ts             # Clipboard, FragmentStore, KeyValueStore, DocumentTheme, AudioPlayer interfaces
+│  │  ├─ ports.ts             # Clipboard, FragmentStore, KeyValueStore, DocumentTheme, AudioPlayer, AppUpdates interfaces
 │  │  └─ result.ts            # Result<T, E> type and helpers
 │  ├─ state/
 │  │  ├─ editor.ts            # reducer: word, cursor, undo/redo stacks
@@ -111,9 +130,13 @@ ipa-helper/
 │  │  ├─ local-storage.ts     # KeyValueStore over localStorage; blocked storage reads as empty
 │  │  ├─ document-theme.ts    # DocumentTheme: <html data-theme data-contrast>, follows the system live
 │  │  ├─ url-hash.ts          # sync editor ↔ location.hash
+│  │  ├─ service-worker.ts    # AppUpdates: registers sw.js (production only), reports a waiting version (FR-62)
 │  │  └─ audio/               # web-audio-output (AudioContext playback), audio-player (port over clip sources),
 │  │                          #   symbol-clips (lazy fetch + Cache API), cache, voice (pin + config parser),
 │  │                          #   word-source + synth-protocol + synth-engine + synth.worker (M5.2)
+│  ├─ sw/                     # The service worker (ADR-0013), a separate classic-script entry: rules.ts (pure:
+│  │                          #   precache selection, routing), shell-worker.ts (event handlers over injected
+│  │                          #   caches/fetch), sw.ts (wires them to `self`). Imports nothing outside src/sw.
 │  ├─ ui/
 │  │  ├─ components/          # Generic: Button, IconButton, Tooltip, Dialog, Toggle…
 │  │  └─ features/
@@ -123,6 +146,7 @@ ipa-helper/
 │  │     ├─ audio/            # use-audio: useAudioStatus, usePlaySymbol (FR-30, FR-34)
 │     ├─ settings/         # SettingsDialog (FR-42), suggested \newcommand
 │  │     ├─ saved/            # SavedWordsDialog (FR-16)
+│  │     ├─ update/           # UpdateNotice: "A new version… Reload / Later" (FR-62)
 │  │     └─ help/
 │  ├─ assets/audio/symbols/   # <symbol id>.opus clips + manifest.json, written by `pnpm audio:select`
 │  ├─ assets/voice/           # the pinned Cori .onnx.json (byte for byte; the model itself is fetched)
@@ -432,7 +456,7 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 | Unit | Vitest | domain, state reducers, codecs | 100 % lines/branches for `src/domain`, ≥ 90 % overall |
 | Property | fast-check (in Vitest) | serialisers, tokeniser, URL codec | must pass, 1 000 runs by default |
 | Component | Vitest + Testing Library + user-event | each UI component's behaviour and ARIA | included in coverage |
-| E2E | Playwright (Chromium, Firefox, WebKit) | each spec FR, keyboard flows, URL sharing | all green |
+| E2E | Playwright (Chromium, Firefox, WebKit) | each spec FR, keyboard flows, URL sharing, offline and updates (service workers blocked except in `pwa.spec.ts`) | all green |
 | A11y | @axe-core/playwright | every page state in e2e | 0 violations |
 | Visual | Playwright screenshots, `visual` project (`tests/visual`, Chromium) | dark/light × 360/768/1280 px | reviewed diffs (non-blocking CI job) |
 | Performance | Lighthouse CI (`lighthouserc.json`), median of 3 runs | NFR-3 on simulated Fast 4G (60 ms RTT, 9 Mbps down, 1.5 Mbps up, 4× CPU) | perf ≥ 95, a11y = 100, LCP ≤ 1.5 s |
@@ -466,6 +490,7 @@ Test names cite requirement IDs where applicable: `it('FR-13: Backspace deletes 
 | `pnpm audio:select <picks.json>` | Copies the picked renders to `src/assets/audio/symbols/` and writes `manifest.json` |
 | `pnpm tex:generate` | Writes `tests/tex/out/symbols.tex` from the inventory and the TIPA serialiser (M6.4) |
 | `pnpm tex:check` | Generates the fixture, then compiles it with `pdflatex` (needs TeX Live with `tipa`; CI installs `texlive-latex-base tipa`) |
+| `pnpm icons:render` | Draws the PWA icons into `public/icons/` from the IPA font and tokens.css (M7.1); commit the PNGs |
 | `pnpm voice:fetch` | Downloads the pinned voice model (SHA-256 checked) into `public/voice/` for word synthesis (M5.2); the deploy runs it |
 | `pnpm check` | typecheck → lint → format:check → knip → test:coverage → build → size |
 | `pnpm prepare` | Installs the lefthook git hooks (runs automatically on `pnpm install`) |

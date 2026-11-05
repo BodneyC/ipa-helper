@@ -17,6 +17,9 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${String(port)}`,
     trace: 'on-first-retry',
+    // The app's service worker (ADR-0013) would re-issue requests that page.route
+    // can't see. tests/e2e/pwa.spec.ts opts back in.
+    serviceWorkers: 'block',
   },
   expect: {
     toHaveScreenshot: {

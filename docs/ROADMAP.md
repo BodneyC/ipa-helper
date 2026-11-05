@@ -98,7 +98,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 ## M7: Release hardening
 
-- [ ] **M7.1** PWA: manifest, service worker (precache the app shell and fonts), offline e2e. refs: NFR-5
+- [x] **M7.1** PWA: manifest, service worker (precache the app shell and fonts), offline e2e. refs: NFR-5, FR-60–62, ADR-0013
 - [ ] **M7.2** Cross-browser manual QA checklist run (Safari iOS touch, Firefox). refs: NFR-4
 - [ ] **M7.3** v1.0.0 tag, changelog generated from Conventional Commits.
 
@@ -119,11 +119,20 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
   output rows or un-stick below a height threshold.
 - Run WebKit e2e locally on WSL: install its system libraries
   (`sudo pnpm exec playwright install-deps webkit`). CI already does this.
-- Real favicon/app icon (index.html has an empty `data:,` icon to stop the
-  `/favicon.ico` 404); pairs with the M7 PWA icons.
 - Visual baselines were made on WSL with pinned fonts. If CI's first `visual`
   run shows anti-aliasing diffs above 1 %, regenerate the baselines from CI's
   uploaded actuals (or in the Playwright Docker image) and commit them.
+- `theme-color` follows `prefers-color-scheme` only (M7.1). Have
+  `document-theme.ts` update it when the user overrides the theme, so the
+  browser UI matches.
+- `tests/e2e/pwa.spec.ts` has only run locally on Chromium and Firefox; its first
+  WebKit run is in CI. If WebKit can't do offline with a service worker under
+  Playwright, keep it out of that project with `testIgnore` and cover it in
+  the M7.2 manual check.
+- An installed app left open for days only picks up updates on its next launch
+  (ADR-0013). Consider calling `registration.update()` on `visibilitychange`.
+- `pnpm test:visual` fails locally on the two 360 px page shots, before and after
+  M7.1. Regenerate them or explain the difference.
 - Multi-tab sync for settings and saved words (`storage` event); today the last
   tab to write wins.
 - Symbol clips for the full-IPA sounds (M6.1 ships them without a play

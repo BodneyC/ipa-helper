@@ -39,7 +39,9 @@ The full licence text ships next to each file.
 | [JetBrains Mono](https://www.jetbrains.com/lp/mono/), subset | 2.304 | `public/fonts/jetbrains-mono-ascii.woff2` | SIL Open Font License 1.1 ([`OFL-JetBrainsMono.txt`](public/fonts/OFL-JetBrainsMono.txt)) | The JetBrains Mono Project Authors |
 
 The OFL permits bundling these fonts with GPL software; the fonts themselves stay
-under the OFL.
+under the OFL. The app icons in `public/icons/` are images of a glyph from the
+"ipa-helper IPA" subset (`pnpm icons:render`). The OFL places no restriction on
+images made with the font.
 
 ## Audio and voice models
 

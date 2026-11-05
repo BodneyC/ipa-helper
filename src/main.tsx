@@ -8,9 +8,11 @@ import { createWordSource } from './adapters/audio/word-source';
 import { createBrowserClipboard } from './adapters/clipboard';
 import { createDocumentTheme } from './adapters/document-theme';
 import { createLocalStore } from './adapters/local-storage';
+import { createServiceWorkerUpdates } from './adapters/service-worker';
 import { createUrlFragmentStore } from './adapters/url-hash';
 import { App } from './app/App';
 import { Providers } from './app/providers';
+import { NULL_UPDATES } from './domain/ports';
 import { loadSettings } from './state/settings';
 import { readInitialWord } from './ui/features/word/UrlSync';
 import './styles/tokens.css';
@@ -35,6 +37,16 @@ const services = {
   fragments: createUrlFragmentStore(),
   store: createLocalStore(),
   theme: createDocumentTheme(),
+  // Offline support and updates (FR-61, FR-62, ADR-0013): production builds only,
+  // so the dev server never serves a stale cached shell.
+  updates:
+    import.meta.env.PROD && 'serviceWorker' in navigator
+      ? createServiceWorkerUpdates({
+          container: navigator.serviceWorker,
+          scriptUrl: `${import.meta.env.BASE_URL}sw.js`,
+          scope: import.meta.env.BASE_URL,
+        })
+      : NULL_UPDATES,
 };
 
 createRoot(container).render(

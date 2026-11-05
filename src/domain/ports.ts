@@ -109,3 +109,23 @@ export const NULL_AUDIO: AudioPlayer = {
   playSymbol: () => Promise.resolve(err({ kind: 'audio-unsupported' })),
   playWord: () => Promise.resolve(err({ kind: 'audio-unsupported' })),
 };
+
+/**
+ * New versions of the installed app (FR-62, ADR-0013). Implemented in
+ * src/adapters by the service-worker registration.
+ */
+export interface AppUpdates {
+  /** True once a new version has downloaded and is waiting to take over. Never goes back to false. */
+  available(): boolean;
+  /** Calls `listener` when `available()` changes. Returns an unsubscribe function. */
+  subscribe(listener: () => void): () => void;
+  /** Switches to the waiting version and reloads the page. Does nothing when none is waiting. */
+  apply(): void;
+}
+
+/** Updates that never arrive, for tests, development and browsers without service workers. */
+export const NULL_UPDATES: AppUpdates = {
+  available: () => false,
+  subscribe: () => () => undefined,
+  apply: () => undefined,
+};

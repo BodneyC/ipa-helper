@@ -19,6 +19,7 @@ export default defineConfig({
             'src/domain/**/*.test.ts',
             'src/state/**/*.test.ts',
             'src/styles/**/*.test.ts',
+            'src/sw/**/*.test.ts',
             'scripts/**/*.test.ts',
           ],
         },
@@ -40,6 +41,8 @@ export default defineConfig({
         'src/**/*.test.{ts,tsx}',
         // The composition root only wires real adapters into the DOM; e2e covers it.
         'src/main.tsx',
+        // Likewise the service worker's entry only wires shell-worker.ts to `self` (ADR-0013).
+        'src/sw/sw.ts',
       ],
       reporter: ['text', 'html', 'lcov'],
       thresholds: {

@@ -4,6 +4,7 @@ import type { Dispatch } from 'react';
 import type { EditorAction, EditorState } from './editor';
 import type { Settings, SettingsAction } from './settings';
 import type {
+  AppUpdates,
   AudioPlayer,
   Clipboard,
   DocumentTheme,
@@ -48,6 +49,8 @@ export interface Services {
   readonly store: KeyValueStore;
   /** Applies the theme to the page (FR-40, FR-41). */
   readonly theme: DocumentTheme;
+  /** New versions of the installed app (FR-62). */
+  readonly updates: AppUpdates;
 }
 
 export const ServicesContext = createContext<Services | null>(null);

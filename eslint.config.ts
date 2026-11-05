@@ -194,6 +194,18 @@ export default defineConfig(
               from: ['./src/adapters', './src/main.tsx'],
               message: 'UI reaches adapters only through the composition root (src/main.tsx).',
             },
+            {
+              // The worker is a separate classic script (ADR-0013): sharing a module
+              // with the app would split it into a chunk sw.js can't import.
+              target: ['./src/app', './src/ui', './src/state', './src/adapters', './src/domain'],
+              from: './src/sw',
+              message: 'Only the service worker imports src/sw (ADR-0013).',
+            },
+            {
+              target: './src/sw',
+              from: ['./src/app', './src/ui', './src/state', './src/adapters', './src/main.tsx'],
+              message: 'The service worker imports only src/sw (ADR-0013).',
+            },
           ],
         },
       ],

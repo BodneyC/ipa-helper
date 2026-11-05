@@ -9,8 +9,10 @@
     />
     <meta name="color-scheme" content="dark light" />
     <title>ipa-helper</title>
-    <!-- No icon yet (M7 adds PWA icons); this stops the browser requesting /favicon.ico. -->
-    <link rel="icon" href="data:," />
+    <!-- PWA (FR-60, ADR-0013). The build adds theme-color metas from tokens.css. -->
+    <link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="%BASE_URL%icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="%BASE_URL%icons/apple-touch-icon.png" />
     <link
       rel="preload"
       href="%BASE_URL%fonts/ipa-helper-ipa.woff2"

@@ -7,6 +7,7 @@ import {
   NULL_FRAGMENTS,
   NULL_STORE,
   NULL_THEME,
+  NULL_UPDATES,
 } from '../domain/ports';
 import { EMPTY_WORD } from '../domain/word/word';
 import type { Word } from '../domain/word/word';
@@ -22,6 +23,7 @@ const NULL_SERVICES: Services = {
   fragments: NULL_FRAGMENTS,
   store: NULL_STORE,
   theme: NULL_THEME,
+  updates: NULL_UPDATES,
 };
 
 interface ProvidersProps {
@@ -43,10 +45,13 @@ export function Providers({
   services = NULL_SERVICES,
   children,
 }: ProvidersProps) {
-  const { audio, clipboard, fragments, store, theme } = { ...NULL_SERVICES, ...services };
+  const { audio, clipboard, fragments, store, theme, updates } = {
+    ...NULL_SERVICES,
+    ...services,
+  };
   const allServices = useMemo(
-    () => ({ audio, clipboard, fragments, store, theme }),
-    [audio, clipboard, fragments, store, theme],
+    () => ({ audio, clipboard, fragments, store, theme, updates }),
+    [audio, clipboard, fragments, store, theme, updates],
   );
   const [state, dispatch] = useReducer(editorReducer, initialWord, initialEditorState);
   const [settings, settingsDispatch] = useReducer(settingsReducer, initialSettings);

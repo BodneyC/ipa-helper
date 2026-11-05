@@ -21,6 +21,7 @@ digits.
 | [0010](0010-static-hosting-github-pages.md) | Static hosting on GitHub Pages via Actions | Accepted |
 | [0011](0011-toolchain-versions-at-bootstrap.md) | Pin the toolchain to versions the lint stack supports | Proposed |
 | [0012](0012-extended-ipa-model.md) | Extend the symbol model for the full IPA: commands, diacritics, tie bars and paste | Proposed |
+| [0013](0013-pwa-service-worker.md) | A hand-written service worker that precaches only the app shell | Accepted |
 
 ## Template
 

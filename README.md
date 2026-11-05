@@ -10,8 +10,9 @@ and fully static: nothing leaves your browser. British English audio is planned.
 
 ## Using it
 
-Once deployed, the app runs on GitHub Pages; no install or sign-up is needed. Using the
-TIPA output in LaTeX:
+Once deployed, the app runs on GitHub Pages; no install or sign-up is needed. It
+can also be installed as an app from the browser, and after one visit it works
+offline. Using the TIPA output in LaTeX:
 
 ```latex
 \usepackage{tipa}

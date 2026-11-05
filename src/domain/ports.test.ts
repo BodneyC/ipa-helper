@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import { symbolId } from './inventory/symbol-id';
-import { NULL_AUDIO, NULL_CLIPBOARD, NULL_FRAGMENTS, NULL_STORE, NULL_THEME } from './ports';
+import {
+  NULL_AUDIO,
+  NULL_CLIPBOARD,
+  NULL_FRAGMENTS,
+  NULL_STORE,
+  NULL_THEME,
+  NULL_UPDATES,
+} from './ports';
 import { err } from './result';
 
 describe('NULL_CLIPBOARD', () => {
@@ -45,5 +52,15 @@ describe('NULL_AUDIO', () => {
     expect(NULL_AUDIO.canPlaySymbol(symbolId('esh'))).toBe(false);
     await expect(NULL_AUDIO.playSymbol(symbolId('esh'))).resolves.toEqual(unsupported);
     await expect(NULL_AUDIO.playWord([])).resolves.toEqual(unsupported);
+  });
+});
+
+describe('NULL_UPDATES', () => {
+  it('never has an update and ignores apply and subscriptions (FR-62)', () => {
+    expect(NULL_UPDATES.available()).toBe(false);
+    expect(NULL_UPDATES.subscribe(() => undefined)).not.toThrow();
+    expect(() => {
+      NULL_UPDATES.apply();
+    }).not.toThrow();
   });
 });

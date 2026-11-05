@@ -13,6 +13,7 @@ import { OutputPanel } from '../ui/features/output/OutputPanel';
 import { PaletteWithAudio } from '../ui/features/palette/PaletteWithAudio';
 import { SavedWordsDialog } from '../ui/features/saved/SavedWordsDialog';
 import { SettingsDialog } from '../ui/features/settings/SettingsDialog';
+import { UpdateNotice } from '../ui/features/update/UpdateNotice';
 import { PasteDialog } from '../ui/features/word/PasteDialog';
 import { UrlSync } from '../ui/features/word/UrlSync';
 import { WordActions } from '../ui/features/word/WordActions';
@@ -112,6 +113,7 @@ export function App() {
           setHelpOpen(false);
         }}
       />
+      <UpdateNotice />
     </AnnouncerProvider>
   );
 }
