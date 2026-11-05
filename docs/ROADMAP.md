@@ -84,7 +84,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 ## M5: Word audio
 
-- [ ] **M5.1** `piperPhonemeSerialiser`: Word → Piper phoneme IDs, stress moved to the vowel nucleus and a terminal `.` appended (ADR-0009 findings), with fast-check tests. deps: M4.1
+- [x] **M5.1** `piperPhonemeSerialiser`: Word → Piper phoneme IDs, stress moved to the vowel nucleus and a terminal `!` (1–4 sounds) or ` ….` (5+) appended (ADR-0009 "Word endings"), with fast-check tests. deps: M4.1
 - [ ] **M5.2** Worker-based synthesis adapter: lazy model fetch, Cache API, progress UI. deps: M5.1, M4.2 · refs: FR-31, FR-33
 - [ ] **M5.3** "Play word" button, loading/error states, and an e2e test with a mocked worker. deps: M5.2
 

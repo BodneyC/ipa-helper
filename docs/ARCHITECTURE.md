@@ -365,11 +365,14 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   lazy-loads its model/WASM on first use, caches it with the Cache API, and plays
   through Web Audio (`AudioContext`).
 - Word synthesis takes the Word through `piperPhonemeSerialiser` (domain, pure)
-  so stress and length carry through. It emits Piper phoneme IDs and moves each
-  stress mark from the syllable onset to just before the stressed vowel, which is
-  how the voice was trained, and appends a terminal `.` so the voice stops
-  cleanly (ADR-0009 findings). The UI never handles raw
-  synthesis strings.
+  (`src/domain/serialise/piper.ts`), so stress and length carry through. It
+  moves each stress mark from the syllable onset to just before the stressed
+  vowel, which is how the voice was trained, and drops syllable breaks. It ends
+  a word of 1–4 sounds in `!`, and writes a longer word as ` X.` with a
+  leading space, which stops the voice running on (ADR-0009, "Word endings").
+  `piperPhonemeIds(text, phoneme_id_map)` turns that text into the voice's
+  input IDs; the clip scripts and the synthesis worker share it. The UI never
+  handles raw synthesis strings.
 - The worker creates the onnxruntime session on the first audio request (or
   when "Sound on select" is switched on) and reports a loading status; creation
   takes about 1.2–1.6 s on a fast desktop.

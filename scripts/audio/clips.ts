@@ -75,36 +75,6 @@ export const candidates = (symbols: readonly PhoneSymbol[] = soundingSymbols()):
     })),
   );
 
-/** A Piper voice's `phoneme_id_map`: one codepoint → its IDs. */
-export type PhonemeIdMap = Readonly<Record<string, readonly number[] | undefined>>;
-
-/**
- * Piper's input encoding (ADR-0009): BOS `^` and PAD `_`, then each codepoint
- * followed by PAD, then EOS `$`. Returns the codepoints the voice lacks instead
- * when there are any.
- */
-export const phonemeIds = (
-  text: string,
-  map: PhonemeIdMap,
-):
-  | { readonly ok: true; readonly ids: number[] }
-  | { readonly ok: false; readonly missing: string[] } => {
-  const id = (symbol: string) => map[symbol];
-  const [bos, pad, eos] = [id('^'), id('_'), id('$')];
-  if (bos === undefined || pad === undefined || eos === undefined) {
-    return { ok: false, missing: ['^', '_', '$'].filter((s) => id(s) === undefined) };
-  }
-  const ids = [...bos, ...pad];
-  const missing: string[] = [];
-  for (const symbol of text) {
-    const found = id(symbol);
-    if (found === undefined) missing.push(symbol);
-    else ids.push(...found, ...pad);
-  }
-  ids.push(...eos);
-  return missing.length > 0 ? { ok: false, missing } : { ok: true, ids };
-};
-
 /** One committed clip, as recorded in the manifest. */
 export interface ClipEntry {
   readonly frame: Frame;

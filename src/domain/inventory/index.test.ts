@@ -158,4 +158,16 @@ describe('isSounding', () => {
       Array.from({ length: 5 }, () => 'suprasegmental'),
     );
   });
+
+  it('M6: a diacritic only modifies a sound, so it is not sounding', () => {
+    const tilde = {
+      id: symbolId('tilde'),
+      ipa: '\u0303',
+      tipa: { kind: 'wrap', name: '~' },
+      name: 'nasalised',
+      inventories: ['extended'],
+      category: 'diacritic',
+    } as const;
+    expect(isSounding(tilde)).toBe(false);
+  });
 });

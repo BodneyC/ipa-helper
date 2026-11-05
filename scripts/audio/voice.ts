@@ -7,8 +7,8 @@ import { join } from 'node:path';
 
 import * as ort from 'onnxruntime-web';
 
-import { phonemeIds } from './clips';
-import type { PhonemeIdMap } from './clips';
+import { piperPhonemeIds } from '../../src/domain/serialise/piper';
+import type { PhonemeIdMap } from '../../src/domain/serialise/piper';
 
 /** The repository root. */
 export const ROOT = join(import.meta.dirname, '..', '..');
@@ -117,9 +117,9 @@ export const loadVoice = async (): Promise<Synthesiser> => {
     sampleRate: config.sampleRate,
     scales: config.scales,
     synthesise: async (text, scales = config.scales) => {
-      const encoded = phonemeIds(text, config.idMap);
-      if (!encoded.ok) throw new Error(`"${text}": the voice has no ${encoded.missing.join(' ')}`);
-      const { ids } = encoded;
+      const encoded = piperPhonemeIds(text, config.idMap);
+      if (!encoded.ok) throw new Error(`"${text}": the voice has no ${encoded.error.join(' ')}`);
+      const ids = encoded.value;
       const out = await session.run({
         input: new ort.Tensor('int64', BigInt64Array.from(ids, BigInt), [1, ids.length]),
         input_lengths: new ort.Tensor('int64', BigInt64Array.of(BigInt(ids.length)), [1]),

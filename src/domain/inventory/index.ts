@@ -29,6 +29,8 @@ export const symbolsIn = (inventory: InventoryId): readonly PhoneSymbol[] =>
 
 /**
  * True when a symbol makes a sound of its own and so can be played (FR-30).
- * Suprasegmentals are marks on other sounds, so they have no clip.
+ * Suprasegmentals and diacritics (M6) only modify other sounds, so they have
+ * no clip and don't count towards a word's length (ADR-0009).
  */
-export const isSounding = (symbol: PhoneSymbol): boolean => symbol.category !== 'suprasegmental';
+export const isSounding = (symbol: PhoneSymbol): boolean =>
+  symbol.category !== 'suprasegmental' && symbol.category !== 'diacritic';

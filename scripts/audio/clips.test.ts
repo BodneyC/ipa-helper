@@ -4,7 +4,6 @@ import {
   candidates,
   frameText,
   parseRendered,
-  phonemeIds,
   resolvePicks,
   SLOW_LENGTH_SCALE,
   soundingSymbols,
@@ -32,22 +31,6 @@ describe('symbol clip candidates (M4.3)', () => {
   it('ends every text in "!" and stresses only just before a vowel', () => {
     for (const c of candidates()) expect(c.text.endsWith('!')).toBe(true);
     expect(frameText('tʃ', 'schwa-both')).toBe('ətʃˈə!');
-  });
-});
-
-describe('phonemeIds', () => {
-  const map = { '^': [1], _: [0], $: [2], p: [10], ə: [20], '!': [4] };
-
-  it('wraps each codepoint in PAD between BOS and EOS (ADR-0009)', () => {
-    expect(phonemeIds('pə!', map)).toEqual({ ok: true, ids: [1, 0, 10, 0, 20, 0, 4, 0, 2] });
-  });
-
-  it('reports codepoints the voice lacks', () => {
-    expect(phonemeIds('pʘə', map)).toEqual({ ok: false, missing: ['ʘ'] });
-  });
-
-  it('reports a map without its control symbols', () => {
-    expect(phonemeIds('p', { p: [10], _: [0] })).toEqual({ ok: false, missing: ['^', '$'] });
   });
 });
 
