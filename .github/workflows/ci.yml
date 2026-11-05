@@ -89,6 +89,10 @@ jobs:
     needs: check
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    # TeX Live's "small" scheme has pdflatex and tipa. Pulling it is quicker and
+    # steadier than apt-installing TeX from Ubuntu's mirrors, which once took
+    # over 10 minutes.
+    container: texlive/texlive:latest-small
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -97,10 +101,6 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Install pdflatex and tipa
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends texlive-latex-base tipa
       - run: pnpm tex:check
       - name: Upload the compiled symbols
         if: ${{ !cancelled() }}
