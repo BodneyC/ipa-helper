@@ -106,8 +106,9 @@ audio length becomes erratic: over three runs each, `maʊzˈɛlt` gave
 0.82–0.85 s with a final `.`. Any of `.`, ` .`, `,`, `!` stabilised all six
 test words (`spikes/m4.1-piper/endings.mjs`), and the maintainer confirmed
 by ear that every punctuated variant sounds right. The serialiser (M5.1)
-must append `.` to every word sent to the voice. (Symbol clips end in `!`
-instead; see "Symbol clips (M4.3)" below.)
+must append `.` to every word sent to the voice. (Superseded for short
+words: see "Word endings (M5.1)" below. Symbol clips end in `!`; see
+"Symbol clips (M4.3)".)
 
 **Compressed model.** Dynamic int8 quantisation (`onnxruntime.quantization`,
 MatMul + Gemm + Conv weights) shrinks the model to **19.5 MB**, but session
@@ -168,7 +169,41 @@ decisions below.
 - **Consequence for M5.1:** a word with only one or two sounds can run away
   just as a symbol does. Before fixing the terminal `.` for words, the
   serialiser's tests must try very short words, and may need to use `!` for
-  them.
+  them. (Done: see "Word endings (M5.1)".)
+
+## Word endings (M5.1)
+
+Amended 2026-11-05 while implementing M5.1. The maintainer chose to keep `.`
+for longer words and use `!` for short ones. Measurements, as the shortest and
+longest length over several takes:
+
+- **`.` runs away on short words.** `æ.` 2.1–4.4 s, `ˈæt.` 4.3–7.8 s,
+  `kæt.` 2.3–4.2 s. On 60 random made-up words of 1–4 sounds, 41 of 180 takes
+  ran away.
+- **There's no clean cutoff by length alone.** The runaways have the stress
+  mark first in the text, or no stress mark at all. That can happen at any
+  length: `ˈɪmpækt.` (6 sounds) ran to 3.1–7.5 s, and `ˈæbəkəs.` to 1.3–2.8 s.
+- **A leading space fixes the long words.** `" ˈɪmpækt."` gave 0.49–0.82 s
+  and `" ˈæbəkəs."` 0.85–1.01 s. On short words it isn't enough (5 runaways
+  in 180).
+- **`!` is stable at every length:** 1 borderline take in 180 on short words
+  (1.13 s for a 2-sound word), and 0 in 180 on 60 random words of 5–8 sounds.
+
+**Decision.** `piperPhonemeSerialiser` writes:
+- `<phonemes>!` for a word with **fewer than 5 sounding tokens** (an
+  affricate, diphthong or long vowel counts as one token);
+- `␣<phonemes>.` (with a leading space) for **5 or more**. In the random
+  sample, this form had 0 runaways in 180 takes.
+
+The serialiser also does three other things:
+- It moves each stress mark rightwards, past consonants, to just before the
+  next vowel or diphthong. A stress mark with no vowel after it is dropped.
+- It drops syllable breaks, because Piper would read `.` as the end of a
+  sentence.
+- It keeps length marks where they are.
+
+The measurement scripts were throwaway, kept out of the repository. They
+used the same voice loader as `scripts/audio`.
 
 ## Consequences
 - The model and the onnxruntime-web wasm files are **self-hosted** on the
