@@ -61,7 +61,10 @@ ipa-helper/
 ├─ docs/                      # Spec, architecture, ADRs, roadmap
 ├─ scripts/
 │  ├─ install-toolchain.sh    # Installs fnm, Node, pnpm, deps, browsers
-│  └─ subset-fonts.sh         # Rebuilds public/fonts (pinned downloads + fontTools in a temp venv)
+│  ├─ subset-fonts.sh         # Rebuilds public/fonts (pinned downloads + fontTools in a temp venv)
+│  └─ audio/                  # Symbol clip generator (M4.3, ADR-0009): clips.ts (pure: frames, phoneme IDs, picks),
+│                             #   voice.ts (pinned Cori download + onnxruntime-web + ffmpeg-static Opus),
+│                             #   candidates.ts / select.ts (entry points), listen-page.ts
 ├─ public/
 │  └─ fonts/                  # Charis SIL subset renamed "ipa-helper IPA" (OFL RFN), JetBrains Mono subset; built by scripts/subset-fonts.sh
 ├─ src/
@@ -106,7 +109,8 @@ ipa-helper/
 │  │  ├─ local-storage.ts     # KeyValueStore over localStorage; blocked storage reads as empty
 │  │  ├─ document-theme.ts    # DocumentTheme: <html data-theme data-contrast>, follows the system live
 │  │  ├─ url-hash.ts          # sync editor ↔ location.hash
-│  │  └─ audio/               # web-audio-output (AudioContext playback), audio-player (port over clip sources); M5: Web Worker entry
+│  │  └─ audio/               # web-audio-output (AudioContext playback), audio-player (port over clip sources),
+│  │                          #   symbol-clips (lazy fetch + Cache API); M5: Web Worker entry
 │  ├─ ui/
 │  │  ├─ components/          # Generic: Button, IconButton, Tooltip, Dialog, Toggle…
 │  │  └─ features/
@@ -116,6 +120,7 @@ ipa-helper/
 │  │     ├─ settings/         # SettingsDialog (FR-42), suggested \newcommand
 │  │     ├─ saved/            # SavedWordsDialog (FR-16)
 │  │     └─ help/
+│  ├─ assets/audio/symbols/   # <symbol id>.opus clips + manifest.json, written by `pnpm audio:select`
 │  └─ styles/
 │     ├─ tokens.css           # THE ONLY place hex colours may appear
 │     ├─ themes.css           # [data-theme] → semantic tokens
@@ -337,6 +342,12 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   playable. `createAudioPlayer({ output, symbols?, words? })` combines the
   output with one `ClipSource` per channel: the M4.3 clip loader and the M5.2
   worker. A channel without a source reports `unsupported`.
+- Symbol clips (M4.3) are committed Ogg Opus files, one for each sounding RP
+  symbol. Vite fingerprints them, and the bundle carries only their URLs
+  (`?url&no-inline`). `createSymbolClipSource` fetches a clip on its first
+  play, keeps it in memory for the rest of the visit, and stores it in the
+  Cache API (`ipa-helper-audio-v1`) so it works offline. Each clip's frame,
+  for example `əpˈə!` for /p/, is recorded in `manifest.json`.
 - The adapter runs synthesis in a **Web Worker** so the UI thread never blocks,
   lazy-loads its model/WASM on first use, caches it with the Cache API, and plays
   through Web Audio (`AudioContext`).
@@ -389,6 +400,8 @@ Test names cite requirement IDs where applicable: `it('FR-13: Backspace deletes 
 | `pnpm lighthouse` | Build, then Lighthouse CI against `dist/` with Playwright's Chromium: performance ≥ 95, accessibility = 100, LCP ≤ 1.5 s (NFR-3); reports in `.lighthouseci/` |
 | `pnpm knip` | Unused files, exports and dependencies |
 | `pnpm size` | size-limit: initial JS ≤ 100 kB gzipped (NFR-3), measured on `dist/` |
+| `pnpm audio:candidates [--only id,…]` | Renders candidate symbol clips and a listening page into `.cache/symbol-clips/` (M4.3) |
+| `pnpm audio:select <picks.json>` | Copies the picked renders to `src/assets/audio/symbols/` and writes `manifest.json` |
 | `pnpm check` | typecheck → lint → format:check → knip → test:coverage → build → size |
 | `pnpm prepare` | Installs the lefthook git hooks (runs automatically on `pnpm install`) |
 

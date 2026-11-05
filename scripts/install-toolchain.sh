@@ -6,7 +6,8 @@
 #   2. Node.js    — version pinned in .node-version (via fnm)
 #   3. pnpm       — version pinned in package.json "packageManager" (via Corepack,
 #                   falling back to `npm i -g`)
-#   4. Project dependencies       (pnpm install)         — if package.json exists
+#   4. Project dependencies       (pnpm install)         — if package.json exists,
+#                                  including the dev-only ffmpeg-static binary
 #   5. Playwright browsers + libs (pnpm exec playwright) — if Playwright is a dependency
 #   6. Optional: TeX Live + tipa for the TIPA compile test (--with-tex)
 #
@@ -220,6 +221,13 @@ if (( opt_project )); then
       pnpm install
     fi
     ok "dependencies installed"
+    # ffmpeg-static downloads its binary in a build script (allowed in
+    # pnpm-workspace.yaml). Only `pnpm audio:candidates` needs it (M4.3).
+    if [[ -x node_modules/ffmpeg-static/ffmpeg ]]; then
+      ok "ffmpeg (ffmpeg-static) for the symbol clip scripts"
+    elif grep -q '"ffmpeg-static"' package.json; then
+      warn "ffmpeg-static has no binary (download blocked?); run: pnpm rebuild ffmpeg-static"
+    fi
   else
     warn "no package.json yet; run /bootstrap in Claude Code, then re-run this script"
   fi

@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { createAudioPlayer } from './adapters/audio/audio-player';
+import { createSymbolClipSource } from './adapters/audio/symbol-clips';
 import { createBrowserAudioOutput } from './adapters/audio/web-audio-output';
 import { createBrowserClipboard } from './adapters/clipboard';
 import { createDocumentTheme } from './adapters/document-theme';
@@ -22,8 +23,11 @@ if (container === null) {
 }
 
 const services = {
-  // Sources arrive with M4.3 (symbol clips) and M5.2 (word synthesis).
-  audio: createAudioPlayer({ output: createBrowserAudioOutput() }),
+  // Word synthesis (M5.2) adds a `words` source.
+  audio: createAudioPlayer({
+    output: createBrowserAudioOutput(),
+    symbols: createSymbolClipSource(),
+  }),
   clipboard: createBrowserClipboard(),
   fragments: createUrlFragmentStore(),
   store: createLocalStore(),

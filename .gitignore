@@ -19,3 +19,5 @@ bun.lockb
 # Under WSL, chrome-launcher (via Lighthouse CI) makes its Chrome profile dirs
 # under a Windows-style relative path in the working directory.
 /C:*
+# Voice model downloads and candidate symbol clips (scripts/audio, M4.3)
+.cache/

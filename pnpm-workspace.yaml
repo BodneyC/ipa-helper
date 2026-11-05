@@ -11,3 +11,8 @@ peerDependencyRules:
 # root "prepare" script instead.
 allowBuilds:
   lefthook: false
+  # Downloads the pinned ffmpeg binary that scripts/audio uses to encode symbol
+  # clips (M4.3). Dev-only: ffmpeg never ships to the browser.
+  ffmpeg-static: true
+  # Pulled in by onnxruntime-web; its postinstall only prints a notice.
+  protobufjs: false
