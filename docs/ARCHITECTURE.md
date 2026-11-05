@@ -295,7 +295,15 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `domain/codec/url.ts` into the initial word, so loading adds no undo step. The
   `<UrlSync>` component writes edits back, loads user-changed fragments
   (`hashchange`) as one undoable `replace`, and shows a dismissible notice for an
-  invalid fragment.
+  invalid fragment. The adapter listens from creation and hands a change made
+  before anything subscribed to the first subscriber, because the first render
+  is a transition (below).
+- **First render** (NFR-3): `main.tsx` calls `root.render` inside
+  `startTransition`, so React renders the palette's hundred-odd keys in short
+  slices instead of one long task. That took Total Blocking Time at 8× CPU from
+  ~230 ms to ~25 ms with the same LCP, which keeps Lighthouse on CI's slower
+  runners above the budget. The app is on screen a moment after `load`, so e2e
+  tests that measure the palette wait for it first.
 - **Saved words** (FR-16, `src/state/saved-words.ts`): a newest-first list of
   `{ id, fragment, gloss, savedAt }` under `ipa-helper:saved-words:v1`. The word
   is stored as its URL-codec fragment (ADR-0007), so it is versioned and

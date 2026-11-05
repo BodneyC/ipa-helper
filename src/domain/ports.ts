@@ -23,7 +23,11 @@ export interface FragmentStore {
   read(): string;
   /** Replaces the fragment without adding a history entry. */
   write(fragment: string): void;
-  /** Calls `listener` when the user changes the fragment. Returns an unsubscribe function. */
+  /**
+   * Calls `listener` when the user changes the fragment, including a change made
+   * before anything subscribed (handed to the first subscriber). Returns an
+   * unsubscribe function.
+   */
   subscribe(listener: (fragment: string) => void): () => void;
 }
 

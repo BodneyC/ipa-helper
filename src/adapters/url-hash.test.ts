@@ -33,4 +33,17 @@ describe('URL fragment adapter', () => {
     window.dispatchEvent(new HashChangeEvent('hashchange'));
     expect(listener).toHaveBeenCalledExactlyOnceWith('w=1:k');
   });
+
+  it('FR-15: hands a change made before anyone subscribed to the first subscriber, once', () => {
+    // The first render is a transition (NFR-3): a pasted link can land before UrlSync listens.
+    const store = createUrlFragmentStore();
+    window.history.replaceState(null, '', '/#w=1:k.ash.t');
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    const first = vi.fn();
+    store.subscribe(first)();
+    const second = vi.fn();
+    store.subscribe(second);
+    expect(first).toHaveBeenCalledExactlyOnceWith('w=1:k.ash.t');
+    expect(second).not.toHaveBeenCalled();
+  });
 });

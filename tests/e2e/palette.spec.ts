@@ -104,10 +104,10 @@ test.describe('symbol palette (FR-1, FR-2)', () => {
 
   test('NFR-4: keys are at least 44 × 44 px', async ({ page }) => {
     await page.goto('/');
-    const sizes = await page
-      .getByRole('region', { name: 'Symbols' })
-      .getByRole('button')
-      .evaluateAll((keys) => keys.map((k) => k.getBoundingClientRect()));
+    const keys = page.getByRole('region', { name: 'Symbols' }).getByRole('button');
+    // The first render is a transition (NFR-3), so wait for it before measuring.
+    await expect(keys.first()).toBeVisible();
+    const sizes = await keys.evaluateAll((all) => all.map((k) => k.getBoundingClientRect()));
     expect(sizes.length).toBeGreaterThan(50);
     for (const { width, height } of sizes) {
       expect(width).toBeGreaterThanOrEqual(44);

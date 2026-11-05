@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, startTransition } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { createAudioPlayer } from './adapters/audio/audio-player';
@@ -49,14 +49,20 @@ const services = {
       : NULL_UPDATES,
 };
 
-createRoot(container).render(
-  <StrictMode>
-    <Providers
-      services={services}
-      initialWord={readInitialWord(services.fragments)}
-      initialSettings={loadSettings(services.store)}
-    >
-      <App />
-    </Providers>
-  </StrictMode>,
-);
+const root = createRoot(container);
+// NFR-3: the first render is a transition, so React renders the palette's
+// hundred-odd keys in short slices instead of one long task that blocks input.
+// It paints at the same time as a plain render; only the commit is one piece.
+startTransition(() => {
+  root.render(
+    <StrictMode>
+      <Providers
+        services={services}
+        initialWord={readInitialWord(services.fragments)}
+        initialSettings={loadSettings(services.store)}
+      >
+        <App />
+      </Providers>
+    </StrictMode>,
+  );
+});
