@@ -40,6 +40,13 @@ describe('IPA serialiser', () => {
     expect(bare.serialise(ids('tesh', 'face', 'i-long'))).toBe('tʃeɪiː');
   });
 
+  it('M6.2: puts each diacritic straight after its base, as Unicode expects', () => {
+    expect(bare.serialise(ids('t', 'aspirated'))).toBe('tʰ');
+    expect(bare.serialise(ids('e', 'nasalised'))).toBe('e\u0303');
+    expect(bare.serialise(ids('n', 'voiceless', 'syllabic'))).toBe('n\u0325\u0329');
+    expect(bare.serialise(ids('p', 'ejective'))).toBe('pʼ');
+  });
+
   it('concatenates each token’s IPA, and broad r only changes ɹ', () => {
     fc.assert(
       fc.property(anyWord, (word) => {

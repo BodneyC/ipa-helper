@@ -91,7 +91,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 ## M6: Extended IPA
 
 - [x] **M6.1** Full pulmonic consonant chart, remaining cardinal vowels, and non-pulmonic consonants. refs: SPEC §7.6
-- [ ] **M6.2** Diacritics as modifier tokens (IPA combining characters, TIPA wrap macros). refs: FR-1, ARCH §4
+- [x] **M6.2** Diacritics as modifier tokens (IPA combining characters, TIPA wrap macros). refs: FR-1, ARCH §4
 - [ ] **M6.3** Paste-IPA tokeniser (greedy longest-match, unknown-character reporting). refs: FR-17
 - [ ] **M6.4** CI TeX job: generate a `.tex` file covering every symbol, compile it with pdflatex + tipa, and fail on error. refs: FR-22, ADR-0008
 - [ ] **M6.5** Optional tie-bar affricates setting (`t͡ʃ` / `\t{tS}`). refs: SPEC §7.2
@@ -130,3 +130,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
   affordance; ADR-0012). The clip scripts in `scripts/audio` only cover RP today.
 - IPA "other symbols" not yet in the full inventory: ɕ ʑ ɥ ɧ ɺ ʜ ʢ ʡ, and
   the labiodental flap ⱱ once something can typeset it (ADR-0012).
+- Word audio with diacritics: the voice knows only ʰ ʲ ˤ ˞ and six combining
+  marks (SPEC §7.6), so any other diacritic makes Play word fail with "This
+  word can't be spoken". Consider speaking the base sounds and naming the
+  marks that were left out.

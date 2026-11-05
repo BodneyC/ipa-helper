@@ -60,7 +60,7 @@ export function Palette({
   // The word display isn't focused while keys are pressed, so say what changed.
   const activate = (symbol: PhoneSymbol) => {
     onActivate(symbol);
-    announce(`Added ${labelsOf(symbol, rDisplay).ipa}`);
+    announce(`Added ${labelsOf(symbol, rDisplay).glyph}`);
   };
 
   const body = (group: Group, members: readonly PhoneSymbol[]) => {

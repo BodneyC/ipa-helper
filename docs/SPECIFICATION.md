@@ -65,7 +65,9 @@ pronounced in British English, at no cost and without signing up for anything.
   6. **Suprasegmentals**: primary stress `ˈ`, secondary stress `ˌ`, length `ː`,
      half-length `ˑ`, syllable break `.`.
   7. **Diacritics** (`extended` only, milestone M6): syllabic, nasalised,
-     voiceless, aspirated, and so on.
+     voiceless, aspirated, and so on. *As built (M6.2): each is a token of its
+     own that marks the token just before it (so in `tʰ̥` the ring is under
+     the ʰ). Keys show the mark on a dotted circle, `◌̃`.*
 - **FR-2** Each symbol key shows the glyph prominently, with a small secondary
   label. On hover, focus or long-press it shows a tooltip/popover with:
   the IPA name (e.g. "voiceless postalveolar fricative"), a British example word with
@@ -342,6 +344,32 @@ Ejectives are written with the ejective diacritic `ʼ` (`'`), e.g. `pʼ`.
 | ɤ | `\textramshorns{}` | | o | `o` | | œ | `\oe{}` | | ɜ | `\textrevepsilon{}` |
 | ɞ | `\textcloserevepsilon{}` | | ɔ | `\textopeno{}` | | a | `a` | | ɶ | `\OE{}` |
 | ɑ | `\textscripta{}` | | | | | | | | | |
+
+**Diacritics** (M6.2), in the IPA chart's order. Combining marks wrap the
+preceding token in TIPA (`\textsubring{n}`); spacing ones follow it (`t\super{h}`).
+
+| IPA | Name | TIPA | | IPA | Name | TIPA |
+| --- | --- | --- | --- | --- | --- | --- |
+| ◌̥ | voiceless | `\textsubring{…}` | | ◌̬ | voiced | `\textsubwedge{…}` |
+| ◌ʰ | aspirated | `\super{h}` | | ◌̹ | more rounded | `\textsubrhalfring{…}` |
+| ◌̜ | less rounded | `\textsublhalfring{…}` | | ◌̟ | advanced | `\textsubplus{…}` |
+| ◌̠ | retracted | `\textsubbar{…}` | | ◌̈ | centralised | `\"{…}` |
+| ◌̽ | mid-centralised | `\textovercross{…}` | | ◌̩ | syllabic | `\textsyllabic{…}` |
+| ◌̯ | non-syllabic | `\textsubarch{…}` | | ◌˞ | rhoticity | `\textrhoticity{}` |
+| ◌̤ | breathy voiced | `\textsubumlaut{…}` | | ◌̰ | creaky voiced | `\textsubtilde{…}` |
+| ◌̼ | linguolabial | `\textseagull{…}` | | ◌ʷ | labialised | `\super{w}` |
+| ◌ʲ | palatalised | `\super{j}` | | ◌ˠ | velarised | `\super{\textgamma}` |
+| ◌ˤ | pharyngealised | `\super{\textrevglotstop}` | | ◌̴ | velarised or pharyngealised | `\textsuperimposetilde{…}` |
+| ◌̝ | raised | `\textraising{…}` | | ◌̞ | lowered | `\textlowering{…}` |
+| ◌̘ | advanced tongue root | `\textadvancing{…}` | | ◌̙ | retracted tongue root | `\textretracting{…}` |
+| ◌̪ | dental | `\textsubbridge{…}` | | ◌̺ | apical | `\textinvsubbridge{…}` |
+| ◌̻ | laminal | `\textsubsquare{…}` | | ◌̃ | nasalised | `\~{…}` |
+| ◌ⁿ | nasal release | `\super{n}` | | ◌ˡ | lateral release | `\super{l}` |
+| ◌̚ | no audible release | `\textcorner{}` | | ◌ʼ | ejective | `'` |
+
+The word voice (FR-31) knows only some of these marks (ʰ ʲ ˤ ˞ and the
+syllabic, non-syllabic, dental, apical, laminal and nasalised marks). A word
+with any other diacritic can't be spoken, and Play word says so.
 
 ## 8. Out of scope (v1)
 

@@ -41,7 +41,8 @@ describe('self-hosted fonts (NFR-7)', () => {
 
   it('covers every code point of every inventory symbol, plus slashes and the placeholder', () => {
     const ranges = cssRanges('ipa-helper IPA');
-    const text = SYMBOLS.map((s) => s.ipa).join('') + '/…r';
+    // ◌ is the dotted circle diacritic keys sit on (M6.2).
+    const text = SYMBOLS.map((s) => s.ipa).join('') + '/…r◌';
     // Array.from iterates code points, which is what unicode-range matches.
     const missing = Array.from(text, (c) => c.codePointAt(0) ?? 0)
       .filter((cp) => !covers(ranges, cp))

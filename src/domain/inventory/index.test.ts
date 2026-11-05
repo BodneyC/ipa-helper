@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { isSounding, SYMBOLS, symbolById, symbolsIn } from '.';
 import { AFFRICATES, CONSONANTS, EXTENDED_AFFRICATES, EXTENDED_CONSONANTS } from './consonants';
+import { DIACRITICS } from './diacritics';
 import { DIPHTHONGS } from './diphthongs';
 import { NON_PULMONIC } from './non-pulmonic';
 import { SUPRASEGMENTALS } from './suprasegmentals';
@@ -207,6 +208,18 @@ describe('extended inventory (SPEC §7.6)', () => {
     ];
     expect(added.filter((s) => rp.includes(s))).toEqual([]);
     expect(added.length).toBeGreaterThan(60);
+  });
+
+  it('FR-1, M6.2: has the IPA chart diacritics, each a single mark that is no sound itself', () => {
+    expect(DIACRITICS).toHaveLength(32);
+    expect(extended.filter((s) => s.category === 'diacritic')).toEqual(DIACRITICS);
+    expect(DIACRITICS.filter((d) => !/^.$/su.test(d.ipa)).map((d) => d.id)).toEqual([]);
+    expect(DIACRITICS.filter(isSounding)).toEqual([]);
+    // Combining marks wrap their base in TIPA; spacing ones follow it (ADR-0012).
+    const combining = (d: (typeof DIACRITICS)[number]) => /^\p{M}$/u.test(d.ipa);
+    expect(
+      DIACRITICS.filter((d) => combining(d) !== (d.tipa.kind === 'wrap')).map((d) => d.id),
+    ).toEqual(['no-audible-release']);
   });
 
   it('FR-1: puts at most one sound at each non-pulmonic place × manner', () => {

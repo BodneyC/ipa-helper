@@ -37,6 +37,7 @@ test.describe('full IPA inventory (FR-3, SPEC §7.6)', () => {
       'Vowels',
       'Diphthongs',
       'Suprasegmentals',
+      'Diacritics',
     ]);
     await page.reload();
     await expect(page.getByRole('combobox', { name: 'Inventory' })).toHaveValue('extended');
@@ -63,7 +64,31 @@ test.describe('full IPA inventory (FR-3, SPEC §7.6)', () => {
     await page.getByRole('button', { name: /^ç\s?,/ }).click();
     await page.getByRole('button', { name: /^ʘ\s?,/ }).click();
     await expect(page.getByRole('textbox', { name: 'Word' })).toContainText('çʘ');
-    await expect(page.getByText('\\c{c}\\textbullseye{}', { exact: true })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Word' }).locator('output').last()).toHaveText(
+      '\\c{c}\\textbullseye{}',
+    );
+  });
+
+  test('FR-1, M6.2: diacritics sit on ◌ and attach to the token before them', async ({ page }) => {
+    await showFullIpa(page);
+    const diacritics = page.getByRole('region', { name: 'Diacritics' });
+    await expect(diacritics.getByRole('button')).toHaveCount(32 + 1); // + the collapse toggle
+    const nasalised = diacritics.getByRole('button', { name: /^◌\u0303\s?, nasalised$/ });
+    await nasalised.hover();
+    await expect(page.getByRole('tooltip')).toContainText('TIPA \\~{}');
+
+    await page.getByRole('button', { name: /^t\s?, voiceless alveolar plosive/ }).click();
+    await diacritics.getByRole('button', { name: /^◌ʰ\s?, aspirated$/ }).click();
+    await page.getByRole('button', { name: /^e\s?, close-mid front/ }).click();
+    await nasalised.click();
+    const outputs = page.getByRole('region', { name: 'Word' }).locator('output');
+    await expect(outputs.first()).toHaveText('/tʰe\u0303/');
+    await expect(outputs.last()).toHaveText('t\\super{h}\\~{e}');
+
+    // Backspace removes the diacritic alone: it is a token of its own (ADR-0007).
+    await page.getByRole('textbox', { name: 'Word' }).press('Backspace');
+    await expect(outputs.last()).toHaveText('t\\super{h}e');
+    await expectNoA11yViolations(page);
   });
 
   test('FR-1: the vowel trapezoid fits every IPA vowel without overlapping keys', async ({

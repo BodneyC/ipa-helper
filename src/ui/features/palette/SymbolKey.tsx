@@ -186,7 +186,7 @@ export function SymbolKey({ symbol, labels, onActivate, player }: SymbolKeyProps
          * add a space after each flex item; name computation collapses the two.
          */}
         <span className={styles['glyph']}>
-          {labels.ipa}
+          {labels.glyph}
           <span className="visuallyHidden">{hiddenMiddle}</span>
         </span>
         {micro !== undefined && <span className={styles['micro']}>{micro}</span>}

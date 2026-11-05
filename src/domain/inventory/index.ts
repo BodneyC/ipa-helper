@@ -3,6 +3,7 @@
  * everything outside the inventory looks symbols up through it.
  */
 import { AFFRICATES, CONSONANTS, EXTENDED_AFFRICATES, EXTENDED_CONSONANTS } from './consonants';
+import { DIACRITICS } from './diacritics';
 import { DIPHTHONGS } from './diphthongs';
 import { NON_PULMONIC } from './non-pulmonic';
 import { SUPRASEGMENTALS } from './suprasegmentals';
@@ -21,6 +22,7 @@ export const SYMBOLS: readonly PhoneSymbol[] = [
   ...EXTENDED_VOWELS,
   ...DIPHTHONGS,
   ...SUPRASEGMENTALS,
+  ...DIACRITICS,
 ];
 
 const byId: ReadonlyMap<SymbolId, PhoneSymbol> = new Map(SYMBOLS.map((s) => [s.id, s]));

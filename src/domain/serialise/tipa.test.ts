@@ -10,16 +10,16 @@ import type { SymbolId } from '../inventory/symbol-id';
 import type { DiacriticSymbol, PhoneSymbol, TipaEncoding } from '../inventory/types';
 import { idsOf, wordFromIds } from '../word/word';
 
-/** A diacritic fixture, so the `wrap` encoding is covered before M6 adds real ones. */
+/** A diacritic fixture for malformed-data tests; the registry has the real ones (M6.2). */
 const tilde: DiacriticSymbol = {
   id: symbolId('tilde'),
-  ipa: '̃',
+  ipa: '\u0303',
   tipa: { kind: 'wrap', name: '~' },
   name: 'nasalised',
   inventories: ['extended'],
   category: 'diacritic',
 };
-const symbols: readonly PhoneSymbol[] = [...SYMBOLS, tilde];
+const symbols: readonly PhoneSymbol[] = SYMBOLS;
 
 const ids = (...raw: string[]) => wordFromIds(raw.map(symbolId));
 const bare = createTipaSerialiser({ slashes: false, rDisplay: 'narrow' }, symbols);
@@ -148,17 +148,33 @@ describe('TIPA serialiser', () => {
     expect(bare.serialise(ids('face'))).toBe('eI');
   });
 
-  it('wraps the preceding token for a diacritic', () => {
-    expect(bare.serialise(ids('e', 'tilde'))).toBe('\\~{e}');
-    expect(bare.serialise(ids('t', 'esh', 'tilde'))).toBe('t\\~{S}');
-    expect(bare.serialise(ids('ash', 'tilde', 'tilde'))).toBe('\\~{\\~{\\ae{}}}');
-    expect(bare.serialise(ids('tilde', 'p'))).toBe('\\~{}p');
+  it('FR-1, M6.2: wraps the preceding token for a combining diacritic', () => {
+    expect(bare.serialise(ids('e', 'nasalised'))).toBe('\\~{e}');
+    expect(bare.serialise(ids('t', 'esh', 'nasalised'))).toBe('t\\~{S}');
+    expect(bare.serialise(ids('ash', 'nasalised', 'nasalised'))).toBe('\\~{\\~{\\ae{}}}');
+    expect(bare.serialise(ids('nasalised', 'p'))).toBe('\\~{}p');
+    expect(bare.serialise(ids('n', 'voiceless'))).toBe('\\textsubring{n}');
+    expect(bare.serialise(ids('n', 'syllabic', 'voiceless'))).toBe(
+      '\\textsubring{\\textsyllabic{n}}',
+    );
+    expect(bare.serialise(ids('e', 'centralised'))).toBe('\\"{e}');
+  });
+
+  it('FR-1, M6.2: writes a spacing diacritic after its base', () => {
+    expect(bare.serialise(ids('t', 'aspirated'))).toBe('t\\super{h}');
+    expect(bare.serialise(ids('t', 'velarised'))).toBe('t\\super{\\textgamma}');
+    expect(bare.serialise(ids('p', 'ejective'))).toBe("p'");
+    expect(bare.serialise(ids('p', 'ejective', 'ejective'))).toBe("p''");
+    expect(bare.serialise(ids('schwa', 'rhoticity'))).toBe('@\\textrhoticity{}');
+    // A diacritic marks the token just before it, as the IPA text does: in
+    // `tʰ̥` the ring is under the ʰ.
+    expect(bare.serialise(ids('t', 'aspirated', 'voiceless'))).toBe('t\\textsubring{\\super{h}}');
   });
 
   it('ADR-0012: writes a command as it is, needing no separator either side', () => {
     expect(bare.serialise(ids('c-cedilla'))).toBe('\\c{c}');
     expect(bare.serialise(ids('i', 'c-cedilla', 'a'))).toBe('i\\c{c}a');
-    expect(bare.serialise(ids('c-cedilla', 'tilde'))).toBe('\\~{\\c{c}}');
+    expect(bare.serialise(ids('c-cedilla', 'nasalised'))).toBe('\\~{\\c{c}}');
   });
 
   it('Q-2: can add slashes inside the macro argument', () => {

@@ -6,5 +6,8 @@ export const lit = (text: string): TipaEncoding => ({ kind: 'literal', text });
 /** A TIPA encoding written as a control word, e.g. `macro('ae')` for æ (`\ae{}`). */
 export const macro = (name: string): TipaEncoding => ({ kind: 'macro', name });
 
+/** A TIPA diacritic that wraps the preceding token, e.g. `wrap('~')` for nasalised (`\~{e}`). */
+export const wrap = (name: string): TipaEncoding => ({ kind: 'wrap', name });
+
 /** A complete, self-delimiting TIPA command, e.g. `command('\\c{c}')` for ç (ADR-0012). */
 export const command = (text: string): TipaEncoding => ({ kind: 'command', text });

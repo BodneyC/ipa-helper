@@ -13,26 +13,32 @@ const get = (id: string): PhoneSymbol => {
 
 describe('labelsOf', () => {
   it('FR-2: gives the glyph and TIPA code of literal and macro symbols', () => {
-    expect(labelsOf(get('esh'), 'narrow')).toEqual({ ipa: 'ʃ', tipa: 'S' });
-    expect(labelsOf(get('ash'), 'narrow')).toEqual({ ipa: 'æ', tipa: '\\ae{}' });
-    expect(labelsOf(get('secondary-stress'), 'narrow')).toEqual({ ipa: 'ˌ', tipa: '""' });
+    expect(labelsOf(get('esh'), 'narrow')).toEqual({ ipa: 'ʃ', glyph: 'ʃ', tipa: 'S' });
+    expect(labelsOf(get('ash'), 'narrow')).toEqual({ ipa: 'æ', glyph: 'æ', tipa: '\\ae{}' });
+    expect(labelsOf(get('secondary-stress'), 'narrow')).toEqual({
+      ipa: 'ˌ',
+      glyph: 'ˌ',
+      tipa: '""',
+    });
+    expect(labelsOf(get('c-cedilla'), 'narrow').tipa).toBe('\\c{c}');
   });
 
   it('Q-3: applies the r-display setting', () => {
-    expect(labelsOf(get('turned-r'), 'narrow')).toEqual({ ipa: 'ɹ', tipa: '\\textturnr{}' });
-    expect(labelsOf(get('turned-r'), 'broad')).toEqual({ ipa: 'r', tipa: 'r' });
+    expect(labelsOf(get('turned-r'), 'narrow')).toMatchObject({ ipa: 'ɹ', tipa: '\\textturnr{}' });
+    expect(labelsOf(get('turned-r'), 'broad')).toEqual({ ipa: 'r', glyph: 'r', tipa: 'r' });
   });
 
-  it('shows a wrap diacritic as its macro with an empty argument', () => {
-    const tilde: PhoneSymbol = {
-      id: symbolId('tilde'),
-      ipa: '̃',
-      tipa: { kind: 'wrap', name: '~' },
-      name: 'nasalised',
-      inventories: ['extended'],
-      category: 'diacritic',
-    };
-    expect(labelsOf(tilde, 'narrow').tipa).toBe('\\~{}');
+  it('M6.2: shows a diacritic on a dotted circle, and a wrap as its macro around nothing', () => {
+    expect(labelsOf(get('nasalised'), 'narrow')).toEqual({
+      ipa: '\u0303',
+      glyph: '\u25cc\u0303',
+      tipa: '\\~{}',
+    });
+    expect(labelsOf(get('aspirated'), 'narrow')).toEqual({
+      ipa: 'ʰ',
+      glyph: '◌ʰ',
+      tipa: '\\super{h}',
+    });
   });
 
   it('throws on an encoding kind it does not know, as untyped data could carry', () => {

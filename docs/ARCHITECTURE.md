@@ -83,7 +83,7 @@ ipa-helper/
 │  │  │  ├─ non-pulmonic.ts   # M6: clicks and implosives (ADR-0012)
 │  │  │  ├─ diphthongs.ts
 │  │  │  ├─ suprasegmentals.ts
-│  │  │  ├─ diacritics.ts     # M6
+│  │  │  ├─ diacritics.ts     # M6.2: combining marks (TIPA wrap) and spacing modifiers (ADR-0012)
 │  │  │  └─ index.ts          # registry: byId, inventories, groups
 │  │  ├─ word/
 │  │  │  ├─ word.ts           # Word = readonly Token[]; pure ops (insert, delete…)
@@ -92,7 +92,7 @@ ipa-helper/
 │  │  │  ├─ serialiser.ts     # interface Serialiser { serialise(word): string }
 │  │  │  ├─ ipa.ts
 │  │  │  ├─ tipa.ts           # boundary-safe joining (FR-22)
-│  │  │  ├─ labels.ts         # a key's glyph and TIPA code (FR-2, Q-3)
+│  │  │  ├─ labels.ts         # a key's glyph (diacritics on ◌) and TIPA code (FR-2, Q-3)
 │  │  │  └─ filter.ts         # matchesFilter: the palette filter's matching rule (FR-4)
 │  │  ├─ parse/
 │  │  │  └─ ipa-tokeniser.ts  # M6: greedy longest-match IPA → Word
