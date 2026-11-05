@@ -113,11 +113,14 @@ describe('global shortcuts (FR-51)', () => {
     expect(screen.queryByRole('button', { name: /^p\s?,/ })).not.toBeInTheDocument();
   });
 
-  it('FR-3: the inventory switch offers RP, with Full IPA not yet available', () => {
-    setup();
+  it('FR-3: the inventory switch starts on RP and switches to the full IPA', async () => {
+    const { user } = setup();
     const inventory = screen.getByRole('combobox', { name: 'Inventory' });
     expect(inventory).toHaveValue('rp');
-    expect(screen.getByRole('option', { name: 'Full IPA (coming soon)' })).toBeDisabled();
+    expect(screen.queryByRole('region', { name: 'Non-pulmonic consonants' })).toBeNull();
+    await user.selectOptions(inventory, 'Full IPA');
+    expect(inventory).toHaveValue('extended');
+    expect(screen.getByRole('region', { name: 'Non-pulmonic consonants' })).toBeInTheDocument();
   });
 
   it('the top bar button opens the same dialog', async () => {

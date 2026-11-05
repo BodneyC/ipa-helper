@@ -44,10 +44,7 @@ export function TopBar({ query, onQueryChange, filterRef, onHelp, onSettings }: 
               }}
             >
               <option value="rp">RP</option>
-              {/* FR-3: the Full inventory is populated in M6. */}
-              <option value="extended" disabled>
-                Full IPA (coming soon)
-              </option>
+              <option value="extended">Full IPA</option>
             </select>
           </label>
           <label className={styles['field']}>

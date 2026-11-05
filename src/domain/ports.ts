@@ -89,6 +89,11 @@ export interface AudioPlayer {
   readonly progress: Readonly<Record<AudioChannel, number | undefined>>;
   /** Calls `listener` after `status` or `progress` changes. Returns an unsubscribe function. */
   subscribe(listener: () => void): () => void;
+  /**
+   * True when `id` has a sound this player can play (FR-30). Symbols without a
+   * clip, such as most of the full IPA (ADR-0012), get no play affordance.
+   */
+  canPlaySymbol(id: SymbolId): boolean;
   /** Resolves when the sound ends or a newer one cuts it off. */
   playSymbol(id: SymbolId): Promise<Result<void, AudioError>>;
   /** Resolves when the sound ends or a newer one cuts it off. */
@@ -100,6 +105,7 @@ export const NULL_AUDIO: AudioPlayer = {
   status: { symbols: 'unsupported', words: 'unsupported' },
   progress: { symbols: undefined, words: undefined },
   subscribe: () => () => undefined,
+  canPlaySymbol: () => false,
   playSymbol: () => Promise.resolve(err({ kind: 'audio-unsupported' })),
   playWord: () => Promise.resolve(err({ kind: 'audio-unsupported' })),
 };

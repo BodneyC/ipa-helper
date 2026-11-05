@@ -2,12 +2,15 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
 import { matchesFilter } from './filter';
-import { SYMBOLS, symbolById } from '../inventory';
+import { SYMBOLS, symbolById, symbolsIn } from '../inventory';
 import { symbolId } from '../inventory/symbol-id';
 import type { PhoneSymbol } from '../inventory/types';
 
+/** Filters the RP palette, as the default view does (FR-3). */
 const find = (query: string, rDisplay: 'narrow' | 'broad' = 'narrow') =>
-  SYMBOLS.filter((s) => matchesFilter(s, query, rDisplay)).map((s) => s.ipa);
+  symbolsIn('rp')
+    .filter((s) => matchesFilter(s, query, rDisplay))
+    .map((s) => s.ipa);
 
 const sym = (id: string): PhoneSymbol => {
   const s = symbolById(symbolId(id));

@@ -2,18 +2,23 @@
  * The symbol registry. This is the only barrel file in src/ (ARCHITECTURE §11):
  * everything outside the inventory looks symbols up through it.
  */
-import { AFFRICATES, CONSONANTS } from './consonants';
+import { AFFRICATES, CONSONANTS, EXTENDED_AFFRICATES, EXTENDED_CONSONANTS } from './consonants';
 import { DIPHTHONGS } from './diphthongs';
+import { NON_PULMONIC } from './non-pulmonic';
 import { SUPRASEGMENTALS } from './suprasegmentals';
 import type { SymbolId } from './symbol-id';
 import type { InventoryId, PhoneSymbol } from './types';
-import { VOWELS } from './vowels';
+import { EXTENDED_VOWELS, VOWELS } from './vowels';
 
 /** Every known symbol, in palette group order (FR-1). */
 export const SYMBOLS: readonly PhoneSymbol[] = [
   ...CONSONANTS,
+  ...EXTENDED_CONSONANTS,
   ...AFFRICATES,
+  ...EXTENDED_AFFRICATES,
+  ...NON_PULMONIC,
   ...VOWELS,
+  ...EXTENDED_VOWELS,
   ...DIPHTHONGS,
   ...SUPRASEGMENTALS,
 ];

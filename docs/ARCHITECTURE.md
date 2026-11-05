@@ -80,6 +80,7 @@ ipa-helper/
 │  │  │  ├─ example.ts        # example('**sh**ip') → { word, highlight } (SPEC §7 notation)
 │  │  │  ├─ encoding.ts       # lit('S') / macro('ae') TipaEncoding helpers
 │  │  │  ├─ vowels.ts
+│  │  │  ├─ non-pulmonic.ts   # M6: clicks and implosives (ADR-0012)
 │  │  │  ├─ diphthongs.ts
 │  │  │  ├─ suprasegmentals.ts
 │  │  │  ├─ diacritics.ts     # M6
@@ -150,7 +151,7 @@ export type SymbolId = string & { readonly __brand: 'SymbolId' };
 // HEIGHTS, BACKNESSES, …); each union type is derived from its tuple.
 
 export type Category =
-  | 'consonant' | 'affricate' | 'vowel' | 'diphthong'
+  | 'consonant' | 'affricate' | 'non-pulmonic' | 'vowel' | 'diphthong'
   | 'suprasegmental' | 'diacritic';
 
 export type InventoryId = 'rp' | 'extended';
@@ -171,7 +172,7 @@ interface BaseSymbol {
 }
 
 export interface ConsonantSymbol extends BaseSymbol {
-  readonly category: 'consonant' | 'affricate';
+  readonly category: 'consonant' | 'affricate' | 'non-pulmonic';   // clicks, implosives (ADR-0012)
   readonly place: Place; readonly manner: Manner; readonly voiced: boolean;
   readonly secondary?: SecondaryArticulation;   // e.g. ɫ = velarised l, keeps chart cells distinct
 }
@@ -189,7 +190,8 @@ export type PhoneSymbol =
 export type TipaEncoding =
   | { readonly kind: 'literal'; readonly text: string }   // "S", "tS", "i:"
   | { readonly kind: 'macro'; readonly name: string }     // "textturnr" → \textturnr{}
-  | { readonly kind: 'wrap'; readonly name: string };     // diacritic: \~{…}
+  | { readonly kind: 'wrap'; readonly name: string }      // diacritic: \~{…}
+  | { readonly kind: 'command'; readonly text: string };  // self-delimiting: \c{c}, \super{h} (ADR-0012)
 
 export interface Token { readonly key: number; readonly symbolId: SymbolId } // key: React list identity
 export type Word = readonly Token[];
@@ -282,7 +284,10 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   inventory setting and the filter text. Each group picks a layout component:
   `ConsonantChart` (CSS grid: place × manner), `VowelTrapezoid` (absolutely
   positioned keys in an SVG-backed trapezoid, scaling to its container), and
-  `KeyGrid` for the rest.
+  `KeyGrid` for the rest. In the full IPA (M6.1) the consonant chart uses all
+  twelve place columns and scrolls inside its card, the non-pulmonic group is a
+  `KeyGrid`, and the trapezoid takes the full row and widens
+  (`data-widest="wide"`) because some points hold three vowels.
 - `<SymbolKey>`: a `<button>` with `aria-label` "ʃ, voiceless postalveolar
   fricative, as in ship". A tooltip/popover shows details. Roving tabindex is
   managed per group by `useRovingFocus` (`ui/components/roving-focus.ts`):
@@ -290,10 +295,10 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   always `preventDefault`ed inside a group.
 - Symbol audio (FR-30, FR-34, M4.4): `<PaletteWithAudio>` sits inside the
   announcer and wires `<Palette>` to the audio player via `usePlaySymbol`
-  (`ui/features/audio/use-audio.ts`). That hook returns `undefined` when the
-  symbol channel is unsupported, so no play affordance renders, and it
-  announces any failed play. A sounding key (`isSounding` in the domain
-  registry) plays on Alt+click, Alt+Enter or a touch long-press. It also has a
+  (`ui/features/audio/use-audio.ts`). That hook returns a `SymbolPlayer`
+  (`canPlay`, `play`), or `undefined` when the symbol channel is unsupported,
+  so no play affordance renders, and it announces any failed play. A key the
+  player can play (`isSounding` in the domain registry, and a clip) plays on Alt+click, Alt+Enter or a touch long-press. It also has a
   24 px speaker button on its corner, shown while the key is hovered or
   focused. The speaker is a pointer convenience only (`tabIndex=-1`,
   `aria-hidden`); keyboard and screen reader users get Alt+Enter, which is
@@ -351,7 +356,10 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 
 - Port (`src/domain/ports.ts`): `interface AudioPlayer { readonly status:
   Record<'symbols' | 'words', AudioStatus>; subscribe(listener): unsubscribe;
-  playSymbol(id): Promise<Result<void, AudioError>>; playWord(word): … }`.
+  canPlaySymbol(id): boolean; playSymbol(id): Promise<Result<void, AudioError>>;
+  playWord(word): … }`. `canPlaySymbol` is true only for symbols with a clip
+  (`SYMBOL_CLIP_IDS`, the sounding RP symbols), so the palette offers no play
+  affordance for full-IPA sounds (ADR-0012).
   Each channel has its own status (`unsupported | idle | loading | ready`),
   because symbol clips and the word voice load independently. `status` is an
   immutable snapshot that is replaced on change, so the UI can read it with

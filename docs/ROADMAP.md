@@ -90,7 +90,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 ## M6: Extended IPA
 
-- [ ] **M6.1** Full pulmonic consonant chart, remaining cardinal vowels, and non-pulmonic consonants. refs: SPEC §7.6
+- [x] **M6.1** Full pulmonic consonant chart, remaining cardinal vowels, and non-pulmonic consonants. refs: SPEC §7.6
 - [ ] **M6.2** Diacritics as modifier tokens (IPA combining characters, TIPA wrap macros). refs: FR-1, ARCH §4
 - [ ] **M6.3** Paste-IPA tokeniser (greedy longest-match, unknown-character reporting). refs: FR-17
 - [ ] **M6.4** CI TeX job: generate a `.tex` file covering every symbol, compile it with pdflatex + tipa, and fail on error. refs: FR-22, ADR-0008
@@ -126,5 +126,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
   uploaded actuals (or in the Playwright Docker image) and commit them.
 - Multi-tab sync for settings and saved words (`storage` event); today the last
   tab to write wins.
-- Inventory switch: enable "Full IPA" when M6 populates it, and check that the
-  5.5 rem select still fits its label.
+- Symbol clips for the full-IPA sounds (M6.1 ships them without a play
+  affordance; ADR-0012). The clip scripts in `scripts/audio` only cover RP today.
+- IPA "other symbols" not yet in the full inventory: ɕ ʑ ɥ ɧ ɺ ʜ ʢ ʡ, and
+  the labiodental flap ⱱ once something can typeset it (ADR-0012).

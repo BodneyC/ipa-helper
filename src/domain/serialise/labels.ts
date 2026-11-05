@@ -20,6 +20,8 @@ export const labelsOf = (symbol: PhoneSymbol, rDisplay: RDisplay): SymbolLabels 
     case 'macro':
     case 'wrap':
       return { ipa, tipa: `\\${tipa.name}{}` };
+    case 'command':
+      return { ipa, tipa: tipa.text };
     default:
       return assertNever(tipa);
   }

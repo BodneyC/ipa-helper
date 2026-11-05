@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { createAudioPlayer } from './adapters/audio/audio-player';
-import { createSymbolClipSource } from './adapters/audio/symbol-clips';
+import { createSymbolClipSource, SYMBOL_CLIP_IDS } from './adapters/audio/symbol-clips';
 import { createBrowserAudioOutput } from './adapters/audio/web-audio-output';
 import { createWordSource } from './adapters/audio/word-source';
 import { createBrowserClipboard } from './adapters/clipboard';
@@ -27,6 +27,7 @@ const services = {
   audio: createAudioPlayer({
     output: createBrowserAudioOutput(),
     symbols: createSymbolClipSource(),
+    symbolIds: SYMBOL_CLIP_IDS,
     // Word synthesis runs in a worker (M5.2); without workers there's no word audio.
     words: typeof Worker === 'undefined' ? undefined : createWordSource(),
   }),

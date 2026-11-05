@@ -1,9 +1,8 @@
 import { Palette } from './Palette';
 import type { PaletteProps } from './Palette';
-import { isSounding } from '../../../domain/inventory/index';
 import { usePlaySymbol } from '../audio/use-audio';
 
-interface PaletteWithAudioProps extends Omit<PaletteProps, 'onPlay'> {
+interface PaletteWithAudioProps extends Omit<PaletteProps, 'player'> {
   /** FR-34: play each symbol as it is added. */
   readonly soundOnSelect: boolean;
 }
@@ -13,14 +12,14 @@ interface PaletteWithAudioProps extends Omit<PaletteProps, 'onPlay'> {
  * announcer, so a sound that fails to play is announced.
  */
 export function PaletteWithAudio({ soundOnSelect, onActivate, ...props }: PaletteWithAudioProps) {
-  const play = usePlaySymbol(props.rDisplay);
+  const player = usePlaySymbol(props.rDisplay);
   return (
     <Palette
       {...props}
-      onPlay={play}
+      player={player}
       onActivate={(symbol) => {
         onActivate(symbol);
-        if (soundOnSelect && isSounding(symbol)) play?.(symbol);
+        if (soundOnSelect && player?.canPlay(symbol) === true) player.play(symbol);
       }}
     />
   );

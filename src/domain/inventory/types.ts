@@ -24,6 +24,8 @@ export type Place = (typeof PLACES)[number];
 /**
  * Manners of articulation, in IPA chart row order (top to bottom). `affricate`
  * isn't a row in the IPA chart, but RP treats `tʃ` and `dʒ` as single phonemes.
+ * The last three are the non-pulmonic manners, which the IPA chart lists in a
+ * table of their own (ADR-0012).
  */
 export const MANNERS = [
   'plosive',
@@ -35,6 +37,9 @@ export const MANNERS = [
   'affricate',
   'approximant',
   'lateral-approximant',
+  'click',
+  'lateral-click',
+  'implosive',
 ] as const;
 /** A manner of articulation. */
 export type Manner = (typeof MANNERS)[number];
@@ -74,6 +79,7 @@ export type Backness = (typeof BACKNESSES)[number];
 export const CATEGORIES = [
   'consonant',
   'affricate',
+  'non-pulmonic',
   'vowel',
   'diphthong',
   'suprasegmental',
@@ -82,7 +88,7 @@ export const CATEGORIES = [
 /** A symbol category. */
 export type Category = (typeof CATEGORIES)[number];
 
-/** Symbol sets the user can switch between (FR-3). `extended` is filled in during M6. */
+/** Symbol sets the user can switch between (FR-3): British English, and the full IPA. */
 export const INVENTORY_IDS = ['rp', 'extended'] as const;
 /** An inventory identifier. */
 export type InventoryId = (typeof INVENTORY_IDS)[number];
@@ -124,7 +130,12 @@ export type TipaEncoding =
   /** A control word without its backslash, e.g. `"textturnr"` → `\textturnr{}`. */
   | { readonly kind: 'macro'; readonly name: string }
   /** A diacritic macro that wraps the preceding symbol, e.g. `"~"` → `\~{…}`. */
-  | { readonly kind: 'wrap'; readonly name: string };
+  | { readonly kind: 'wrap'; readonly name: string }
+  /**
+   * A complete TeX fragment that starts with a control word and ends with `}`,
+   * e.g. `\c{c}` or `\super{h}`. Nothing either side can merge with it (ADR-0012).
+   */
+  | { readonly kind: 'command'; readonly text: string };
 
 /** Fields every symbol has, whatever its category. */
 interface BaseSymbol {
@@ -144,9 +155,12 @@ interface BaseSymbol {
   readonly audioKey?: string;
 }
 
-/** A consonant or affricate, placed in the consonant chart by place × manner × voicing. */
+/**
+ * A consonant, affricate or non-pulmonic consonant (click or implosive). Plain
+ * consonants go in the consonant chart by place × manner × voicing.
+ */
 export interface ConsonantSymbol extends BaseSymbol {
-  readonly category: 'consonant' | 'affricate';
+  readonly category: 'consonant' | 'affricate' | 'non-pulmonic';
   readonly place: Place;
   readonly manner: Manner;
   readonly voiced: boolean;

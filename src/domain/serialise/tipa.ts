@@ -49,7 +49,8 @@ const join = (pieces: readonly Piece[]): string =>
  * /ˈθɔːnɪk/.
  *
  * - Macros are always written `\name{}`, so a following letter can't extend the
- *   control word (`\ae{}p`, not `\aep`).
+ *   control word (`\ae{}p`, not `\aep`). A `command` (`\c{c}`) already ends
+ *   in `}`, so it is written as it is (ADR-0012).
  * - Literals get a `{}` between them when they would otherwise merge into a
  *   different shortcut (see {@link needsSeparator}). So `"{}"` is two primary
  *   stresses, never one secondary stress.
@@ -74,6 +75,8 @@ export const createTipaSerialiser = (
       }
       case 'macro':
         return [...pieces, { separated: false, body: `\\${tipa.name}{}`, literal: undefined }];
+      case 'command':
+        return [...pieces, { separated: false, body: tipa.text, literal: undefined }];
       case 'wrap': {
         // The macro's backslash now starts the boundary, so the wrapped token's
         // separator is no longer needed.

@@ -7,6 +7,7 @@ import type { PhoneSymbol } from '../../../domain/inventory/types';
 import type { SymbolLabels } from '../../../domain/serialise/labels';
 import { ROVING_ITEM } from '../../components/roving-focus';
 import { Tooltip } from '../../components/Tooltip';
+import type { SymbolPlayer } from '../audio/use-audio';
 
 interface SymbolKeyProps {
   readonly symbol: PhoneSymbol;
@@ -14,10 +15,10 @@ interface SymbolKeyProps {
   /** FR-10: called on click, tap, Enter or Space. */
   readonly onActivate: (symbol: PhoneSymbol) => void;
   /**
-   * FR-30: plays the symbol. Left out when audio is unavailable; marks with no
-   * sound of their own get no play affordance either way.
+   * FR-30: plays symbols. Left out when audio is unavailable; a symbol it
+   * can't play (a mark, or a sound with no clip) gets no play affordance.
    */
-  readonly onPlay?: ((symbol: PhoneSymbol) => void) | undefined;
+  readonly player?: SymbolPlayer | undefined;
 }
 
 /** How long a touch must last to count as a long-press (FR-2). */
@@ -27,7 +28,8 @@ const HOVER_CLOSE_MS = 120;
 
 /**
  * A palette key (FR-2): the glyph with a small label under it (the example word,
- * or the name for marks with no example). Hover, focus or a
+ * or the name for marks with no example; none for a sound with no example).
+ * Hover, focus or a
  * touch long-press shows a tooltip with the name, a highlighted example word and
  * the TIPA code. The tooltip stays open while hovered and closes on Escape
  * (WCAG 1.4.13). A long-press shows the tooltip without adding the symbol.
@@ -38,11 +40,11 @@ const HOVER_CLOSE_MS = 120;
  * from assistive technology, whose path is Alt+Enter (shown in the tooltip and
  * the help dialog).
  */
-export function SymbolKey({ symbol, labels, onActivate, onPlay }: SymbolKeyProps) {
+export function SymbolKey({ symbol, labels, onActivate, player }: SymbolKeyProps) {
   const play =
-    onPlay !== undefined && isSounding(symbol)
+    player?.canPlay(symbol) === true
       ? () => {
-          onPlay(symbol);
+          player.play(symbol);
         }
       : undefined;
   const tooltipId = useId();
@@ -113,7 +115,16 @@ export function SymbolKey({ symbol, labels, onActivate, onPlay }: SymbolKeyProps
   };
 
   const { example } = symbol;
-  const micro = example?.word ?? symbol.name;
+  // A sound without an example word (most of the full IPA) shows no label: its
+  // chart row and column say what it is, and long names would widen every key.
+  // Marks show their (short) name instead.
+  const micro = example?.word ?? (isSounding(symbol) ? undefined : symbol.name);
+  const hiddenMiddle =
+    example !== undefined
+      ? `, ${symbol.name}, as in `
+      : micro === undefined
+        ? `, ${symbol.name}`
+        : ', ';
 
   return (
     <span className={styles['wrap']}>
@@ -176,9 +187,9 @@ export function SymbolKey({ symbol, labels, onActivate, onPlay }: SymbolKeyProps
          */}
         <span className={styles['glyph']}>
           {labels.ipa}
-          <span className="visuallyHidden">{example ? `, ${symbol.name}, as in ` : ', '}</span>
+          <span className="visuallyHidden">{hiddenMiddle}</span>
         </span>
-        <span className={styles['micro']}>{micro}</span>
+        {micro !== undefined && <span className={styles['micro']}>{micro}</span>}
         {/* SPEC §6: a brief accent pulse says "just added". */}
         {pulses > 0 && <span key={pulses} className={styles['pulse']} aria-hidden="true" />}
       </button>

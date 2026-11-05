@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { LONG_PRESS_MS, SymbolKey } from './SymbolKey';
-import { symbolById } from '../../../domain/inventory';
+import { isSounding, symbolById } from '../../../domain/inventory';
 import { symbolId } from '../../../domain/inventory/symbol-id';
 import type { PhoneSymbol } from '../../../domain/inventory/types';
 import { labelsOf } from '../../../domain/serialise/labels';
@@ -24,7 +24,7 @@ const renderKey = (symbol: PhoneSymbol = esh, withPlay = false) => {
       symbol={symbol}
       labels={labelsOf(symbol, 'narrow')}
       onActivate={onActivate}
-      onPlay={withPlay ? onPlay : undefined}
+      player={withPlay ? { canPlay: isSounding, play: onPlay } : undefined}
     />,
   );
   // The speaker is hidden from assistive technology, so find it by its title.
@@ -186,6 +186,12 @@ describe('<SymbolKey>', () => {
     expect(fireEvent.contextMenu(key)).toBe(true);
   });
 
+  it('FR-2: a sound with no example word shows no label, but keeps its name', () => {
+    const { key } = renderKey(get('t-retroflex'));
+    expect(key).toHaveAccessibleName('ʈ, voiceless retroflex plosive');
+    expect(key.textContent).toBe('ʈ, voiceless retroflex plosive');
+  });
+
   describe('FR-30: play affordance', () => {
     it('plays from the speaker button, without adding the symbol', async () => {
       const user = userEvent.setup();
@@ -227,7 +233,7 @@ describe('<SymbolKey>', () => {
       expect(screen.getByRole('tooltip')).toHaveTextContent('Listen: Alt+click or Alt+Enter');
     });
 
-    it('offers nothing to play for a mark with no sound of its own', async () => {
+    it('offers nothing to play for a symbol the player can’t play, such as a mark', async () => {
       const user = userEvent.setup();
       const { key, onActivate, onPlay, speaker } = renderKey(get('primary-stress'), true);
       expect(speaker()).toBeNull();

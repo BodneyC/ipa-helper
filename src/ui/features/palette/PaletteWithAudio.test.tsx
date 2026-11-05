@@ -6,17 +6,17 @@ import { PaletteWithAudio } from './PaletteWithAudio';
 import { fakeAudio } from '../../../../tests/setup/fake-audio';
 import { Providers } from '../../../app/providers';
 import { symbolId } from '../../../domain/inventory/symbol-id';
-import type { PhoneSymbol } from '../../../domain/inventory/types';
+import type { InventoryId, PhoneSymbol } from '../../../domain/inventory/types';
 import { err } from '../../../domain/result';
 import { AnnouncerProvider } from '../../components/Announcer';
 
-const setup = (soundOnSelect: boolean, player = fakeAudio()) => {
+const setup = (soundOnSelect: boolean, player = fakeAudio(), inventory: InventoryId = 'rp') => {
   const onActivate = vi.fn<(s: PhoneSymbol) => void>();
   const { container } = render(
     <Providers services={{ audio: player.audio }}>
       <AnnouncerProvider>
         <PaletteWithAudio
-          inventory="rp"
+          inventory={inventory}
           rDisplay="narrow"
           query=""
           collapsedGroups={[]}
@@ -63,6 +63,18 @@ describe('<PaletteWithAudio>', () => {
     key(/^ʃ/).focus();
     await user.keyboard('{Alt>}{Enter}{/Alt}');
     expect(await screen.findByText('Couldn’t play ʃ')).toBeInTheDocument();
+  });
+
+  it('ADR-0012: gives no speaker to a sound without a clip, and adds it silently', async () => {
+    const player = fakeAudio();
+    player.canPlaySymbol.mockImplementation((id) => id !== symbolId('c-cedilla'));
+    const { key, onActivate, playSymbol, speakers, user } = setup(true, player, 'extended');
+    const titles = [...speakers()].map((s) => s.getAttribute('title'));
+    expect(titles).toContain('Listen to ʃ');
+    expect(titles).not.toContain('Listen to ç');
+    await user.click(key(/^ç/));
+    expect(onActivate).toHaveBeenCalledTimes(1);
+    expect(playSymbol).not.toHaveBeenCalled();
   });
 
   it('shows no speakers when the browser cannot play audio', () => {

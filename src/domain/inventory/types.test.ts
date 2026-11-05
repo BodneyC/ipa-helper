@@ -71,6 +71,28 @@ const fixtures = [
     voiced: false,
   },
   {
+    id: symbolId('c-cedilla'),
+    ipa: 'ç',
+    tipa: { kind: 'command', text: '\\c{c}' },
+    name: 'voiceless palatal fricative',
+    inventories: ['extended'],
+    category: 'consonant',
+    place: 'palatal',
+    manner: 'fricative',
+    voiced: false,
+  },
+  {
+    id: symbolId('b-implosive'),
+    ipa: 'ɓ',
+    tipa: { kind: 'macro', name: 'texthtb' },
+    name: 'voiced bilabial implosive',
+    inventories: ['extended'],
+    category: 'non-pulmonic',
+    place: 'bilabial',
+    manner: 'implosive',
+    voiced: true,
+  },
+  {
     id: symbolId('i-long'),
     ipa: 'iː',
     tipa: { kind: 'literal', text: 'i:' },
@@ -115,6 +137,7 @@ const placement = (symbol: PhoneSymbol): string => {
   switch (symbol.category) {
     case 'consonant':
     case 'affricate':
+    case 'non-pulmonic':
       return `${symbol.place} ${symbol.manner}`;
     case 'vowel':
       return `${symbol.height} ${symbol.backness}`;
@@ -137,6 +160,8 @@ const renderTipa = (encoding: TipaEncoding): string => {
       return `\\${encoding.name}{}`;
     case 'wrap':
       return `\\${encoding.name}{…}`;
+    case 'command':
+      return encoding.text;
     default:
       return assertNever(encoding);
   }
@@ -149,6 +174,8 @@ describe('inventory types', () => {
       'postalveolar fricative',
       'alveolar lateral-approximant',
       'postalveolar affricate',
+      'palatal fricative',
+      'bilabial implosive',
       'close front',
       'closing',
       'primary-stress',
@@ -156,11 +183,13 @@ describe('inventory types', () => {
     ]);
   });
 
-  it('distinguishes the three TIPA encoding kinds', () => {
+  it('distinguishes the four TIPA encoding kinds', () => {
     expect(fixtures.map((s) => renderTipa(s.tipa))).toEqual([
       'S',
       '\\textltilde{}',
       'tS',
+      '\\c{c}',
+      '\\texthtb{}',
       'i:',
       'eI',
       '"',
@@ -207,14 +236,16 @@ describe('inventory types', () => {
   });
 
   it('narrows PhoneSymbol to one variant per category', () => {
-    // Consonants and affricates share a variant, so narrow on both together.
+    // Consonants, affricates and non-pulmonics share a variant, so narrow on them together.
     type Narrow<C extends Category> = Extract<PhoneSymbol, { readonly category: C }>;
-    expectTypeOf<Narrow<'consonant' | 'affricate'>>().toEqualTypeOf<ConsonantSymbol>();
+    expectTypeOf<
+      Narrow<'consonant' | 'affricate' | 'non-pulmonic'>
+    >().toEqualTypeOf<ConsonantSymbol>();
     expectTypeOf<Narrow<'vowel'>>().toEqualTypeOf<VowelSymbol>();
     expectTypeOf<Narrow<'diphthong'>>().toEqualTypeOf<DiphthongSymbol>();
     expectTypeOf<Narrow<'suprasegmental'>>().toEqualTypeOf<SuprasegmentalSymbol>();
     expectTypeOf<Narrow<'diacritic'>>().toEqualTypeOf<DiacriticSymbol>();
-    expect(fixtures).toHaveLength(CATEGORIES.length + 1);
+    expect(fixtures).toHaveLength(CATEGORIES.length + 2);
   });
 
   it('rejects malformed symbols at compile time', () => {

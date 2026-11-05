@@ -19,6 +19,8 @@ interface AudioPlayerOptions {
   readonly output: AudioOutput;
   /** Per-symbol clips (M4.3). Without it, `playSymbol` reports `audio-unsupported`. */
   readonly symbols?: ClipSource<SymbolId> | undefined;
+  /** The symbols `symbols` has a clip for. Left out, every symbol is assumed to have one. */
+  readonly symbolIds?: ReadonlySet<SymbolId> | undefined;
   /** Word synthesis (M5.2). Without it, `playWord` reports `audio-unsupported`. */
   readonly words?: ClipSource<Word> | undefined;
 }
@@ -28,7 +30,12 @@ interface AudioPlayerOptions {
  * tracks that channel's lazy start-up status (FR-33), then plays the clip
  * through the output.
  */
-export const createAudioPlayer = ({ output, symbols, words }: AudioPlayerOptions): AudioPlayer => {
+export const createAudioPlayer = ({
+  output,
+  symbols,
+  symbolIds,
+  words,
+}: AudioPlayerOptions): AudioPlayer => {
   const initial = (source: ClipSource<never> | undefined): AudioStatus =>
     output.supported && source !== undefined ? 'idle' : 'unsupported';
   let status: Readonly<Record<AudioChannel, AudioStatus>> = {
@@ -94,6 +101,7 @@ export const createAudioPlayer = ({ output, symbols, words }: AudioPlayerOptions
         listeners.delete(listener);
       };
     },
+    canPlaySymbol: (id) => status.symbols !== 'unsupported' && (symbolIds?.has(id) ?? true),
     playSymbol: (id) => play('symbols', symbols, id),
     playWord: (word) => play('words', words, word),
   };

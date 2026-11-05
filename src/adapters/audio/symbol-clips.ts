@@ -32,6 +32,9 @@ const SYMBOL_CLIP_URLS = clipUrls(
   }),
 );
 
+/** The symbols that have a committed clip: the sounding RP symbols (ADR-0012). */
+export const SYMBOL_CLIP_IDS: ReadonlySet<SymbolId> = new Set(SYMBOL_CLIP_URLS.keys());
+
 interface SymbolClipOptions {
   readonly urls?: ReadonlyMap<SymbolId, string>;
   readonly fetchClip?: (url: string) => Promise<Response>;

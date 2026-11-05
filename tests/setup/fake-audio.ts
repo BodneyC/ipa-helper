@@ -21,6 +21,8 @@ export const fakeAudio = (
   };
   const playSymbol = vi.fn<AudioPlayer['playSymbol']>(() => Promise.resolve(result));
   const playWord = vi.fn<AudioPlayer['playWord']>(() => Promise.resolve(result));
+  /** Every symbol has a clip unless a test says otherwise (`mockImplementation`). */
+  const canPlaySymbol = vi.fn<AudioPlayer['canPlaySymbol']>(() => status.symbols !== 'unsupported');
   const audio: AudioPlayer = {
     get status() {
       return status;
@@ -34,6 +36,7 @@ export const fakeAudio = (
         listeners.delete(listener);
       };
     },
+    canPlaySymbol,
     playSymbol,
     playWord,
   };
@@ -43,5 +46,5 @@ export const fakeAudio = (
     progress = { ...progress, [channel]: fraction };
     notify();
   };
-  return { audio, playSymbol, playWord, set };
+  return { audio, canPlaySymbol, playSymbol, playWord, set };
 };

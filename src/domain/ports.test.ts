@@ -42,6 +42,7 @@ describe('NULL_AUDIO', () => {
     expect(NULL_AUDIO.progress).toEqual({ symbols: undefined, words: undefined });
     expect(NULL_AUDIO.subscribe(() => undefined)).not.toThrow();
     const unsupported = err({ kind: 'audio-unsupported' });
+    expect(NULL_AUDIO.canPlaySymbol(symbolId('esh'))).toBe(false);
     await expect(NULL_AUDIO.playSymbol(symbolId('esh'))).resolves.toEqual(unsupported);
     await expect(NULL_AUDIO.playWord([])).resolves.toEqual(unsupported);
   });

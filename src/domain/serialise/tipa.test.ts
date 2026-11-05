@@ -25,19 +25,21 @@ const ids = (...raw: string[]) => wordFromIds(raw.map(symbolId));
 const bare = createTipaSerialiser({ slashes: false, rDisplay: 'narrow' }, symbols);
 
 /** A key that identifies an encoding, for mapping tokenised TIPA back to symbols. */
-const keyOf = (t: TipaEncoding): string => `${t.kind}:${t.kind === 'literal' ? t.text : t.name}`;
+const keyOf = (t: TipaEncoding): string =>
+  `${t.kind}:${t.kind === 'literal' || t.kind === 'command' ? t.text : t.name}`;
 
 /**
  * Test-only reference tokeniser for the TIPA subset the serialiser emits
  * (ADR-0008). It reads literals greedily, longest first, as TeX + TIPA does;
- * `{}` as a separator; `\name{}` as a macro; and `\name{…}` as a wrap around
- * its contents. It returns encoding keys in token order (a wrap after the
- * tokens it encloses), and throws on anything it doesn't recognise.
+ * `{}` as a separator; a known command (`\c{c}`) as itself; `\name{}` as a
+ * macro; and `\name{…}` as a wrap around its contents. It returns encoding keys
+ * in token order (a wrap after the tokens it encloses), and throws on anything
+ * it doesn't recognise.
  */
 const tokenise = (tipa: string, encodings: readonly TipaEncoding[]): readonly string[] => {
-  const literals = encodings
-    .flatMap((e) => (e.kind === 'literal' ? [e.text] : []))
-    .toSorted((a, b) => b.length - a.length);
+  const longestFirst = (texts: readonly string[]) => texts.toSorted((a, b) => b.length - a.length);
+  const literals = longestFirst(encodings.flatMap((e) => (e.kind === 'literal' ? [e.text] : [])));
+  const commands = longestFirst(encodings.flatMap((e) => (e.kind === 'command' ? [e.text] : [])));
   const wraps = new Set(encodings.flatMap((e) => (e.kind === 'wrap' ? [e.name] : [])));
   let i = 0;
 
@@ -53,6 +55,10 @@ const tokenise = (tipa: string, encodings: readonly TipaEncoding[]): readonly st
         i += 2;
       } else if (tipa[i] === '}' && insideGroup) {
         return out;
+      } else if (commands.some((c) => tipa.startsWith(c, i))) {
+        const command = commands.find((c) => tipa.startsWith(c, i)) ?? '';
+        i += command.length;
+        out.push(`command:${command}`);
       } else if (tipa[i] === '\\') {
         i += 1;
         const word = /^[a-zA-Z]+/.exec(tipa.slice(i))?.[0] ?? tipa.charAt(i);
@@ -78,6 +84,13 @@ const tokenise = (tipa: string, encodings: readonly TipaEncoding[]): readonly st
 
   return sequence(false);
 };
+
+/**
+ * Under the broad display, the British r and the trill r are both written `r`
+ * (Q-3), so their TIPA can't tell them apart. Round trips compare against this.
+ */
+const canonical = (ids: readonly SymbolId[], rDisplay: RDisplay): readonly SymbolId[] =>
+  rDisplay === 'broad' ? ids.map((id) => (id === symbolId('turned-r') ? symbolId('r') : id)) : ids;
 
 /** Tokenises serialiser output back to symbol IDs. */
 const decode = (tipa: string, rDisplay: RDisplay): readonly SymbolId[] => {
@@ -142,6 +155,12 @@ describe('TIPA serialiser', () => {
     expect(bare.serialise(ids('tilde', 'p'))).toBe('\\~{}p');
   });
 
+  it('ADR-0012: writes a command as it is, needing no separator either side', () => {
+    expect(bare.serialise(ids('c-cedilla'))).toBe('\\c{c}');
+    expect(bare.serialise(ids('i', 'c-cedilla', 'a'))).toBe('i\\c{c}a');
+    expect(bare.serialise(ids('c-cedilla', 'tilde'))).toBe('\\~{\\c{c}}');
+  });
+
   it('Q-2: can add slashes inside the macro argument', () => {
     const slashed = createTipaSerialiser({ slashes: true, rDisplay: 'narrow' });
     expect(slashed.serialise(ids('esh'))).toBe('/S/');
@@ -181,7 +200,7 @@ describe('TIPA serialiser', () => {
     fc.assert(
       fc.property(anyWord, anyRDisplay, (word, rDisplay) => {
         const tipa = createTipaSerialiser({ slashes: false, rDisplay }, symbols);
-        expect(decode(tipa.serialise(word), rDisplay)).toEqual(idsOf(word));
+        expect(decode(tipa.serialise(word), rDisplay)).toEqual(canonical(idsOf(word), rDisplay));
       }),
     );
   });

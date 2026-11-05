@@ -117,6 +117,17 @@
   inset: 3rem 3.5rem 1.75rem;
 }
 
+/* Three-vowel clusters (full IPA): more room at the edges and between points. */
+.trapezoid[data-widest='wide'] {
+  min-width: 38rem;
+  max-width: 54rem;
+  height: 28rem;
+}
+
+.trapezoid[data-widest='wide'] .plot {
+  inset-inline: 5.5rem;
+}
+
 .outline {
   position: absolute;
   inset: 0;

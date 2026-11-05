@@ -8,9 +8,9 @@ import {
   vowelTrapezoid,
 } from './chart';
 import type { ChartSlot } from './chart';
-import { CONSONANTS } from './consonants';
+import { CONSONANTS, EXTENDED_CONSONANTS } from './consonants';
 import { BACKNESSES, HEIGHTS } from './types';
-import { VOWELS } from './vowels';
+import { EXTENDED_VOWELS, VOWELS } from './vowels';
 
 const ipa = (slot: ChartSlot | undefined): string =>
   slot === undefined
@@ -146,5 +146,52 @@ describe('vowel trapezoid (FR-1)', () => {
   it('places every vowel exactly once', () => {
     expect(clusters.flatMap((c) => c.symbols)).toHaveLength(VOWELS.length);
     expect(vowelTrapezoid([])).toEqual([]);
+  });
+});
+
+describe('full IPA charts (FR-1, SPEC §7.6)', () => {
+  const full = consonantChart([...CONSONANTS, ...EXTENDED_CONSONANTS]);
+  const cell = (manner: string, place: string) => {
+    const row = full.rows[full.manners.findIndex((m) => m === manner)];
+    const found = row?.[full.places.findIndex((p) => p === place)];
+    return found === undefined ? '?' : `${ipa(found.voiceless)} ${ipa(found.voiced)}`;
+  };
+
+  it('uses every place column and every pulmonic manner row', () => {
+    expect(full.places).toHaveLength(12);
+    expect(full.manners).toEqual([
+      'plosive',
+      'nasal',
+      'trill',
+      'tap',
+      'fricative',
+      'lateral-fricative',
+      'approximant',
+      'lateral-approximant',
+    ]);
+  });
+
+  it('fills the cells as the IPA chart does', () => {
+    expect(cell('plosive', 'retroflex')).toBe('ʈ ɖ');
+    expect(cell('plosive', 'uvular')).toBe('q ɢ');
+    expect(cell('plosive', 'glottal')).toBe('ʔ impossible');
+    expect(cell('trill', 'bilabial')).toBe('empty ʙ');
+    expect(cell('fricative', 'palatal')).toBe('ç ʝ');
+    expect(cell('fricative', 'pharyngeal')).toBe('ħ ʕ');
+    expect(cell('lateral-fricative', 'alveolar')).toBe('ɬ ɮ');
+    expect(cell('lateral-approximant', 'velar')).toBe('empty ʟ');
+    expect(cell('nasal', 'pharyngeal')).toBe('impossible impossible');
+  });
+
+  it('places the extra vowels with the RP ones, without collisions', () => {
+    const clusters = vowelTrapezoid([...VOWELS, ...EXTENDED_VOWELS]);
+    const at = (height: string, backness: string) =>
+      clusters
+        .find((c) => c.height === height && c.backness === backness)
+        ?.symbols.map((s) => s.ipa)
+        .join(' ');
+    expect(at('close', 'front')).toBe('i iː y');
+    expect(at('open-mid', 'back')).toBe('ʌ ɔ ɔː');
+    expect(at('open', 'front')).toBe('a ɶ');
   });
 });

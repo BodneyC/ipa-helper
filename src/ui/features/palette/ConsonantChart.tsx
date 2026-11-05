@@ -6,13 +6,14 @@ import type { ChartSlot } from '../../../domain/inventory/chart';
 import type { ConsonantSymbol, PhoneSymbol } from '../../../domain/inventory/types';
 import { labelsOf } from '../../../domain/serialise/labels';
 import type { RDisplay } from '../../../domain/serialise/serialiser';
+import type { SymbolPlayer } from '../audio/use-audio';
 
 interface ConsonantChartProps {
   readonly symbols: readonly ConsonantSymbol[];
   readonly rDisplay: RDisplay;
   readonly onActivate: (symbol: PhoneSymbol) => void;
-  /** FR-30: plays a symbol; left out when audio is unavailable. */
-  readonly onPlay?: ((symbol: PhoneSymbol) => void) | undefined;
+  /** FR-30: plays symbols; left out when audio is unavailable. */
+  readonly player?: SymbolPlayer | undefined;
 }
 
 /**
@@ -20,7 +21,7 @@ interface ConsonantChartProps {
  * down; voiceless left and voiced right in each cell. Empty and impossible cells
  * look different. It's a real table, so screen readers announce the headers.
  */
-export function ConsonantChart({ symbols, rDisplay, onActivate, onPlay }: ConsonantChartProps) {
+export function ConsonantChart({ symbols, rDisplay, onActivate, player }: ConsonantChartProps) {
   const { places, manners, rows } = consonantChart(symbols);
 
   const renderSlot = (slot: ChartSlot, voicing: string) => {
@@ -34,7 +35,7 @@ export function ConsonantChart({ symbols, rDisplay, onActivate, onPlay }: Conson
                 symbol={symbol}
                 labels={labelsOf(symbol, rDisplay)}
                 onActivate={onActivate}
-                onPlay={onPlay}
+                player={player}
               />
             ))}
           </span>

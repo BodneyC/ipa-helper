@@ -21,6 +21,7 @@ import type { RDisplay } from '../../../domain/serialise/serialiser';
 import { useAnnounce } from '../../components/Announcer';
 import { Card } from '../../components/Card';
 import { useRovingFocus } from '../../components/roving-focus';
+import type { SymbolPlayer } from '../audio/use-audio';
 
 export interface PaletteProps {
   readonly inventory: InventoryId;
@@ -32,8 +33,8 @@ export interface PaletteProps {
   readonly onToggleGroup: (group: Category) => void;
   /** FR-10: a key was activated. */
   readonly onActivate: (symbol: PhoneSymbol) => void;
-  /** FR-30: plays a symbol; left out when audio is unavailable. */
-  readonly onPlay?: ((symbol: PhoneSymbol) => void) | undefined;
+  /** FR-30: plays symbols; left out when audio is unavailable. */
+  readonly player?: SymbolPlayer | undefined;
 }
 
 const isConsonant = (s: PhoneSymbol): s is ConsonantSymbol =>
@@ -51,7 +52,7 @@ export function Palette({
   collapsedGroups,
   onToggleGroup,
   onActivate,
-  onPlay,
+  player,
 }: PaletteProps) {
   const symbols = symbolsIn(inventory).filter((s) => matchesFilter(s, query, rDisplay));
   const filtering = query.trim() !== '';
@@ -63,7 +64,7 @@ export function Palette({
   };
 
   const body = (group: Group, members: readonly PhoneSymbol[]) => {
-    const props = { rDisplay, onActivate: activate, onPlay };
+    const props = { rDisplay, onActivate: activate, player };
     switch (group.layout) {
       case 'chart':
         return <ConsonantChart symbols={members.filter(isConsonant)} {...props} />;
@@ -108,7 +109,8 @@ export function Palette({
               group.layout === 'chart'
                 ? styles['wide']
                 : group.layout === 'vowels'
-                  ? styles['double']
+                  ? // The full IPA's trapezoid is wider than two columns.
+                    styles[inventory === 'extended' ? 'wide' : 'double']
                   : undefined
             }
           >

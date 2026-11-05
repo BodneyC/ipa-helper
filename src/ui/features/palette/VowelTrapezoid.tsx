@@ -7,13 +7,14 @@ import { TRAPEZOID_OUTLINE, trapezoidPoint, vowelTrapezoid } from '../../../doma
 import type { PhoneSymbol, VowelSymbol } from '../../../domain/inventory/types';
 import { labelsOf } from '../../../domain/serialise/labels';
 import type { RDisplay } from '../../../domain/serialise/serialiser';
+import type { SymbolPlayer } from '../audio/use-audio';
 
 interface VowelTrapezoidProps {
   readonly symbols: readonly VowelSymbol[];
   readonly rDisplay: RDisplay;
   readonly onActivate: (symbol: PhoneSymbol) => void;
-  /** FR-30: plays a symbol; left out when audio is unavailable. */
-  readonly onPlay?: ((symbol: PhoneSymbol) => void) | undefined;
+  /** FR-30: plays symbols; left out when audio is unavailable. */
+  readonly player?: SymbolPlayer | undefined;
 }
 
 const percent = (n: number) => `${String(n * 100)}%`;
@@ -39,11 +40,18 @@ const COLUMN_LABELS = (['front', 'central', 'back'] as const).map((backness) => 
  * Keys are in reading order (close to open, front to back) for keyboard users,
  * and each key's name says where it sits.
  */
-export function VowelTrapezoid({ symbols, rDisplay, onActivate, onPlay }: VowelTrapezoidProps) {
+export function VowelTrapezoid({ symbols, rDisplay, onActivate, player }: VowelTrapezoidProps) {
   const captionId = useId();
+  const clusters = vowelTrapezoid(symbols);
+  // The full IPA puts three vowels at some points (i iː y); the chart widens to fit.
+  const widest = Math.max(0, ...clusters.map((c) => c.symbols.length));
   return (
     <div className={styles['scroll']}>
-      <figure className={styles['trapezoid']} aria-labelledby={captionId}>
+      <figure
+        className={styles['trapezoid']}
+        aria-labelledby={captionId}
+        data-widest={widest > 2 ? 'wide' : undefined}
+      >
         <figcaption id={captionId} className="visuallyHidden">
           Vowel chart: close vowels at the top, open at the bottom; front on the left, back on the
           right.
@@ -78,7 +86,7 @@ export function VowelTrapezoid({ symbols, rDisplay, onActivate, onPlay }: VowelT
             </span>
           ))}
           <ul className={styles['clusters']}>
-            {vowelTrapezoid(symbols).map((cluster) => (
+            {clusters.map((cluster) => (
               <li
                 key={`${cluster.height} ${cluster.backness}`}
                 className={styles['cluster']}
@@ -90,7 +98,7 @@ export function VowelTrapezoid({ symbols, rDisplay, onActivate, onPlay }: VowelT
                     symbol={symbol}
                     labels={labelsOf(symbol, rDisplay)}
                     onActivate={onActivate}
-                    onPlay={onPlay}
+                    player={player}
                   />
                 ))}
               </li>

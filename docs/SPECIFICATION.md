@@ -1,6 +1,6 @@
 # ipa-helper — Specification
 
-Status: **Draft v1** · Owner: repository maintainer · Last updated: 2026-11-04
+Status: **Draft v1** · Owner: repository maintainer · Last updated: 2026-11-05
 
 Requirement IDs (`FR-x`, `NFR-x`) are stable. Roadmap tasks and tests refer to
 them. Don't renumber them. Mark withdrawn requirements as *Withdrawn* instead
@@ -56,21 +56,28 @@ pronounced in British English, at no cost and without signing up for anything.
      articulation, rows are manner, and voiceless/voiced pairs share a cell
      (voiceless on the left). Cells that are empty or physically impossible are shown as such.
   2. **Affricates**: `tʃ dʒ` (plus `ts dz` in `extended`).
-  3. **Vowels (monophthongs)**: shown on a **vowel trapezoid** (front–central–back
+  3. **Non-pulmonic consonants** (`extended` only): clicks and implosives, as
+     in the IPA chart's separate table.
+  4. **Vowels (monophthongs)**: shown on a **vowel trapezoid** (front–central–back
      × close–open), with rounded/unrounded pairs side by side. Long variants (`iː`, `ɑː`,
      `ɔː`, `uː`, `ɜː`) are offered next to their short counterparts.
-  4. **Diphthongs**: `eɪ aɪ ɔɪ əʊ aʊ ɪə eə ʊə` (British set).
-  5. **Suprasegmentals**: primary stress `ˈ`, secondary stress `ˌ`, length `ː`,
+  5. **Diphthongs**: `eɪ aɪ ɔɪ əʊ aʊ ɪə eə ʊə` (British set).
+  6. **Suprasegmentals**: primary stress `ˈ`, secondary stress `ˌ`, length `ː`,
      half-length `ˑ`, syllable break `.`.
-  6. **Diacritics** (`extended` only, milestone M6): syllabic, nasalised,
+  7. **Diacritics** (`extended` only, milestone M6): syllabic, nasalised,
      voiceless, aspirated, and so on.
 - **FR-2** Each symbol key shows the glyph prominently, with a small secondary
   label. On hover, focus or long-press it shows a tooltip/popover with:
   the IPA name (e.g. "voiceless postalveolar fricative"), a British example word with
   the relevant letters highlighted (e.g. "**sh**ip"), and the TIPA encoding.
+  *As built: the secondary label is the example word. Marks show their name
+  instead. Sounds without a British example (most of the `extended` inventory)
+  show no secondary label, because their chart position already says what they
+  are. Their name is still in the tooltip and the accessible name.*
 - **FR-3** An inventory switch chooses between **British English (RP)**, the
   default, and **Full IPA**. The RP view hides symbols outside the inventory. It does
-  not just grey them out.
+  not just grey them out. *As built (M6.1): the choice is remembered. Full IPA
+  sounds that have no recorded clip (FR-30) have no play affordance.*
 - **FR-4** A filter box narrows the palette by symbol, name, example word or
   TIPA code (e.g. typing `fric` or `S` finds `ʃ`).
   Glyphs and TIPA codes match as case-sensitive substrings (`S` finds `ʃ`, `s`
@@ -293,6 +300,48 @@ This adds the rest of the IPA pulmonic consonants, the remaining cardinal
 vowels, the non-pulmonic consonants and the diacritics. For anything outside TIPA's
 single-character shortcuts, prefer the **long-form macros** (`\textturnh`,
 `\textbeltl`, `\textrtailn`, …). Every entry needs a compile test.
+
+Extended symbols have no example word (the examples are British). The model
+details are in ADR-0012. TIPA can't typeset the labiodental flap `ⱱ`, so it is
+left out. `ç` is `\c{c}`, because TIPA's shortcut `C` is `ɕ`.
+
+**Pulmonic consonants** added to §7.1:
+
+| IPA | TIPA | | IPA | TIPA | | IPA | TIPA | | IPA | TIPA |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ʈ | `\textrtailt{}` | | ɖ | `\textrtaild{}` | | c | `c` | | ɟ | `\textbardotlessj{}` |
+| q | `q` | | ɢ | `\textscg{}` | | ɱ | `\textltailm{}` | | ɳ | `\textrtailn{}` |
+| ɲ | `\textltailn{}` | | ɴ | `\textscn{}` | | ʙ | `\textscb{}` | | r | `r` |
+| ʀ | `\textscr{}` | | ɾ | `\textfishhookr{}` | | ɽ | `\textrtailr{}` | | ɸ | `\textphi{}` |
+| β | `\textbeta{}` | | ʂ | `\textrtails{}` | | ʐ | `\textrtailz{}` | | ç | `\c{c}` |
+| ʝ | `\textctj{}` | | ʍ | `\textturnw{}` | | ɣ | `\textgamma{}` | | χ | `\textchi{}` |
+| ʁ | `\textinvscr{}` | | ħ | `\textcrh{}` | | ʕ | `\textrevglotstop{}` | | ɦ | `\texthth{}` |
+| ɬ | `\textbeltl{}` | | ɮ | `\textlyoghlig{}` | | ʋ | `\textscriptv{}` | | ɻ | `\textturnrrtail{}` |
+| ɰ | `\textturnmrleg{}` | | ɭ | `\textrtaill{}` | | ʎ | `\textturny{}` | | ʟ | `\textscl{}` |
+
+**Affricates** added to §7.2: `ts` (`ts`), `dz` (`dz`).
+
+**Non-pulmonic consonants**:
+
+| IPA | TIPA | Name | | IPA | TIPA | Name |
+| --- | --- | --- | --- | --- | --- | --- |
+| ʘ | `\textbullseye{}` | bilabial click | | ɓ | `\texthtb{}` | bilabial implosive |
+| ǀ | `\textpipe{}` | dental click | | ɗ | `\texthtd{}` | alveolar implosive |
+| ǃ | `!` | postalveolar click | | ʄ | `\texthtbardotlessj{}` | palatal implosive |
+| ǂ | `\textdoublebarpipe{}` | palatoalveolar click | | ɠ | `\texthtg{}` | velar implosive |
+| ǁ | `\textdoublepipe{}` | alveolar lateral click | | ʛ | `\texthtscg{}` | uvular implosive |
+
+Ejectives are written with the ejective diacritic `ʼ` (`'`), e.g. `pʼ`.
+
+**Vowels** added to §7.3:
+
+| IPA | TIPA | | IPA | TIPA | | IPA | TIPA | | IPA | TIPA |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| y | `y` | | ɨ | `\textbari{}` | | ʉ | `\textbaru{}` | | ɯ | `\textturnm{}` |
+| ʏ | `\textscy{}` | | ø | `\o{}` | | ɘ | `\textreve{}` | | ɵ | `\textbaro{}` |
+| ɤ | `\textramshorns{}` | | o | `o` | | œ | `\oe{}` | | ɜ | `\textrevepsilon{}` |
+| ɞ | `\textcloserevepsilon{}` | | ɔ | `\textopeno{}` | | a | `a` | | ɶ | `\OE{}` |
+| ɑ | `\textscripta{}` | | | | | | | | | |
 
 ## 8. Out of scope (v1)
 

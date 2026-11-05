@@ -16,6 +16,13 @@ export interface Group {
 export const GROUPS: readonly Group[] = [
   { category: 'consonant', title: 'Consonants', accent: 'consonant', layout: 'chart' },
   { category: 'affricate', title: 'Affricates', accent: 'affricate', layout: 'grid' },
+  // Full IPA only. Consonants too, so they share the consonant accent (SPEC §6).
+  {
+    category: 'non-pulmonic',
+    title: 'Non-pulmonic consonants',
+    accent: 'consonant',
+    layout: 'grid',
+  },
   { category: 'vowel', title: 'Vowels', accent: 'vowel', layout: 'vowels' },
   { category: 'diphthong', title: 'Diphthongs', accent: 'diphthong', layout: 'grid' },
   { category: 'suprasegmental', title: 'Suprasegmentals', accent: 'supra', layout: 'grid' },

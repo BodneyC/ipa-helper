@@ -70,7 +70,7 @@
 }
 
 .select {
-  width: 5.5rem; /* fits "Full IPA"; the open list shows the full option text */
+  width: auto; /* sizes to its longest option, "Full IPA"; the filter gives way instead */
 }
 
 .filter {

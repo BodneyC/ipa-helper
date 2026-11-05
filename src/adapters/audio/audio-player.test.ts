@@ -54,6 +54,16 @@ describe('audio player', () => {
     expect(play).toHaveBeenCalledWith(CLIP);
   });
 
+  it('ADR-0012: can play only the symbols its clip source covers', () => {
+    const symbols = vi.fn<ClipSource<typeof ESH>>(() => Promise.resolve(ok(CLIP)));
+    const output = fakeOutput().output;
+    const covered = createAudioPlayer({ output, symbols, symbolIds: new Set([ESH]) });
+    expect(covered.canPlaySymbol(ESH)).toBe(true);
+    expect(covered.canPlaySymbol(symbolId('c-cedilla'))).toBe(false);
+    expect(createAudioPlayer({ output, symbols }).canPlaySymbol(symbolId('c-cedilla'))).toBe(true);
+    expect(createAudioPlayer({ output }).canPlaySymbol(ESH)).toBe(false);
+  });
+
   it('reports channels without a source, or without Web Audio, as unsupported', async () => {
     const unsupported = err({ kind: 'audio-unsupported' });
     const noSources = createAudioPlayer({ output: fakeOutput().output });

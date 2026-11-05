@@ -32,13 +32,18 @@ test.describe('inventory and filter (FR-3, FR-4)', () => {
     await expect(palette.getByRole('heading', { level: 3 })).toHaveCount(5);
   });
 
-  test('FR-3: the inventory switch shows RP; Full IPA is not available yet', async ({ page }) => {
+  test('FR-3: RP hides full-IPA symbols, and Full IPA shows them to the filter', async ({
+    page,
+  }) => {
     const inventory = page.getByRole('combobox', { name: 'Inventory' });
+    const filter = page.getByRole('searchbox', { name: 'Filter symbols' });
     await expect(inventory).toHaveValue('rp');
-    await expect(inventory.getByRole('option', { name: /Full IPA/ })).toHaveJSProperty(
-      'disabled',
-      true,
-    );
+    await filter.fill('retroflex');
+    await expect(page.getByText('No symbols match “retroflex”.')).toBeVisible();
+    await inventory.selectOption({ label: 'Full IPA' });
+    await expect(page.getByText('8 symbols match “retroflex”.')).toBeVisible();
+    await expect(page.getByRole('button', { name: /^ʈ\s?,/ })).toBeVisible();
+    await expectNoA11yViolations(page);
   });
 
   test('the top bar fits a 360 px phone', async ({ page }) => {
