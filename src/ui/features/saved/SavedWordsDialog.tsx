@@ -12,6 +12,7 @@ import {
   savedWordsReducer,
 } from '../../../state/saved-words';
 import type { SavedWord } from '../../../state/saved-words';
+import { glyphsOf } from '../../../state/settings';
 import { useAnnounce } from '../../components/Announcer';
 import { Dialog } from '../../components/Dialog';
 
@@ -43,7 +44,7 @@ export function SavedWordsDialog({ open, onClose }: SavedWordsDialogProps) {
     saveSavedWords(store, list);
   }, [store, list]);
 
-  const ipa = createIpaSerialiser({ slashes: true, rDisplay: settings.rDisplay });
+  const ipa = createIpaSerialiser({ slashes: true, ...glyphsOf(settings) });
   const ipaOf = (entry: SavedWord) => {
     const word = decodeWord(entry.fragment);
     return word.ok ? ipa.serialise(word.value) : '';

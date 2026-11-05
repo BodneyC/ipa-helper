@@ -14,7 +14,7 @@ const renderPalette = (rDisplay: 'narrow' | 'broad' = 'narrow', query = '') => {
   const view = render(
     <Palette
       inventory="rp"
-      rDisplay={rDisplay}
+      glyphs={{ rDisplay, tieBars: false }}
       query={query}
       collapsedGroups={[]}
       onToggleGroup={onToggleGroup}
@@ -108,7 +108,7 @@ describe('<Palette>', () => {
       <AnnouncerProvider>
         <Palette
           inventory="rp"
-          rDisplay="broad"
+          glyphs={{ rDisplay: 'broad', tieBars: false }}
           query=""
           collapsedGroups={[]}
           onToggleGroup={vi.fn()}
@@ -140,7 +140,7 @@ describe('<Palette>', () => {
     const { unmount } = render(
       <Palette
         inventory="rp"
-        rDisplay="narrow"
+        glyphs={{ rDisplay: 'narrow', tieBars: false }}
         query="zzz"
         collapsedGroups={[]}
         onToggleGroup={vi.fn()}
@@ -167,7 +167,7 @@ describe('<Palette>', () => {
 
     const props = {
       inventory: 'rp',
-      rDisplay: 'narrow',
+      glyphs: { rDisplay: 'narrow', tieBars: false } as const,
       onToggleGroup,
       onActivate: vi.fn(),
     } as const;

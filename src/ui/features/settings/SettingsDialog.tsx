@@ -140,6 +140,23 @@ export function SettingsDialog({ open, onClose, onHelp }: SettingsDialogProps) {
         />
 
         <fieldset className={styles['fieldset']}>
+          <legend className={styles['legend']}>Affricates</legend>
+          <label className={styles['option']}>
+            <input
+              type="checkbox"
+              checked={settings.tieBars}
+              onChange={(event) => {
+                update({ tieBars: event.target.checked });
+              }}
+            />
+            <span className={styles['optionText']}>
+              Write with a tie bar: <span className={styles['ipa']}>t͡ʃ</span>,{' '}
+              <code>\t{'{tS}'}</code>
+            </span>
+          </label>
+        </fieldset>
+
+        <fieldset className={styles['fieldset']}>
           <legend className={styles['legend']}>Sound</legend>
           <label className={styles['option']}>
             <input

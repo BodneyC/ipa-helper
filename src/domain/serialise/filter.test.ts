@@ -6,10 +6,12 @@ import { SYMBOLS, symbolById, symbolsIn } from '../inventory';
 import { symbolId } from '../inventory/symbol-id';
 import type { PhoneSymbol } from '../inventory/types';
 
+const NARROW = { rDisplay: 'narrow', tieBars: false } as const;
+
 /** Filters the RP palette, as the default view does (FR-3). */
-const find = (query: string, rDisplay: 'narrow' | 'broad' = 'narrow') =>
+const find = (query: string, rDisplay: 'narrow' | 'broad' = 'narrow', tieBars = false) =>
   symbolsIn('rp')
-    .filter((s) => matchesFilter(s, query, rDisplay))
+    .filter((s) => matchesFilter(s, query, { rDisplay, tieBars }))
     .map((s) => s.ipa);
 
 const sym = (id: string): PhoneSymbol => {
@@ -31,9 +33,9 @@ describe('matchesFilter (FR-4)', () => {
   });
 
   it('matches TIPA case-sensitively', () => {
-    expect(matchesFilter(sym('esh'), 'S', 'narrow')).toBe(true);
-    expect(matchesFilter(sym('ash'), '\\ae', 'narrow')).toBe(true);
-    expect(matchesFilter(sym('turned-v'), '2', 'narrow')).toBe(true);
+    expect(matchesFilter(sym('esh'), 'S', NARROW)).toBe(true);
+    expect(matchesFilter(sym('ash'), '\\ae', NARROW)).toBe(true);
+    expect(matchesFilter(sym('turned-v'), '2', NARROW)).toBe(true);
     expect(find('2')).toEqual(['ʌ']);
   });
 
@@ -54,18 +56,24 @@ describe('matchesFilter (FR-4)', () => {
     expect(find('r', 'broad')).toContain('ɹ');
   });
 
+  it('M6.5: finds a tie-barred affricate by its glyph with or without the tie bar', () => {
+    expect(find('tʃ', 'narrow', true)).toEqual(['tʃ']);
+    expect(find('t\u0361ʃ', 'narrow', true)).toEqual(['tʃ']);
+    expect(find('\\t{tS}', 'narrow', true)).toEqual(['tʃ']);
+  });
+
   it('matches everything for a blank query', () => {
     fc.assert(
       fc.property(fc.stringMatching(/^\s*$/), (blank) => {
-        expect(SYMBOLS.every((s) => matchesFilter(s, blank, 'narrow'))).toBe(true);
+        expect(SYMBOLS.every((s) => matchesFilter(s, blank, NARROW))).toBe(true);
       }),
     );
   });
 
   it('every symbol is found by its own glyph and by its own name', () => {
     for (const s of SYMBOLS) {
-      expect(matchesFilter(s, s.ipa, 'narrow')).toBe(true);
-      expect(matchesFilter(s, s.name, 'narrow')).toBe(true);
+      expect(matchesFilter(s, s.ipa, NARROW)).toBe(true);
+      expect(matchesFilter(s, s.name, NARROW)).toBe(true);
     }
   });
 });

@@ -59,6 +59,17 @@ describe('<SettingsDialog> (FR-42)', () => {
     expect(current().rDisplay).toBe('broad');
   });
 
+  it('M6.5: turns tie bars on affricates on and off', async () => {
+    const { dialog, user } = setup();
+    const affricates = within(dialog).getByRole('group', { name: 'Affricates' });
+    const tie = within(affricates).getByRole('checkbox', { name: /^Write with a tie bar/ });
+    expect(tie).not.toBeChecked();
+    await user.click(tie);
+    expect(current().tieBars).toBe(true);
+    await user.click(tie);
+    expect(current().tieBars).toBe(false);
+  });
+
   it('FR-20, Q-2: sets both slash options', async () => {
     const { dialog, user } = setup();
     await user.click(within(dialog).getByRole('checkbox', { name: 'Copy IPA with slashes' }));

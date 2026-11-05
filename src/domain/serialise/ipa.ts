@@ -8,7 +8,7 @@ import type { PhoneSymbol } from '../inventory/types';
  * its base.
  */
 export const createIpaSerialiser = (
-  { slashes, rDisplay }: DisplayOptions,
+  { slashes, ...glyphs }: DisplayOptions,
   symbols?: readonly PhoneSymbol[],
 ): Serialiser => {
   const resolve = createResolver(symbols);
@@ -17,7 +17,7 @@ export const createIpaSerialiser = (
     serialise: (word) =>
       withSlashes(
         resolve(word)
-          .map((symbol) => rendering(symbol, rDisplay).ipa)
+          .map((symbol) => rendering(symbol, glyphs).ipa)
           .join(''),
         slashes,
       ),

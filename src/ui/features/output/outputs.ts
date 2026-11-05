@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { createIpaSerialiser } from '../../../domain/serialise/ipa';
 import { createTipaSerialiser } from '../../../domain/serialise/tipa';
 import { useEditor, useSettings } from '../../../state/hooks';
+import { glyphsOf } from '../../../state/settings';
 
 interface Outputs {
   readonly empty: boolean;
@@ -22,12 +23,12 @@ export const useOutputs = (): Outputs => {
   const { settings } = useSettings();
   const { word } = state;
   return useMemo(() => {
-    const { rDisplay } = settings;
-    const tipa = createTipaSerialiser({ slashes: settings.tipaSlashes, rDisplay }).serialise(word);
+    const glyphs = glyphsOf(settings);
+    const tipa = createTipaSerialiser({ slashes: settings.tipaSlashes, ...glyphs }).serialise(word);
     return {
       empty: word.length === 0,
-      ipaShown: createIpaSerialiser({ slashes: true, rDisplay }).serialise(word),
-      ipaCopied: createIpaSerialiser({ slashes: settings.ipaSlashes, rDisplay }).serialise(word),
+      ipaShown: createIpaSerialiser({ slashes: true, ...glyphs }).serialise(word),
+      ipaCopied: createIpaSerialiser({ slashes: settings.ipaSlashes, ...glyphs }).serialise(word),
       tipa,
       macro: `\\${settings.macroName}{${tipa}}`,
     };

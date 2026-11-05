@@ -10,9 +10,9 @@ const ids = (...raw: string[]) => wordFromIds(raw.map(symbolId));
 const thornic = ids('primary-stress', 'theta', 'open-o-long', 'n', 'small-cap-i', 'k');
 const trap = ids('t', 'turned-r', 'ash', 'p');
 
-const narrow = createIpaSerialiser({ slashes: true, rDisplay: 'narrow' });
-const bare = createIpaSerialiser({ slashes: false, rDisplay: 'narrow' });
-const broad = createIpaSerialiser({ slashes: true, rDisplay: 'broad' });
+const narrow = createIpaSerialiser({ slashes: true, rDisplay: 'narrow', tieBars: false });
+const bare = createIpaSerialiser({ slashes: false, rDisplay: 'narrow', tieBars: false });
+const broad = createIpaSerialiser({ slashes: true, rDisplay: 'broad', tieBars: false });
 
 const anyWord = fc.array(fc.constantFrom(...SYMBOLS.map((s) => s.id))).map(wordFromIds);
 
@@ -47,6 +47,13 @@ describe('IPA serialiser', () => {
     expect(bare.serialise(ids('p', 'ejective'))).toBe('pʼ');
   });
 
+  it('SPEC §7.2, M6.5: draws affricates with a tie bar when asked, and nothing else', () => {
+    const tied = createIpaSerialiser({ slashes: false, rDisplay: 'narrow', tieBars: true });
+    expect(tied.serialise(ids('tesh', 'dezh', 'ts', 't', 'esh'))).toBe(
+      't\u0361ʃd\u0361ʒt\u0361stʃ',
+    );
+  });
+
   it('concatenates each token’s IPA, and broad r only changes ɹ', () => {
     fc.assert(
       fc.property(anyWord, (word) => {
@@ -63,7 +70,10 @@ describe('IPA serialiser', () => {
 
   it('accepts its own symbol set', () => {
     const ezh = symbolById(symbolId('ezh'));
-    const custom = createIpaSerialiser({ slashes: false, rDisplay: 'narrow' }, ezh ? [ezh] : []);
+    const custom = createIpaSerialiser(
+      { slashes: false, rDisplay: 'narrow', tieBars: false },
+      ezh ? [ezh] : [],
+    );
     expect(custom.serialise(ids('ezh'))).toBe('ʒ');
     expect(() => custom.serialise(ids('esh'))).toThrow('unknown symbol ID: esh');
   });

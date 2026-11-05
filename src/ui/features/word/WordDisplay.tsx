@@ -45,7 +45,7 @@ export function WordDisplay() {
 
   const glyphs = word.map((token) => {
     const symbol = symbolById(token.symbolId);
-    return symbol === undefined ? '?' : labelsOf(symbol, settings.rDisplay).ipa;
+    return symbol === undefined ? '?' : labelsOf(symbol, settings).ipa;
   });
 
   const onKeyDown = (event: KeyboardEvent) => {

@@ -30,9 +30,12 @@ export function PasteDialog({ open, onClose }: PasteDialogProps) {
   const announce = useAnnounce();
   const ids = { input: useId(), feedback: useId() };
   const [text, setText] = useState('');
-  const { rDisplay } = settings;
+  const { rDisplay, tieBars } = settings;
   const tokenise = useMemo(() => createIpaTokeniser({ rDisplay }), [rDisplay]);
-  const ipa = useMemo(() => createIpaSerialiser({ slashes: true, rDisplay }), [rDisplay]);
+  const ipa = useMemo(
+    () => createIpaSerialiser({ slashes: true, rDisplay, tieBars }),
+    [rDisplay, tieBars],
+  );
   const result = tokenise(text);
   const usable = result.ok && result.value.length > 0;
 

@@ -12,7 +12,7 @@ interface PaletteWithAudioProps extends Omit<PaletteProps, 'player'> {
  * announcer, so a sound that fails to play is announced.
  */
 export function PaletteWithAudio({ soundOnSelect, onActivate, ...props }: PaletteWithAudioProps) {
-  const player = usePlaySymbol(props.rDisplay);
+  const player = usePlaySymbol(props.glyphs);
   return (
     <Palette
       {...props}

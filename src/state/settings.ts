@@ -2,7 +2,7 @@ import { CATEGORIES, INVENTORY_IDS } from '../domain/inventory/types';
 import type { Category, InventoryId } from '../domain/inventory/types';
 import type { KeyValueStore } from '../domain/ports';
 import { assertNever } from '../domain/result';
-import type { RDisplay } from '../domain/serialise/serialiser';
+import type { GlyphOptions, RDisplay } from '../domain/serialise/serialiser';
 
 /** FR-40: `system` follows `prefers-color-scheme`; the others override it. */
 export const THEMES = ['system', 'dark', 'light'] as const;
@@ -30,6 +30,8 @@ export interface Settings {
   readonly tipaSlashes: boolean;
   /** Q-3: display the British r as `ɹ` (narrow) or `r` (broad). */
   readonly rDisplay: RDisplay;
+  /** SPEC §7.2 (M6.5): write affricates with a tie bar, `t͡ʃ` and `\t{tS}`. */
+  readonly tieBars: boolean;
   /** FR-5: palette groups the user has collapsed. */
   readonly collapsedGroups: readonly Category[];
   /** FR-34: play each symbol as it is added. */
@@ -48,6 +50,7 @@ export const DEFAULT_SETTINGS: Settings = {
   ipaSlashes: true,
   tipaSlashes: false,
   rDisplay: 'narrow',
+  tieBars: false,
   collapsedGroups: [],
   soundOnSelect: false,
 };
@@ -79,6 +82,7 @@ const validators: { readonly [K in keyof Settings]: (value: unknown) => value is
   ipaSlashes: isBoolean,
   tipaSlashes: isBoolean,
   rDisplay: oneOf(R_DISPLAYS),
+  tieBars: isBoolean,
   collapsedGroups: isCategoryList,
   soundOnSelect: isBoolean,
 };
@@ -111,10 +115,14 @@ export const parseSettings = (value: unknown, fallback: Settings = DEFAULT_SETTI
     ipaSlashes: pick('ipaSlashes'),
     tipaSlashes: pick('tipaSlashes'),
     rDisplay: pick('rDisplay'),
+    tieBars: pick('tieBars'),
     collapsedGroups: pick('collapsedGroups'),
     soundOnSelect: pick('soundOnSelect'),
   };
 };
+
+/** The settings that change how symbols are drawn (keys, word, outputs). */
+export const glyphsOf = ({ rDisplay, tieBars }: Settings): GlyphOptions => ({ rDisplay, tieBars });
 
 /** Everything that can happen to the settings. */
 export type SettingsAction =

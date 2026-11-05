@@ -3,15 +3,19 @@ import type { SymbolId } from '../inventory/symbol-id';
 import type { PhoneSymbol } from '../inventory/types';
 import { err, ok } from '../result';
 import type { Result } from '../result';
+import { tieBarred } from '../serialise/serialiser';
 import type { RDisplay } from '../serialise/serialiser';
 import { wordFromIds } from '../word/word';
 import type { Word } from '../word/word';
 
 /** A character the tokeniser doesn't know (FR-17). */
 export interface UnknownCharacter {
-  /** The character: one code point, decomposed (NFD). */
+  /** The character: one code point. */
   readonly text: string;
-  /** Its position in the trimmed, decomposed input, counted in code points from 0. */
+  /**
+   * Its position in the trimmed input, counted in code points from 0, after
+   * unknown precomposed characters are decomposed.
+   */
   readonly index: number;
 }
 
@@ -21,24 +25,15 @@ interface TokeniserOptions {
   readonly rDisplay: RDisplay;
 }
 
-const TIE_BAR = '͡';
-
 /**
  * ASCII stand-ins people type for IPA characters: `g` for `ɡ` and `:` for `ː`,
  * so `i:` reads as `iː` (ADR-0012).
  */
 const asciiVariant = (ipa: string): string => ipa.replaceAll('ɡ', 'g').replaceAll('ː', ':');
 
-/** An affricate written with a tie bar, `t͡ʃ`, or `undefined` if it isn't two code points. */
-const tied = (symbol: PhoneSymbol): string | undefined => {
-  const [first, second, ...rest] = Array.from(symbol.ipa);
-  return symbol.category === 'affricate' &&
-    first !== undefined &&
-    second !== undefined &&
-    rest.length === 0
-    ? first + TIE_BAR + second
-    : undefined;
-};
+/** An affricate written with a tie bar, as in `t͡ʃ` (SPEC §7.2). */
+const tied = (symbol: PhoneSymbol): string | undefined =>
+  symbol.category === 'affricate' ? tieBarred(symbol.ipa) : undefined;
 
 /** Every spelling the tokeniser accepts, decomposed, mapped to its symbol. */
 const spellings = (
@@ -48,7 +43,7 @@ const spellings = (
   const map = new Map<string, SymbolId>();
   const add = (text: string | undefined, id: SymbolId, override = false) => {
     if (text === undefined) return;
-    const key = text.normalize('NFD');
+    const key = text.normalize('NFC');
     if (override || !map.has(key)) map.set(key, id);
   };
   // Real spellings first, so an alias never hides one.
@@ -75,7 +70,9 @@ const unwrap = (text: string): string => {
 
 /**
  * FR-17: reads pasted IPA into a word (ADR-0007, ADR-0012). The text is
- * decomposed (NFD), so a precomposed `ẽ` reads as `e` + nasalised. Surrounding
+ * composed (NFC), which puts stacked marks in canonical order without
+ * splitting a symbol such as `ç`; then any precomposed character that isn't a
+ * symbol is decomposed, so `ẽ` reads as `e` + nasalised. Surrounding
  * whitespace and one pair of `/…/` or `[…]` are ignored. At each position the
  * longest known spelling wins, so `tʃ` is the affricate and `iː` the long vowel.
  *
@@ -87,14 +84,25 @@ export const createIpaTokeniser = (
   symbols: readonly PhoneSymbol[] = SYMBOLS,
 ): ((text: string) => Result<Word, readonly UnknownCharacter[]>) => {
   const known = spellings(symbols, options);
-  /** The longest spelling, in code points. */
-  const longest = Math.max(0, ...[...known.keys()].map((k) => Array.from(k).length));
+  /** The longest spelling, in code points when decomposed. */
+  const longest = Math.max(
+    0,
+    ...[...known.keys()].map((k) => Array.from(k.normalize('NFD')).length),
+  );
   return (text) => {
-    const chars = Array.from(unwrap(text.normalize('NFD')));
+    const chars = Array.from(unwrap(text.normalize('NFC'))).flatMap((c) =>
+      known.has(c) ? [c] : Array.from(c.normalize('NFD')),
+    );
     /** The longest known spelling starting at `index`, as [code points, symbol]. */
     const matchAt = (index: number): readonly [number, SymbolId] | undefined => {
       for (let length = Math.min(longest, chars.length - index); length > 0; length--) {
-        const id = known.get(chars.slice(index, index + length).join(''));
+        // NFC, so `c` + U+0327 (from a decomposed ḉ, say) still finds ç.
+        const id = known.get(
+          chars
+            .slice(index, index + length)
+            .join('')
+            .normalize('NFC'),
+        );
         if (id !== undefined) return [length, id];
       }
       return undefined;

@@ -223,10 +223,12 @@ export interface Serialiser { readonly id: string; serialise(word: Word): string
 ```
 
 Serialisers are built by factories that take the display options
-(`{ slashes, rDisplay }`) and, optionally, the symbol set (defaults to the
+(`{ slashes, rDisplay, tieBars }`; `GlyphOptions` is the last two, which
+`labelsOf`, `matchesFilter` and the palette take too) and, optionally, the symbol set (defaults to the
 registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 `createTipaSerialiser(options, symbols?)`. Q-3's broad `r` is a rendering of the
-`turned-r` symbol, applied in both serialisers so the TIPA row shows the same glyphs (FR-22).
+`turned-r` symbol, applied in both serialisers so the TIPA row shows the same glyphs (FR-22). Tie bars (M6.5) are a rendering too: an affricate becomes `t͡ʃ` and a
+`\t{tS}` command (ADR-0012).
 
 - `ipaSerialiser`: concatenates `symbol.ipa`. A slashes option adds `/…/`.
 - `tipaSerialiser`: concatenates encodings and applies a **boundary-safety
@@ -252,14 +254,14 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `replace` (from URL or paste). The reducer is pure and fully unit-tested, with
   exhaustive `switch` statements guarded by `assertNever`.
 - **Settings store**: theme, contrast, inventory, macro name, slash option,
-  collapsed groups, r-display, sound-on-select. Persisted through the
+  collapsed groups, r-display, tie bars, sound-on-select. Persisted through the
   `KeyValueStore` port under a versioned key (`ipa-helper:settings:v1`) and
   validated on load with a hand-written type guard. No `JSON.parse` result is
   trusted without validation. `parseSettings` validates field by field: an invalid
   or missing field falls back to its default (or, in the reducer, its current
   value) without discarding the valid ones. Fields: `theme` (system|dark|light),
   `contrast`, `inventory`, `macroName` (letters only), `ipaSlashes` (FR-20),
-  `tipaSlashes` (Q-2), `rDisplay`, `collapsedGroups` (categories), `soundOnSelect`.
+  `tipaSlashes` (Q-2), `rDisplay`, `tieBars` (M6.5), `collapsedGroups` (categories), `soundOnSelect`.
   `main.tsx` reads them with `loadSettings(store)` before the first render;
   `<SettingsSync>` writes them back with `saveSettings` on every change.
 - **URL sync**: the editor word is mirrored to `location.hash`

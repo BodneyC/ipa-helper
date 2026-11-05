@@ -17,7 +17,7 @@ const setup = (soundOnSelect: boolean, player = fakeAudio(), inventory: Inventor
       <AnnouncerProvider>
         <PaletteWithAudio
           inventory={inventory}
-          rDisplay="narrow"
+          glyphs={{ rDisplay: 'narrow', tieBars: false }}
           query=""
           collapsedGroups={[]}
           onToggleGroup={() => undefined}

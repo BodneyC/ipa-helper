@@ -1,6 +1,5 @@
-import { assertNever } from '../result';
-import { rendering } from './serialiser';
-import type { RDisplay } from './serialiser';
+import { rendering, standalone } from './serialiser';
+import type { GlyphOptions } from './serialiser';
 import type { PhoneSymbol } from '../inventory/types';
 
 /** The dotted circle a diacritic is shown on when it stands alone (ADR-0012). */
@@ -20,17 +19,8 @@ export interface SymbolLabels {
 }
 
 /** The glyph and TIPA code a key shows for `symbol`. */
-export const labelsOf = (symbol: PhoneSymbol, rDisplay: RDisplay): SymbolLabels => {
-  const { ipa, tipa } = rendering(symbol, rDisplay);
+export const labelsOf = (symbol: PhoneSymbol, glyphs: GlyphOptions): SymbolLabels => {
+  const { ipa, tipa } = rendering(symbol, glyphs);
   const glyph = symbol.category === 'diacritic' ? DOTTED_CIRCLE + ipa : ipa;
-  switch (tipa.kind) {
-    case 'literal':
-    case 'command':
-      return { ipa, glyph, tipa: tipa.text };
-    case 'macro':
-    case 'wrap':
-      return { ipa, glyph, tipa: `\\${tipa.name}{}` };
-    default:
-      return assertNever(tipa);
-  }
+  return { ipa, glyph, tipa: standalone(tipa) };
 };

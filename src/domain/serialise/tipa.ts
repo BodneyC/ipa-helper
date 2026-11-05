@@ -58,14 +58,14 @@ const join = (pieces: readonly Piece[]): string =>
  *   `\~{e}`. With no preceding token it wraps an empty group.
  */
 export const createTipaSerialiser = (
-  { slashes, rDisplay }: DisplayOptions,
+  { slashes, ...glyphs }: DisplayOptions,
   symbols: readonly PhoneSymbol[] = SYMBOLS,
 ): Serialiser => {
   const resolve = createResolver(symbols);
   const literals = literalsOf(symbols);
 
   const append = (pieces: readonly Piece[], symbol: PhoneSymbol): readonly Piece[] => {
-    const { tipa } = rendering(symbol, rDisplay);
+    const { tipa } = rendering(symbol, glyphs);
     const last = pieces.at(-1);
     switch (tipa.kind) {
       case 'literal': {

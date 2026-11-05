@@ -9,7 +9,7 @@ import type { DisplayOptions } from '../../src/domain/serialise/serialiser';
 import { createTipaSerialiser } from '../../src/domain/serialise/tipa';
 import { wordFromIds } from '../../src/domain/word/word';
 
-const NARROW: DisplayOptions = { slashes: false, rDisplay: 'narrow' };
+const NARROW: DisplayOptions = { slashes: false, rDisplay: 'narrow', tieBars: false };
 const BASES = [symbolId('n'), symbolId('e')];
 
 /** The TIPA the app writes for a word of these symbols. */
@@ -20,12 +20,15 @@ const tipaOf = (ids: readonly SymbolId[], options: DisplayOptions = NARROW): str
 const row = (label: string, tipa: string) => `\\texttt{${label}} & \\ipa{${tipa}} \\\\`;
 
 /** Samples written as a run of `\ipa{…}` calls, wrapped by TeX. */
-const run = (words: readonly (readonly SymbolId[])[]) =>
-  words.map((ids) => `\\ipa{${tipaOf(ids)}}`).join(' ');
+const run = (words: readonly (readonly SymbolId[])[], options: DisplayOptions = NARROW) =>
+  words.map((ids) => `\\ipa{${tipaOf(ids, options)}}`).join(' ');
+
+const TIED: DisplayOptions = { ...NARROW, tieBars: true };
 
 /**
  * The whole document (M6.4):
- * - every symbol on its own, and the broad British r (Q-3);
+ * - every symbol on its own, the broad British r (Q-3), and each affricate
+ *   under a tie bar (M6.5), alone and next to every symbol;
  * - every diacritic on a consonant and a vowel, and every pair of diacritics
  *   stacked on one base;
  * - every ordered pair of symbols, so every boundary the serialiser can write
@@ -39,11 +42,24 @@ const run = (words: readonly (readonly SymbolId[])[]) =>
 export const symbolsTex = (): string => {
   const ids = SYMBOLS.map((s) => s.id);
   const marks = SYMBOLS.filter((s) => s.category === 'diacritic').map((s) => s.id);
+  const affricates = SYMBOLS.filter((s) => s.category === 'affricate').map((s) => s.id);
+  const tied = affricates
+    .map((a) =>
+      run(
+        ids.flatMap((b) => [
+          [a, b],
+          [b, a],
+        ]),
+        TIED,
+      ),
+    )
+    .join('\n\n');
   const rows = [
     ...SYMBOLS.map((s) => row(s.id, tipaOf([s.id]))),
     ...SYMBOLS.filter((s) => s.ipa === 'ɹ').map((s) =>
       row(`${s.id} (broad)`, tipaOf([s.id], { ...NARROW, rDisplay: 'broad' })),
     ),
+    ...affricates.map((id) => row(`${id} (tie bar)`, tipaOf([id], TIED))),
     ...marks.flatMap((mark) => BASES.map((base) => row(`${base}+${mark}`, tipaOf([base, mark])))),
   ].join('\n');
   const stacked = run(marks.flatMap((a) => marks.map((b) => [symbolId('n'), a, b])));
@@ -70,6 +86,8 @@ ${rows}
 \\section*{Stacked diacritics}
 \\raggedright
 ${stacked}
+\\section*{Tie-bar affricates next to every symbol}
+${tied}
 \\section*{Every ordered pair of symbols}
 ${pairs}
 \\end{document}

@@ -17,7 +17,7 @@ import type {
 import { assertNever } from '../../../domain/result';
 import { matchesFilter } from '../../../domain/serialise/filter';
 import { labelsOf } from '../../../domain/serialise/labels';
-import type { RDisplay } from '../../../domain/serialise/serialiser';
+import type { GlyphOptions } from '../../../domain/serialise/serialiser';
 import { useAnnounce } from '../../components/Announcer';
 import { Card } from '../../components/Card';
 import { useRovingFocus } from '../../components/roving-focus';
@@ -25,7 +25,8 @@ import type { SymbolPlayer } from '../audio/use-audio';
 
 export interface PaletteProps {
   readonly inventory: InventoryId;
-  readonly rDisplay: RDisplay;
+  /** How symbols are drawn: r-display (Q-3) and tie bars (M6.5). */
+  readonly glyphs: GlyphOptions;
   /** FR-4: the filter text; blank shows everything. */
   readonly query: string;
   /** FR-5: groups the user has collapsed. Ignored while filtering, so matches show. */
@@ -47,24 +48,24 @@ const isVowel = (s: PhoneSymbol): s is VowelSymbol => s.category === 'vowel';
  */
 export function Palette({
   inventory,
-  rDisplay,
+  glyphs,
   query,
   collapsedGroups,
   onToggleGroup,
   onActivate,
   player,
 }: PaletteProps) {
-  const symbols = symbolsIn(inventory).filter((s) => matchesFilter(s, query, rDisplay));
+  const symbols = symbolsIn(inventory).filter((s) => matchesFilter(s, query, glyphs));
   const filtering = query.trim() !== '';
   const announce = useAnnounce();
   // The word display isn't focused while keys are pressed, so say what changed.
   const activate = (symbol: PhoneSymbol) => {
     onActivate(symbol);
-    announce(`Added ${labelsOf(symbol, rDisplay).glyph}`);
+    announce(`Added ${labelsOf(symbol, glyphs).glyph}`);
   };
 
   const body = (group: Group, members: readonly PhoneSymbol[]) => {
-    const props = { rDisplay, onActivate: activate, player };
+    const props = { glyphs, onActivate: activate, player };
     switch (group.layout) {
       case 'chart':
         return <ConsonantChart symbols={members.filter(isConsonant)} {...props} />;

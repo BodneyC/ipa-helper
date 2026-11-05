@@ -1,7 +1,8 @@
 import { SYMBOLS } from '../inventory';
-import { lit } from '../inventory/encoding';
+import { command, lit } from '../inventory/encoding';
 import { symbolId } from '../inventory/symbol-id';
 import type { PhoneSymbol, TipaEncoding } from '../inventory/types';
+import { assertNever } from '../result';
 import type { Word } from '../word/word';
 
 /** Projects a word onto one output notation (ARCHITECTURE §4.1, ADR-0008). */
@@ -17,11 +18,17 @@ export interface Serialiser {
  */
 export type RDisplay = 'narrow' | 'broad';
 
+/** How symbols are drawn, wherever they appear: keys, the word, both outputs. */
+export interface GlyphOptions {
+  readonly rDisplay: RDisplay;
+  /** SPEC §7.2 (M6.5): write affricates with a tie bar, `t͡ʃ` and `\t{tS}`. */
+  readonly tieBars: boolean;
+}
+
 /** Options shared by the serialisers that show a transcription. */
-export interface DisplayOptions {
+export interface DisplayOptions extends GlyphOptions {
   /** Wrap the output in `/…/` (FR-20, Q-2). */
   readonly slashes: boolean;
-  readonly rDisplay: RDisplay;
 }
 
 /** What a serialiser writes for one token. */
@@ -54,9 +61,39 @@ export const createResolver = (
     });
 };
 
-/** How `symbol` is written under the display options (Q-3 r-display). */
-export const rendering = (symbol: PhoneSymbol, rDisplay: RDisplay): Rendering =>
-  rDisplay === 'broad' && symbol.id === TURNED_R ? BROAD_R : symbol;
+const TIE_BAR = '\u0361';
+
+/** `tʃ` → `t͡ʃ`: a tie bar after the first code point (SPEC §7.2). */
+export const tieBarred = (ipa: string): string => ipa.replace(/^(.)/su, `$1${TIE_BAR}`);
+
+/**
+ * A TIPA encoding written on its own, e.g. `S`, `\ae{}`, `\c{c}`, or a wrap
+ * around nothing, `\~{}`.
+ */
+export const standalone = (tipa: TipaEncoding): string => {
+  switch (tipa.kind) {
+    case 'literal':
+    case 'command':
+      return tipa.text;
+    case 'macro':
+    case 'wrap':
+      return `\\${tipa.name}{}`;
+    default:
+      return assertNever(tipa);
+  }
+};
+
+/**
+ * How `symbol` is written under the glyph options: the broad r (Q-3), and an
+ * affricate under a tie bar (SPEC §7.2), `t͡ʃ` in IPA and `\t{tS}` in TIPA.
+ */
+export const rendering = (symbol: PhoneSymbol, { rDisplay, tieBars }: GlyphOptions): Rendering => {
+  if (rDisplay === 'broad' && symbol.id === TURNED_R) return BROAD_R;
+  if (tieBars && symbol.category === 'affricate') {
+    return { ipa: tieBarred(symbol.ipa), tipa: command(`\\t{${standalone(symbol.tipa)}}`) };
+  }
+  return symbol;
+};
 
 /** Wraps `text` in slashes when asked to. */
 export const withSlashes = (text: string, slashes: boolean): string =>

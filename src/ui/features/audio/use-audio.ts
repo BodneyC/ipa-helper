@@ -4,7 +4,7 @@ import { isSounding } from '../../../domain/inventory/index';
 import type { PhoneSymbol } from '../../../domain/inventory/types';
 import type { AudioPlayer } from '../../../domain/ports';
 import { labelsOf } from '../../../domain/serialise/labels';
-import type { RDisplay } from '../../../domain/serialise/serialiser';
+import type { GlyphOptions } from '../../../domain/serialise/serialiser';
 import { useServices } from '../../../state/hooks';
 import { useAnnounce } from '../../components/Announcer';
 
@@ -34,17 +34,17 @@ export interface SymbolPlayer {
  * screen reader users either. `undefined` when this browser can't play symbols,
  * so callers can leave the play affordance out.
  */
-export const usePlaySymbol = (rDisplay: RDisplay): SymbolPlayer | undefined => {
+export const usePlaySymbol = (glyphs: GlyphOptions): SymbolPlayer | undefined => {
   const { audio } = useServices();
   const status = useAudioStatus();
   const announce = useAnnounce();
   const play = useCallback(
     (symbol: PhoneSymbol) => {
       void audio.playSymbol(symbol.id).then((result) => {
-        if (!result.ok) announce(`Couldn’t play ${labelsOf(symbol, rDisplay).ipa}`);
+        if (!result.ok) announce(`Couldn’t play ${labelsOf(symbol, glyphs).ipa}`);
       });
     },
-    [audio, announce, rDisplay],
+    [audio, announce, glyphs],
   );
   const canPlay = useCallback(
     (symbol: PhoneSymbol) => isSounding(symbol) && audio.canPlaySymbol(symbol.id),

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import styles from './App.module.css';
 import { SettingsSync } from './SettingsSync';
@@ -31,6 +31,9 @@ export function App() {
   const [pasteOpen, setPasteOpen] = useState(false);
   const [query, setQuery] = useState('');
   const filterRef = useRef<HTMLInputElement>(null);
+  const { rDisplay, tieBars } = settings;
+  // Stable between word edits, so the palette's play handlers don't churn.
+  const glyphs = useMemo(() => ({ rDisplay, tieBars }), [rDisplay, tieBars]);
   const openHelp = () => {
     setHelpOpen(true);
   };
@@ -77,7 +80,7 @@ export function App() {
           onToggleGroup={(group) => {
             settingsDispatch({ type: 'toggleGroup', group });
           }}
-          rDisplay={settings.rDisplay}
+          glyphs={glyphs}
           soundOnSelect={settings.soundOnSelect}
           onActivate={(symbol) => {
             dispatch({ type: 'insert', symbolId: symbol.id });

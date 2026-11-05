@@ -6,7 +6,7 @@ import { createTipaSerialiser } from '../../src/domain/serialise/tipa';
 import { wordFromIds } from '../../src/domain/word/word';
 
 const tex = symbolsTex();
-const tipa = createTipaSerialiser({ slashes: false, rDisplay: 'narrow' });
+const tipa = createTipaSerialiser({ slashes: false, rDisplay: 'narrow', tieBars: false });
 
 const balanced = (text: string): boolean => {
   let depth = 0;
@@ -30,6 +30,8 @@ describe('TeX compile fixture (M6.4, FR-22)', () => {
     );
     expect(missing.map((s) => s.id)).toEqual([]);
     expect(tex).toContain('\\texttt{turned-r (broad)} & \\ipa{r}');
+    expect(tex).toContain('\\texttt{tesh (tie bar)} & \\ipa{\\t{tS}}');
+    expect(tex).toContain('\\ipa{\\t{dZ}\\ae{}}');
   });
 
   it('covers every diacritic on a base, and every ordered pair of symbols', () => {

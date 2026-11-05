@@ -6,12 +6,12 @@ import { SymbolKey } from './SymbolKey';
 import { TRAPEZOID_OUTLINE, trapezoidPoint, vowelTrapezoid } from '../../../domain/inventory/chart';
 import type { PhoneSymbol, VowelSymbol } from '../../../domain/inventory/types';
 import { labelsOf } from '../../../domain/serialise/labels';
-import type { RDisplay } from '../../../domain/serialise/serialiser';
+import type { GlyphOptions } from '../../../domain/serialise/serialiser';
 import type { SymbolPlayer } from '../audio/use-audio';
 
 interface VowelTrapezoidProps {
   readonly symbols: readonly VowelSymbol[];
-  readonly rDisplay: RDisplay;
+  readonly glyphs: GlyphOptions;
   readonly onActivate: (symbol: PhoneSymbol) => void;
   /** FR-30: plays symbols; left out when audio is unavailable. */
   readonly player?: SymbolPlayer | undefined;
@@ -40,7 +40,7 @@ const COLUMN_LABELS = (['front', 'central', 'back'] as const).map((backness) => 
  * Keys are in reading order (close to open, front to back) for keyboard users,
  * and each key's name says where it sits.
  */
-export function VowelTrapezoid({ symbols, rDisplay, onActivate, player }: VowelTrapezoidProps) {
+export function VowelTrapezoid({ symbols, glyphs, onActivate, player }: VowelTrapezoidProps) {
   const captionId = useId();
   const clusters = vowelTrapezoid(symbols);
   // The full IPA puts three vowels at some points (i iː y); the chart widens to fit.
@@ -96,7 +96,7 @@ export function VowelTrapezoid({ symbols, rDisplay, onActivate, player }: VowelT
                   <SymbolKey
                     key={symbol.id}
                     symbol={symbol}
-                    labels={labelsOf(symbol, rDisplay)}
+                    labels={labelsOf(symbol, glyphs)}
                     onActivate={onActivate}
                     player={player}
                   />

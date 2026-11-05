@@ -269,7 +269,11 @@ Encodings marked † use a long-form macro on purpose, for clarity and safety.
 | tʃ | `tS` | **ch**urch |
 | dʒ | `dZ` | **j**udge |
 
-The tie-bar forms (`t͡ʃ` → `\t{tS}`) are offered as a setting in M6.
+The tie-bar forms (`t͡ʃ` → `\t{tS}`) are offered as a setting in M6. *As
+built (M6.5): "Affricates: write with a tie bar" in Settings, off by default.
+It redraws every affricate on the keys, in the word and in both outputs. The
+word itself, its URL and saved words are unchanged, and pasted tie-bar forms
+always read as the affricate (ADR-0012).*
 
 ### 7.3 Vowels
 

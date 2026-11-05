@@ -45,6 +45,32 @@ test.describe('settings (FR-40 – FR-42, Q-2, Q-3)', () => {
     ).toBeAttached();
   });
 
+  test('SPEC §7.2, M6.5: tie bars redraw affricates everywhere, and are remembered', async ({
+    page,
+  }) => {
+    await page.getByRole('button', { name: /^tʃ\s?, voiceless postalveolar affricate/ }).click();
+    const outputs = page.getByRole('region', { name: 'Word' }).locator('output');
+    await expect(outputs.last()).toHaveText('tS');
+
+    await page.getByRole('button', { name: 'Settings' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Settings' });
+    await dialog.getByRole('checkbox', { name: /^Write with a tie bar/ }).check();
+    await expectNoA11yViolations(page);
+    await page.keyboard.press('Escape');
+
+    await expect(outputs.first()).toHaveText('/t\u0361ʃ/');
+    await expect(outputs.last()).toHaveText('\\t{tS}');
+    const key = page.getByRole('button', {
+      name: /^t\u0361ʃ\s?, voiceless postalveolar affricate/,
+    });
+    await expect(key).toBeVisible();
+    // The word itself doesn't change: the URL still names the affricate.
+    await expect(page).toHaveURL(/#w=1:tesh$/);
+
+    await page.reload();
+    await expect(outputs.last()).toHaveText('\\t{tS}');
+  });
+
   test('FR-40: "Match system" follows the system again after an override', async ({ page }) => {
     await page.getByRole('button', { name: 'Settings' }).click();
     const dialog = page.getByRole('dialog', { name: 'Settings' });

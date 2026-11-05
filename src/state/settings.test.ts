@@ -30,6 +30,7 @@ const custom: Settings = {
   ipaSlashes: false,
   tipaSlashes: true,
   rDisplay: 'broad',
+  tieBars: true,
   collapsedGroups: ['vowel', 'diphthong'],
   soundOnSelect: true,
 };
@@ -42,6 +43,7 @@ const anySettings: fc.Arbitrary<Settings> = fc.record({
   ipaSlashes: fc.boolean(),
   tipaSlashes: fc.boolean(),
   rDisplay: fc.constantFrom('narrow', 'broad'),
+  tieBars: fc.boolean(),
   collapsedGroups: fc.subarray(['consonant', 'affricate', 'vowel'] as const),
   soundOnSelect: fc.boolean(),
 });
@@ -60,6 +62,7 @@ describe('settings schema', () => {
       ipaSlashes: true,
       tipaSlashes: false,
       rDisplay: 'narrow',
+      tieBars: false,
       collapsedGroups: [],
       soundOnSelect: false,
     });

@@ -46,7 +46,7 @@ describe('IPA tokeniser (FR-17)', () => {
     expect(read(' / / ')).toEqual({ ok: true, value: [] });
   });
 
-  it('ADR-0012: decomposes, so a precomposed ẽ is e + nasalised and ç still reads as ç', () => {
+  it('ADR-0012: decomposes unknown characters, so a precomposed ẽ is e + nasalised, but ç stays ç', () => {
     expect(read('ẽ')).toEqual({ ok: true, value: ids('e', 'nasalised') });
     expect(read('ç')).toEqual({ ok: true, value: ids('c-cedilla') });
     expect(read('c\u0327')).toEqual({ ok: true, value: ids('c-cedilla') });
@@ -104,16 +104,35 @@ describe('IPA tokeniser (FR-17)', () => {
     // class), so ◌̞ + ◌̴ can come back as ◌̴ + ◌̞: the same text to Unicode.
     const nfd = (text: string) => text.normalize('NFD');
     fc.assert(
-      fc.property(anyWord, anyRDisplay, fc.boolean(), (word, rDisplay, slashes) => {
-        const ipa = createIpaSerialiser({ slashes, rDisplay });
-        const text = ipa.serialise(word);
-        const back = createIpaTokeniser({ rDisplay })(text);
-        expect(mapResult(back, (w) => nfd(ipa.serialise(w)))).toEqual({
-          ok: true,
-          value: nfd(text),
-        });
-      }),
+      fc.property(
+        anyWord,
+        anyRDisplay,
+        fc.boolean(),
+        fc.boolean(),
+        (word, rDisplay, slashes, tieBars) => {
+          const text = createIpaSerialiser({ slashes, rDisplay, tieBars }).serialise(word);
+          const back = createIpaTokeniser({ rDisplay })(text);
+          // Compared without tie bars: separate t + ʃ read back as the affricate
+          // tʃ (longest match), which tie bars would then draw as t͡ʃ.
+          const ipa = createIpaSerialiser({ slashes, rDisplay, tieBars: false });
+          expect(mapResult(back, (w) => nfd(ipa.serialise(w)))).toEqual({
+            ok: true,
+            value: nfd(ipa.serialise(word)),
+          });
+        },
+      ),
     );
+  });
+
+  it('ADR-0012: keeps ç whole when a mark below it is reordered past its cedilla', () => {
+    expect(read('ç\u0334')).toEqual({
+      ok: true,
+      value: ids('c-cedilla', 'velarised-or-pharyngealised'),
+    });
+    expect(read('c\u0327\u0334')).toEqual({
+      ok: true,
+      value: ids('c-cedilla', 'velarised-or-pharyngealised'),
+    });
   });
 
   it('ADR-0012: keeps stacked marks in canonical order', () => {
@@ -126,7 +145,11 @@ describe('IPA tokeniser (FR-17)', () => {
   it('FR-17: never drops a character it does not know', () => {
     fc.assert(
       fc.property(anyWord, strangers, fc.nat(), (word, stranger, at) => {
-        const text = createIpaSerialiser({ slashes: false, rDisplay: 'narrow' }).serialise(word);
+        const text = createIpaSerialiser({
+          slashes: false,
+          rDisplay: 'narrow',
+          tieBars: false,
+        }).serialise(word);
         const chars = Array.from(text);
         const position = at % (chars.length + 1);
         const pasted = [...chars.slice(0, position), stranger, ...chars.slice(position)].join('');

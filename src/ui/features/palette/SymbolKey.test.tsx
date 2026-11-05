@@ -22,7 +22,7 @@ const renderKey = (symbol: PhoneSymbol = esh, withPlay = false) => {
   const { container } = render(
     <SymbolKey
       symbol={symbol}
-      labels={labelsOf(symbol, 'narrow')}
+      labels={labelsOf(symbol, { rDisplay: 'narrow', tieBars: false })}
       onActivate={onActivate}
       player={withPlay ? { canPlay: isSounding, play: onPlay } : undefined}
     />,
