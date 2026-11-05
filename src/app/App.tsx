@@ -13,6 +13,7 @@ import { OutputPanel } from '../ui/features/output/OutputPanel';
 import { PaletteWithAudio } from '../ui/features/palette/PaletteWithAudio';
 import { SavedWordsDialog } from '../ui/features/saved/SavedWordsDialog';
 import { SettingsDialog } from '../ui/features/settings/SettingsDialog';
+import { PasteDialog } from '../ui/features/word/PasteDialog';
 import { UrlSync } from '../ui/features/word/UrlSync';
 import { WordActions } from '../ui/features/word/WordActions';
 import { WordDisplay } from '../ui/features/word/WordDisplay';
@@ -27,6 +28,7 @@ export function App() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
+  const [pasteOpen, setPasteOpen] = useState(false);
   const [query, setQuery] = useState('');
   const filterRef = useRef<HTMLInputElement>(null);
   const openHelp = () => {
@@ -60,6 +62,9 @@ export function App() {
                 onSaved={() => {
                   setSavedOpen(true);
                 }}
+                onPaste={() => {
+                  setPasteOpen(true);
+                }}
               />
               <OutputPanel />
             </div>
@@ -83,6 +88,12 @@ export function App() {
         open={savedOpen}
         onClose={() => {
           setSavedOpen(false);
+        }}
+      />
+      <PasteDialog
+        open={pasteOpen}
+        onClose={() => {
+          setPasteOpen(false);
         }}
       />
       <SettingsDialog

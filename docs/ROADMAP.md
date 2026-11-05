@@ -92,7 +92,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 - [x] **M6.1** Full pulmonic consonant chart, remaining cardinal vowels, and non-pulmonic consonants. refs: SPEC §7.6
 - [x] **M6.2** Diacritics as modifier tokens (IPA combining characters, TIPA wrap macros). refs: FR-1, ARCH §4
-- [ ] **M6.3** Paste-IPA tokeniser (greedy longest-match, unknown-character reporting). refs: FR-17
+- [x] **M6.3** Paste-IPA tokeniser (greedy longest-match, unknown-character reporting). refs: FR-17
 - [ ] **M6.4** CI TeX job: generate a `.tex` file covering every symbol, compile it with pdflatex + tipa, and fail on error. refs: FR-22, ADR-0008
 - [ ] **M6.5** Optional tie-bar affricates setting (`t͡ʃ` / `\t{tS}`). refs: SPEC §7.2
 

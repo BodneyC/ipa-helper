@@ -16,7 +16,7 @@ const renderWord = (word = thornic, rDisplay: 'narrow' | 'broad' = 'narrow') => 
   render(
     <Providers initialWord={word} initialSettings={{ ...DEFAULT_SETTINGS, rDisplay }}>
       <WordDisplay />
-      <WordActions onSaved={() => undefined} />
+      <WordActions onSaved={() => undefined} onPaste={() => undefined} />
     </Providers>,
   );
   const box = screen.getByRole('textbox', { name: 'Word' });

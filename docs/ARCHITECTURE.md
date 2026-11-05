@@ -95,7 +95,7 @@ ipa-helper/
 │  │  │  ├─ labels.ts         # a key's glyph (diacritics on ◌) and TIPA code (FR-2, Q-3)
 │  │  │  └─ filter.ts         # matchesFilter: the palette filter's matching rule (FR-4)
 │  │  ├─ parse/
-│  │  │  └─ ipa-tokeniser.ts  # M6: greedy longest-match IPA → Word
+│  │  │  └─ ipa-tokeniser.ts  # M6.3: NFD + greedy longest-match IPA → Result<Word, UnknownCharacter[]>
 │  │  ├─ codec/
 │  │  │  └─ url.ts            # Word ↔ URL fragment: `w=1:id.id.id`, decode → Result
 │  │  ├─ ports.ts             # Clipboard, FragmentStore, KeyValueStore, DocumentTheme, AudioPlayer interfaces
@@ -117,7 +117,7 @@ ipa-helper/
 │  │  ├─ components/          # Generic: Button, IconButton, Tooltip, Dialog, Toggle…
 │  │  └─ features/
 │  │     ├─ palette/          # SymbolKey, ConsonantChart, VowelTrapezoid (domain: chart.ts vowelTrapezoid), KeyGrid…
-│  │     ├─ word/             # WordDisplay, TokenCursor
+│  │     ├─ word/             # WordDisplay, WordActions, UrlSync, PasteDialog (FR-17)
 │  │     ├─ output/           # OutputPanel, CopyRow
 │  │     ├─ audio/            # use-audio: useAudioStatus, usePlaySymbol (FR-30, FR-34)
 │     ├─ settings/         # SettingsDialog (FR-42), suggested \newcommand

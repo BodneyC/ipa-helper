@@ -5,14 +5,16 @@ import { PlayWordButton } from '../audio/PlayWordButton';
 interface WordActionsProps {
   /** Opens the saved words dialog (FR-16). */
   readonly onSaved: () => void;
+  /** Opens the paste IPA dialog (FR-17). */
+  readonly onPaste: () => void;
 }
 
 /**
  * FR-31: Play word (when word audio is available). FR-13, FR-14, FR-16: Undo,
  * Redo and Clear for the word (Clear can itself be undone), and the way into
- * saved words.
+ * saved words. FR-17: the way into pasting IPA.
  */
-export function WordActions({ onSaved }: WordActionsProps) {
+export function WordActions({ onSaved, onPaste }: WordActionsProps) {
   const { state, dispatch } = useEditor();
   return (
     <div className={styles['actions']} role="group" aria-label="Word actions">
@@ -49,6 +51,9 @@ export function WordActions({ onSaved }: WordActionsProps) {
       </button>
       <button type="button" className={styles['button']} onClick={onSaved}>
         Saved words…
+      </button>
+      <button type="button" className={styles['button']} onClick={onPaste}>
+        Paste IPA…
       </button>
     </div>
   );

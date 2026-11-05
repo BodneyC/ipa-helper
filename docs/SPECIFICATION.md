@@ -111,7 +111,14 @@ pronounced in British English, at no cost and without signing up for anything.
   rename or delete entries. There is no account.
 - **FR-17** *(M6)* **Paste IPA**: the user pastes an IPA string and the app
   tokenises it into known symbols using greedy longest-match. Unknown characters
-  are reported, not silently dropped.
+  are reported, not silently dropped. *As built (M6.3): a "Paste IPA…" word
+  action opens a dialog. As you type or paste, it shows how the text reads, or
+  names each unknown character and its position. "Use as word" replaces the
+  word in one undoable step. Every symbol is recognised whichever inventory is
+  shown. Surrounding `/…/` or `[…]` are ignored. The text is decomposed (NFD),
+  so `ẽ` reads as `e` + nasalised. ASCII `g` and `:` and tie-bar affricates are
+  accepted. When the British r is shown broad (Q-3), `r` reads as `ɹ`
+  (ADR-0012).*
 
 ### 4.3 Output
 
