@@ -133,7 +133,12 @@ pronounced in British English, at no cost and without signing up for anything.
   Alt+click, Alt+Enter or a touch long-press also play the sound. Suprasegmental
   marks have no sound, so they have no play affordance.*
 - **FR-31** A "Play word" button pronounces the whole built word in British English.
-  Stress marks and length must audibly change the output.
+  Stress marks and length must audibly change the output. *As built (M5.3): the
+  button is the first word action. It is disabled until the word has a sound,
+  and is absent where the browser can't run the voice. The first play
+  downloads the voice; until it's ready the button reads "Loading voice…" and a
+  progress bar shows the download. A failure is shown under the button and
+  announced, and the next click retries.*
 - **FR-32** Audio must be **free and require no sign-up, API key or account**,
   for both the user and the maintainer. Prefer approaches that run entirely in the
   browser or use static assets (see ADR-0009).

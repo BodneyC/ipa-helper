@@ -300,6 +300,15 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   listed in the tooltip and the help dialog. "Sound on select" plays after
   each insert, and its checkbox in Settings is disabled when Web Audio is
   missing.
+- Word audio (FR-31, M5.3): `<PlayWordButton>` (`ui/features/audio/`) is the
+  first item in `<WordActions>`. It reads `status.words` and `progress.words`
+  through `useAudioStatus` and `useAudioProgress`. While the channel loads,
+  the button is `aria-disabled` rather than `disabled`, so it keeps focus,
+  and a native `<progress>` bar shows the download (indeterminate when the
+  fraction is unknown). An error message is tied to the button with
+  `aria-describedby` and announced. The e2e spec routes `synth.worker-*.js` to
+  a fake worker that the test releases or fails on command, so it never needs
+  the model.
 - `<GlobalShortcuts>` (`ui/features/help/`) listens on `document` for FR-51 and
   skips events a widget already handled (`defaultPrevented`), text inputs and
   anything inside a `<dialog>`. Copy shortcuts share `useOutputs` and `useCopy`

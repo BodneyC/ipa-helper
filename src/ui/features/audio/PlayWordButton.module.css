@@ -1,0 +1,55 @@
+/* Matches the other word actions (WordActions.module.css). */
+.button {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--accent, var(--color-focus));
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.button:disabled,
+.button[aria-disabled='true'] {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.button:disabled {
+  opacity: 0.6;
+}
+
+.button:hover:not(:disabled, [aria-disabled='true']) {
+  background: var(--color-surface-raised);
+}
+
+.icon {
+  width: 1rem;
+  height: 1rem;
+  fill: currentcolor;
+}
+
+.waves {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.progress {
+  align-self: center;
+  width: 8rem;
+  accent-color: var(--color-focus);
+}
+
+/* Takes its own line under the buttons; red is a border, never text (SPEC §6). */
+.error {
+  flex-basis: 100%;
+  margin: 0;
+  padding-left: var(--space-2);
+  color: var(--color-text);
+  font-size: 0.875rem;
+  border-left: 3px solid var(--color-danger);
+}

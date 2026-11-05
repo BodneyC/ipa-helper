@@ -14,6 +14,13 @@ export const useAudioStatus = (): AudioPlayer['status'] => {
   return useSyncExternalStore(subscribe, () => audio.status);
 };
 
+/** How much of each loading channel's download has arrived, 0–1 (FR-33). */
+export const useAudioProgress = (): AudioPlayer['progress'] => {
+  const { audio } = useServices();
+  const subscribe = useCallback((listener: () => void) => audio.subscribe(listener), [audio]);
+  return useSyncExternalStore(subscribe, () => audio.progress);
+};
+
 /**
  * Plays a symbol's clip (FR-30), announcing a failure so it isn't silent for
  * screen reader users either. `undefined` when this browser can't play symbols,
