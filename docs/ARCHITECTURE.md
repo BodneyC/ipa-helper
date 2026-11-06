@@ -290,6 +290,16 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `tipaSlashes` (Q-2), `rDisplay`, `tieBars` (M6.5), `collapsedGroups` (categories), `soundOnSelect`.
   `main.tsx` reads them with `loadSettings(store)` before the first render;
   `<SettingsSync>` writes them back with `saveSettings` on every change.
+- **Several tabs** (#2): tabs share local storage but not memory. The
+  `KeyValueStore` port's `subscribe(key, listener)` reports another tab's write
+  (the `storage` event; this tab's own writes don't fire it). `<SettingsSync>`
+  loads the stored settings when told, and merges every write with what is
+  stored (`mergeSettings`): a field that changed in storage since this tab last
+  looked keeps the stored value, and the rest take this tab's. Storage that drops
+  writes therefore never rolls back this tab's changes. Saved words treat
+  storage as the source of truth instead: each action is applied to the freshly
+  read list and written back (`updateSavedWords`), so adds, renames and removes
+  from different tabs merge by entry ID.
 - **URL sync**: the editor word is mirrored to `location.hash`
   (`history.replaceState`, debounced 250 ms) through the `FragmentStore` port
   (`adapters/url-hash.ts`). On load, `main.tsx` decodes the hash through
@@ -309,8 +319,9 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `{ id, fragment, gloss, savedAt }` under `ipa-helper:saved-words:v1`. The word
   is stored as its URL-codec fragment (ADR-0007), so it is versioned and
   re-validated on load; entries whose word no longer decodes are dropped. The
-  `<SavedWordsDialog>` owns the list (`useReducer` seeded from the store) and
-  loads a word into the editor as one undoable `replace`.
+  `<SavedWordsDialog>` holds a copy of the stored list, applies each change
+  through `updateSavedWords` (above), reloads it on a `storage` event, and loads
+  a word into the editor as one undoable `replace`.
 - No global state library. If one becomes necessary, write an ADR.
 
 ## 6. UI composition

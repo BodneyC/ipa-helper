@@ -44,12 +44,18 @@ export interface KeyValueStore {
   get(key: string): string | undefined;
   /** Stores a value. Fails silently: settings then last only for the visit. */
   set(key: string, value: string): void;
+  /**
+   * Calls `listener` when another tab or window changes or removes `key`
+   * (writes from this page don't count). Returns an unsubscribe function.
+   */
+  subscribe(key: string, listener: () => void): () => void;
 }
 
 /** A store that remembers nothing, for tests and environments without storage. */
 export const NULL_STORE: KeyValueStore = {
   get: () => undefined,
   set: () => undefined,
+  subscribe: () => () => undefined,
 };
 
 /** Applies the colour theme to the page (FR-40, FR-41). Implemented in src/adapters. */

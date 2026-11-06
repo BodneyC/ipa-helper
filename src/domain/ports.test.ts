@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { symbolId } from './inventory/symbol-id';
 import {
@@ -32,6 +32,13 @@ describe('NULL_STORE', () => {
   it('remembers nothing', () => {
     NULL_STORE.set('k', 'v');
     expect(NULL_STORE.get('k')).toBeUndefined();
+  });
+
+  it('never reports changes', () => {
+    const listener = vi.fn();
+    const unsubscribe = NULL_STORE.subscribe('k', listener);
+    unsubscribe();
+    expect(listener).not.toHaveBeenCalled();
   });
 });
 

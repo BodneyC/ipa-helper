@@ -108,7 +108,8 @@ pronounced in British English, at no cost and without signing up for anything.
   Invalid fragments are ignored and the app shows a non-blocking notice.
 - **FR-16** *(M3)* **Saved words**: the user can save the current word with
   an optional gloss/label to a local list (browser storage), then reload,
-  rename or delete entries. There is no account.
+  rename or delete entries. There is no account. Tabs of the app share the
+  list: a change in one tab shows in the others, and never overwrites theirs.
 - **FR-17** *(M6)* **Paste IPA**: the user pastes an IPA string and the app
   tokenises it into known symbols using greedy longest-match. Unknown characters
   are reported, not silently dropped. *As built (M6.3): a "Paste IPA…" word
@@ -175,6 +176,7 @@ pronounced in British English, at no cost and without signing up for anything.
 - **FR-41** *(M3)* A contrast option (soft / medium / hard) maps to Gruvbox's
   background variants.
 - **FR-42** All settings live in one settings panel/dialog and are stored locally.
+  A setting changed in one tab applies at once in the app's other open tabs.
 
 ### 4.6 Keyboard
 
