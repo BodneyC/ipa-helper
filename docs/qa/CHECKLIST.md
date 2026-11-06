@@ -120,9 +120,9 @@ Notes: …
 
 | F1 | F2 | F3 | F4 | F5 | F6 |
 | --- | --- | --- | --- | --- | --- |
-| ✅ | ➖ | ✅ | ➖ | ⏳ | ✅ |
+| ✅ | ➖ | ✅ | ➖ | ✅ | ✅ |
 
-Result: **fail** (B6, B9). Not checked yet: B3, F5.
+Result: **fail** (B6, B9). Not checked yet: B3.
 
 ### 2026-11-06 · a741077 · iPhone, iOS 27 · Safari 27 · benjcarrington
 
@@ -140,7 +140,7 @@ Result: **fail** (B6, B9). Not checked yet: B3, F5.
 
 | D1 | D2 | D3 | D4 | D5 |
 | --- | --- | --- | --- | --- |
-| ⏳ | ✅ | ✅ | ✅ | ✅ |
+| ✅ | ✅ | ✅ | ✅ | ✅ |
 
 | E1 | E2 | E3 | E4 | E5 |
 | --- | --- | --- | --- | --- |
@@ -148,9 +148,9 @@ Result: **fail** (B6, B9). Not checked yet: B3, F5.
 
 | F1 | F2 | F3 | F4 | F5 | F6 |
 | --- | --- | --- | --- | --- | --- |
-| ✅ | ⏳ | ➖ | ⏳ | ⏳ | ➖ |
+| ✅ | ✅ | ➖ | ✅ | ✅ | ➖ |
 
-Result: **fail** (A4, B1, B2, B6). Not checked yet: D1, F2, F4, F5.
+Result: **fail** (A4, B1, B2, B6).
 
 Notes:
 
