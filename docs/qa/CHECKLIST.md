@@ -6,8 +6,9 @@ release. Automated e2e already covers Chromium, Firefox and WebKit on desktop
 real speakers, real installs, on-screen keyboards, and how things look.
 
 Record each run as a new section under **Runs**: date, commit, device, OS,
-browser and version, and who ran it. Mark each item ✅, ❌ (link an issue) or
-➖ (not applicable). A release needs every item ✅ or ➖ on both targets.
+browser and version, and who ran it. Mark each item ✅, ❌ (link an issue),
+⏳ (not checked yet) or ➖ (not applicable to that target). A release needs every item ✅ or ➖ on both
+targets, so ⏳ blocks it until a later run checks it.
 
 Targets (NFR-4):
 
@@ -81,20 +82,86 @@ Targets (NFR-4):
 
 ## Runs
 
-<!--
-### YYYY-MM-DD · <commit> · <device>, <OS> · <browser> <version> · <tester>
+<!-- Template (newest run first):
+### YYYY-MM-DD · <deployed commit> · <device>, <OS + version> · <browser> <version> · <tester>
 
-| A1 | A2 | A3 | … |
-| --- | --- | --- | --- |
-| ✅ | ✅ | ❌ #12 | … |
+| A1 | A2 | A3 | A4 | A5 |
+| --- | --- | --- | --- | --- |
+| ✅ | ❌ #12 | ⏳ | ➖ | ✅ |
+
+(one table per section, A–F)
+
+Result: pass | fail (<items>). Not checked yet: <items>.
 
 Notes: …
 -->
+
+### 2026-11-06 · a741077 · desktop, Windows · Firefox 159.0.1 · benjcarrington
+
+| A1 | A2 | A3 | A4 | A5 |
+| --- | --- | --- | --- | --- |
+| ✅ | ✅ | ✅ | ➖ | ✅ |
+
+| B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8 | B9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ✅ | ✅ | ⏳ | ➖ | ✅ | ❌ #21 | ✅ | ✅ | ❌ #22 |
+
+| C1 | C2 | C3 | C4 | C5 |
+| --- | --- | --- | --- | --- |
+| ✅ | ✅ | ✅ | ✅ | ✅ |
+
+| D1 | D2 | D3 | D4 | D5 |
+| --- | --- | --- | --- | --- |
+| ➖ | ✅ | ✅ | ✅ | ✅ |
+
+| E1 | E2 | E3 | E4 | E5 |
+| --- | --- | --- | --- | --- |
+| ➖ | ✅ | ✅ | ✅ | ✅ |
+
+| F1 | F2 | F3 | F4 | F5 | F6 |
+| --- | --- | --- | --- | --- | --- |
+| ✅ | ➖ | ✅ | ➖ | ✅ | ✅ |
+
+Result: **fail** (B6, B9). Not checked yet: B3.
+
+### 2026-11-06 · a741077 · iPhone, iOS 27 · Safari 27 · benjcarrington
+
+| A1 | A2 | A3 | A4 | A5 |
+| --- | --- | --- | --- | --- |
+| ✅ | ✅ | ✅ | ❌ #4 | ✅ |
+
+| B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8 | B9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ❌ #23 | ❌ #4 | ✅ | ✅ | ✅ | ❌ #21 | ✅ | ✅ | ✅ |
+
+| C1 | C2 | C3 | C4 | C5 |
+| --- | --- | --- | --- | --- |
+| ✅ | ✅ | ✅ | ✅ | ✅ |
+
+| D1 | D2 | D3 | D4 | D5 |
+| --- | --- | --- | --- | --- |
+| ✅ | ✅ | ✅ | ✅ | ✅ |
+
+| E1 | E2 | E3 | E4 | E5 |
+| --- | --- | --- | --- | --- |
+| ✅ | ✅ | ✅ | ✅ | ✅ |
+
+| F1 | F2 | F3 | F4 | F5 | F6 |
+| --- | --- | --- | --- | --- | --- |
+| ✅ | ✅ | ➖ | ✅ | ✅ | ➖ |
+
+Result: **fail** (A4, B1, B2, B6).
+
+Notes:
+
+- A4: the layout reflows on rotation without losing the word, but the first
+  panel's size (#4) leaves the app unusable afterwards.
+- Outside the NFR-4 targets: Play word fails on Firefox for Android with
+  "Couldn't load the voice…" (#26).
 
 ### 2026-11-05 · bd32f3d · automated only (no manual run yet)
 
 `pnpm test:e2e --project=chromium --project=firefox`: 132 passed, including
 `pwa.spec.ts` (FR-60 – FR-62) on Firefox. That covers parts of A, B (mouse and
 keyboard), C1–C5, E2 and E4 on desktop Firefox in Playwright. It is **not** the
-manual run M7.2 needs. The iOS Safari touch run and the Firefox desktop run
-above are still to do.
+manual run M7.2 needs; the manual runs are recorded above.
