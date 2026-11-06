@@ -193,7 +193,8 @@ longest length over several takes:
 - `<phonemes>!` for a word with **fewer than 5 sounding tokens** (an
   affricate, diphthong or long vowel counts as one token);
 - `␣<phonemes>.` (with a leading space) for **5 or more**. In the random
-  sample, this form had 0 runaways in 180 takes.
+  sample, this form had 0 runaways in 180 takes. (Superseded: see "Every word
+  ends in `!` (#33)" below.)
 
 The serialiser also does three other things:
 - It moves each stress mark rightwards, past consonants, to just before the
@@ -205,13 +206,42 @@ The serialiser also does three other things:
 The measurement scripts were throwaway, kept out of the repository. They
 used the same voice loader as `scripts/audio`.
 
+## Every word ends in `!` (#33)
+
+Amended 2026-11-06. The maintainer heard `/rəʊdʊn/` run on, and chose the new
+ending by ear from rendered samples.
+
+- **` X.` still runs away.** The app sent `/rəʊdʊn/` as ` ɹəʊdʊn.`, which gave
+  1.5–3.0 s of audio (about 0.7 s is right). The random sample above had missed
+  this: it depends on the word's shape more than its length. Every RP vowel and
+  diphthong was put in the frames `ɹ_dʊn` and `b_dʊn`, giving 48 words of 5–6
+  sounds, and each word was rendered 4 times per ending. A take counts as a
+  runaway above 1.6 s.
+
+  | Ending | Runaways | Longest |
+  | --- | --- | --- |
+  | `␣X.` (the M5.1 rule) | 14 / 192 | 2.77 s |
+  | `X,` | 5 / 192 | 3.12 s |
+  | `X!` | 0 / 192 | 1.52 s |
+  | `␣X!` | 0 / 192 | 1.42 s |
+  | `␣X,` | 0 / 192 | 1.06 s |
+
+  The frame `b_tɪk` gave no runaways with any ending. With the trill `r` in
+  place of `ɹ`, which the app never sends for the RP r, ` X.` ran away on 21 of
+  24 words.
+- **Decision: `piperPhonemeSerialiser` ends every word in `!`, with no
+  leading space, whatever its length.** `!` was already stable on short words
+  and on random words of 5–8 sounds (above). It is what symbol clips use. And it
+  makes the rule length-independent. `␣X,` was shorter still but untested on
+  short words, and a comma risks sounding unfinished.
+
 ## Consequences
 - The model and the onnxruntime-web wasm files are **self-hosted** on the
   same static host, so audio makes no third-party requests (NFR-6). The 63.5 MB
   model is not committed to git: the build fetches it from the pinned
   Hugging Face URL and verifies the SHA-256 above (M4.3/M5.2).
 - Symbol clips (M4.3) are generated with the same voice and runtime as words,
-  so symbols and words sound alike. Clips end in `!` and words in `.`
+  so symbols and words sound alike. Clips and words both end in `!`
   (see "Symbol clips (M4.3)").
 - Introduces a large lazy asset and a Worker. Neither affects NFR-3, because
   they aren't part of the initial bundle.

@@ -5,9 +5,6 @@ import type { PhoneSymbol } from '../inventory/types';
 import { err, ok } from '../result';
 import type { Result } from '../result';
 
-/** Words with fewer sounding tokens than this end in `!` instead of `.` (ADR-0009, M5.1). */
-export const SHORT_WORD_SOUNDS = 5;
-
 const isNucleus = (symbol: PhoneSymbol): boolean =>
   symbol.category === 'vowel' || symbol.category === 'diphthong';
 
@@ -27,13 +24,13 @@ const isSyllableBreak = (symbol: PhoneSymbol): boolean =>
  *   it: `ˈflɒɡ` → `flˈɒɡ`. A stress mark with no vowel after it is dropped.
  * - Syllable breaks are dropped: the voice would read `.` as a full stop.
  * - Length marks stay where they are, so length still changes the sound.
- * - The ending stops the voice running on: `!` for a word of fewer than
- *   {@link SHORT_WORD_SOUNDS} sounds, otherwise a leading space and a final `.`.
+ * - Every word ends in `!`, which stops the voice running on at any length
+ *   (#33).
  */
 const piperText = (symbols: readonly PhoneSymbol[]): string => {
   let text = '';
   let pendingStress = '';
-  let sounds = 0;
+  let sounding = false;
   for (const symbol of symbols) {
     if (isStress(symbol)) {
       pendingStress += symbol.ipa;
@@ -45,10 +42,9 @@ const piperText = (symbols: readonly PhoneSymbol[]): string => {
       pendingStress = '';
     }
     text += symbol.ipa;
-    if (isSounding(symbol)) sounds += 1;
+    if (isSounding(symbol)) sounding = true;
   }
-  if (sounds === 0) return '';
-  return sounds < SHORT_WORD_SOUNDS ? `${text}!` : ` ${text}.`;
+  return sounding ? `${text}!` : '';
 };
 
 /**
