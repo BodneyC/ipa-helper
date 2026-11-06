@@ -13,7 +13,14 @@ built from Conventional Commits (CLAUDE.md §7).
    pnpm changelog <version>
    pnpm version <version> --no-git-tag-version
    ```
-5. Commit as `chore(release): v<version>`, then make an annotated tag:
-   `git tag -a v<version> -m "v<version>"`.
-6. Push the commit and the tag: `git push && git push origin v<version>`. The
-   Pages deploy runs from `main` as usual.
+   Do steps 3–4 on a branch made from an up-to-date `main`:
+   `git switch -c chore/release-v<version> origin/main`.
+5. Commit as `chore(release): v<version>`, and open a PR with that title (`/pr`).
+   Merge it once every required check is green (ADR-0015: `main` only changes through PRs).
+6. Tag the merge commit on `main`, and push the tag (tags aren't protected):
+   ```sh
+   git switch main && git pull --ff-only
+   git tag -a v<version> -m "v<version>"
+   git push origin v<version>
+   ```
+   The Pages deploy runs from `main` as usual.

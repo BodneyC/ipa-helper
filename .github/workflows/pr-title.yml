@@ -1,0 +1,27 @@
+name: PR title
+
+# PRs are squash-merged with the PR title as the commit subject (ADR-0015), so
+# the title must be a Conventional Commit. Same pattern as lefthook's commit-msg hook.
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+jobs:
+  pr-title:
+    name: PR title
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Check the title is a Conventional Commit
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if printf '%s\n' "$TITLE" | grep -qE '^(feat|fix|test|docs|refactor|chore|perf|build|ci|style|revert)(\([a-z0-9./-]+\))?!?: .+'; then
+            echo "OK: $TITLE"
+          else
+            echo "::error title=PR title::\"$TITLE\" is not a Conventional Commit, e.g. \"fix(audio): time out resume() (#3)\". It becomes the squash commit and the changelog entry."
+            exit 1
+          fi

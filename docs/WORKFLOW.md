@@ -20,7 +20,7 @@ in [ADR-0014](adr/0014-github-issues-workflow.md).
   `/roadmap add` gives it a task ID with `refs: #42`, the issue gets the matching
   GitHub milestone, and its title gains the ID: `[M8.1] Accent switch for audio`.
 - A roadmap task doesn't need an issue. Create one only when the task needs
-  discussion, is handed to someone else, or will be worked through a PR.
+  discussion or is handed to someone else.
 - Use the repository's GitHub milestones to mirror roadmap milestones, named the
   same way: `M7: Release hardening`.
 
@@ -140,15 +140,16 @@ new ──► triage ─────┼─────────────�
    `status: ready`, `needs-info` or `blocked`, or close with a `resolution:`.
    Leave a short triage comment explaining the priority.
 3. **Start.** Assign yourself. Move to `status: in-progress`. Create a branch
-   named `<type>/<issue>-<slug>`, e.g. `fix/57-firefox-resume-timeout` or
-   `feat/61-xsampa-export`.
+   from an up-to-date `origin/main`, named `<type>/<issue>-<slug>`, e.g.
+   `fix/57-firefox-resume-timeout` or `feat/61-xsampa-export` (§6).
 4. **Build.** Follow the working loop in `CLAUDE.md`. A `type: feature` issue
    needs a spec change (`/spec`) before code. A design choice needs an ADR
    (`/adr`) before code.
 5. **Review.** Open a PR using the template, with `Closes #N` in the body. Move
-   the issue to `status: in-review`. CI must be green.
-6. **Merge.** Squash-merge with a Conventional Commit title. GitHub closes the
-   issue, and the hygiene workflow clears its status label.
+   the issue to `status: in-review`. Every required check must be green (§6).
+6. **Merge.** The maintainer squash-merges it. The PR title becomes the commit. GitHub
+   closes the issue and deletes the branch, and the hygiene workflow clears the
+   issue's status label.
 
 If work stops partway, move the issue back to `status: ready`, unassign, and
 leave a comment saying where it got to and what is left.
@@ -181,18 +182,72 @@ A good issue lets someone who wasn't there do the work.
 - **Links:** `Blocked by #N`, `Relates to #N`, `refs: FR-x, ADR-NNNN`. Use
   task lists (`- [ ] #N`) or GitHub sub-issues to split `size: L` work.
 
-## 6. Commits and pull requests
+## 6. Branches, pull requests and CI
 
-- One issue or one roadmap task per PR.
-- Commit subject: Conventional Commit with the scope, then the task ID and/or
-  the issue: `fix(audio): time out AudioContext.resume() (#57)` or
-  `feat(output): X-SAMPA export [M8.2] (#61)`.
-- Put `Closes #N` (or `Refs #N` for partial work) in the PR body, and in the
-  commit body when committing directly to `main`.
-- Small docs-only changes may go straight to `main`. Everything else goes
-  through a PR so CI runs on it before it deploys.
-- Dependabot PRs are labelled `type: chore` and `area: deps`. Merge them once
-  green, unless they touch a pin explained in an ADR (for example ADR-0011).
+`main` changes **only** through pull requests (ADR-0015). The `main` ruleset
+(`.github/rulesets/main.json`, applied by `scripts/github/protect-main.sh`)
+rejects direct pushes, force pushes and merge commits. This applies to
+everyone, for every change, including one-line docs fixes.
+
+### Branches
+
+- Always branch from an up-to-date `origin/main`:
+  `git fetch origin && git switch -c <branch> origin/main`.
+- Name it `<type>/<id>-<slug>`. `<type>` is the Conventional Commit type, and `<id>`
+  is the issue number or the roadmap task in lower case. Leave out `<id>` if there is
+  neither: `fix/3-resume-timeout`, `feat/m8.1-accent-switch`, `docs/pr-only-workflow`.
+- One issue or one roadmap task per branch. Keep branches short-lived, and rebase
+  onto `origin/main` rather than merging it in. Push with `--force-with-lease`
+  after a rebase.
+
+### Pull requests
+
+- Open one as soon as the branch is pushed. Use a **draft** while work is
+  incomplete, and mark it ready when you would merge it.
+- **Title:** a Conventional Commit, e.g. `fix(audio): time out AudioContext.resume() (#3)`
+  or `feat(output): X-SAMPA export [M8.2] (#7)`. It becomes the squash commit on
+  `main` and the changelog entry. The `PR title` check enforces the format.
+- **Body:** from the template. Include `Closes #N` (or `Refs #N` for partial work),
+  how each acceptance criterion was verified, and the reason for any new dependency.
+- Give the PR the issue's `type:` and `area:` labels. Move the issue to `status: in-review`.
+- Commits inside the PR can be as granular as you like, because they are squashed. Each
+  still needs a Conventional subject (the `commit-msg` hook checks it).
+
+### CI
+
+Every PR runs the full pipeline. These checks are **required** and must pass on a
+branch that is up to date with `main`:
+
+| Check | What it runs |
+| --- | --- |
+| `pnpm check` | Typecheck, lint, format, knip, unit tests with coverage, build, size budget |
+| `e2e (chromium)`, `e2e (firefox)`, `e2e (webkit)` | Playwright + axe in each browser |
+| `TeX compile (pdflatex + tipa)` | Every symbol and pair compiles (FR-22) |
+| `lighthouse budget` | Performance ≥ 95, accessibility = 100 (NFR-3) |
+| `PR title` | The title is a Conventional Commit |
+
+`visual (reviewed)` also runs, but only as advice: look at its diffs, and re-baseline
+on purpose in the same PR if the change is intended.
+
+- Run `pnpm check` and `pnpm test:e2e --project=chromium` locally before pushing.
+  The `pre-push` hook runs `pnpm check`. Never bypass the hooks.
+- When a check fails, read the log (`gh run view <id> --log-failed`), reproduce it
+  locally, and fix it on the branch. Never re-run a failure until it happens to pass without
+  understanding it. If a check is flaky, file a `type: bug`, `area: ci` issue.
+- If `main` has moved on, update the branch (`gh pr update-branch --rebase`) and let CI run again.
+- If a CI job is renamed, update `.github/rulesets/main.json` in the same PR, and
+  re-run `protect-main.sh` after merging. `scripts/ci/ruleset.test.ts` fails if they drift.
+
+### Merging
+
+- Squash-merge only. The maintainer decides when; agents never merge on their own.
+  `gh pr merge --squash --auto` merges once the checks pass, and the branch is deleted.
+- The squash commit takes the PR title and body. So the body's `Closes #N` closes the
+  issue, and its attribution lines are kept.
+- After merging: `git switch main && git pull --ff-only`, and delete the local branch.
+- Dependabot PRs follow the same rules. They are labelled `type: chore` and
+  `area: deps`. Merge them once green, unless they touch a pin explained in an ADR
+  (for example ADR-0011).
 
 ## 7. Releases
 

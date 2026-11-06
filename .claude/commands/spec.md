@@ -18,4 +18,5 @@ The user wants this behaviour change: **$ARGUMENTS**
 4. Show the user a short diff summary and the list of knock-on effects, and wait for
    confirmation.
 5. On confirmation, apply the spec edit, bump "Last updated", and make the
-   roadmap and architecture updates. Commit as `docs(spec): …`.
+   roadmap and architecture updates on a `docs/spec-<slug>` branch. Commit as `docs(spec): …`,
+   and open a PR with `/pr`.
