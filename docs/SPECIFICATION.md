@@ -75,7 +75,9 @@ pronounced in British English, at no cost and without signing up for anything.
   *As built: the secondary label is the example word. Marks show their name
   instead. Sounds without a British example (most of the `extended` inventory)
   show no secondary label, because their chart position already says what they
-  are. Their name is still in the tooltip and the accessible name.*
+  are. Their name is still in the tooltip and the accessible name.
+  "Focus" means keyboard focus (`:focus-visible`): focus from a click or tap
+  doesn't open the tooltip, so it never stays open after the pointer leaves (#21).*
 - **FR-3** An inventory switch chooses between **British English (RP)**, the
   default, and **Full IPA**. The RP view hides symbols outside the inventory. It does
   not just grey them out. *As built (M6.1): the choice is remembered. Full IPA
