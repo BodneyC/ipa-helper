@@ -39,6 +39,7 @@ const custom: Settings = {
   tieBars: true,
   collapsedGroups: ['vowel', 'diphthong'],
   soundOnSelect: true,
+  hoverableTooltips: true,
   wordDetailsOpen: false,
 };
 
@@ -53,6 +54,7 @@ const anySettings: fc.Arbitrary<Settings> = fc.record({
   tieBars: fc.boolean(),
   collapsedGroups: fc.subarray(['consonant', 'affricate', 'vowel'] as const),
   soundOnSelect: fc.boolean(),
+  hoverableTooltips: fc.boolean(),
   wordDetailsOpen: fc.boolean(),
 });
 
@@ -73,6 +75,7 @@ describe('settings schema', () => {
       tieBars: false,
       collapsedGroups: [],
       soundOnSelect: false,
+      hoverableTooltips: false,
       wordDetailsOpen: true,
     });
     expect(isSettings(DEFAULT_SETTINGS)).toBe(true);

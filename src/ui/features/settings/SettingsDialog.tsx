@@ -157,6 +157,22 @@ export function SettingsDialog({ open, onClose, onHelp }: SettingsDialogProps) {
         </fieldset>
 
         <fieldset className={styles['fieldset']}>
+          <legend className={styles['legend']}>Tooltips</legend>
+          <label className={styles['option']}>
+            <input
+              type="checkbox"
+              checked={settings.hoverableTooltips}
+              onChange={(event) => {
+                update({ hoverableTooltips: event.target.checked });
+              }}
+            />
+            <span className={styles['optionText']}>
+              Keep a key’s tooltip open while the pointer is over it
+            </span>
+          </label>
+        </fieldset>
+
+        <fieldset className={styles['fieldset']}>
           <legend className={styles['legend']}>Sound</legend>
           <label className={styles['option']}>
             <input

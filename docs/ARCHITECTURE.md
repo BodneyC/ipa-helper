@@ -288,7 +288,7 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   value) without discarding the valid ones. Fields: `theme` (system|dark|light),
   `contrast`, `inventory`, `macroName` (letters only), `ipaSlashes` (FR-20),
   `tipaSlashes` (Q-2), `rDisplay`, `tieBars` (M6.5), `collapsedGroups` (categories), `soundOnSelect`,
-  `wordDetailsOpen` (#4).
+  `hoverableTooltips` (FR-2, ADR-0016), `wordDetailsOpen` (#4).
   `main.tsx` reads them with `loadSettings(store)` before the first render;
   `<SettingsSync>` writes them back with `saveSettings` on every change.
 - **Several tabs** (#2): tabs share local storage but not memory. The

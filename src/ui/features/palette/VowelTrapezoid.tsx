@@ -15,6 +15,8 @@ interface VowelTrapezoidProps {
   readonly onActivate: (symbol: PhoneSymbol) => void;
   /** FR-30: plays symbols; left out when audio is unavailable. */
   readonly player?: SymbolPlayer | undefined;
+  /** FR-2 (ADR-0016): keep a key's tooltip open while the pointer is over it. */
+  readonly hoverableTooltips?: boolean | undefined;
 }
 
 const percent = (n: number) => `${String(n * 100)}%`;
@@ -40,7 +42,13 @@ const COLUMN_LABELS = (['front', 'central', 'back'] as const).map((backness) => 
  * Keys are in reading order (close to open, front to back) for keyboard users,
  * and each key's name says where it sits.
  */
-export function VowelTrapezoid({ symbols, glyphs, onActivate, player }: VowelTrapezoidProps) {
+export function VowelTrapezoid({
+  symbols,
+  glyphs,
+  onActivate,
+  player,
+  hoverableTooltips,
+}: VowelTrapezoidProps) {
   const captionId = useId();
   const clusters = vowelTrapezoid(symbols);
   // The full IPA puts three vowels at some points (i iː y); the chart widens to fit.
@@ -99,6 +107,7 @@ export function VowelTrapezoid({ symbols, glyphs, onActivate, player }: VowelTra
                     labels={labelsOf(symbol, glyphs)}
                     onActivate={onActivate}
                     player={player}
+                    hoverableTooltips={hoverableTooltips}
                   />
                 ))}
               </li>

@@ -19,6 +19,11 @@ interface SymbolKeyProps {
    * can't play (a mark, or a sound with no clip) gets no play affordance.
    */
   readonly player?: SymbolPlayer | undefined;
+  /**
+   * FR-2 (ADR-0016): keep the tooltip open while the pointer is over it. Off by
+   * default, so the tooltip closes as soon as the pointer leaves the key.
+   */
+  readonly hoverableTooltips?: boolean | undefined;
 }
 
 /** How long a touch must last to count as a long-press (FR-2). */
@@ -33,8 +38,10 @@ const MODIFIERS: ReadonlySet<string> = new Set(['Alt', 'Control', 'Meta', 'Shift
  * or the name for marks with no example; none for a sound with no example).
  * Hover, keyboard focus or a
  * touch long-press shows a tooltip with the name, a highlighted example word and
- * the TIPA code. The tooltip stays open while hovered and closes on Escape
- * (WCAG 1.4.13). A long-press shows the tooltip without adding the symbol.
+ * the TIPA code. It closes on Escape and, by default, as soon as the pointer
+ * leaves the key; with `hoverableTooltips` it stays open while the pointer is
+ * over it (WCAG 1.4.13, ADR-0016). A long-press shows the tooltip without
+ * adding the symbol.
  * Focus from a click or tap doesn't open it (#21), matching the browser's
  * `:focus-visible` heuristic: the next key press does.
  *
@@ -44,7 +51,13 @@ const MODIFIERS: ReadonlySet<string> = new Set(['Alt', 'Control', 'Meta', 'Shift
  * from assistive technology, whose path is Alt+Enter (shown in the tooltip and
  * the help dialog).
  */
-export function SymbolKey({ symbol, labels, onActivate, player }: SymbolKeyProps) {
+export function SymbolKey({
+  symbol,
+  labels,
+  onActivate,
+  player,
+  hoverableTooltips = false,
+}: SymbolKeyProps) {
   const play =
     player?.canPlay(symbol) === true
       ? () => {
@@ -101,6 +114,10 @@ export function SymbolKey({ symbol, labels, onActivate, player }: SymbolKeyProps
   };
   const leave = () => {
     window.clearTimeout(hoverTimer.current);
+    if (!hoverableTooltips) {
+      setHovered(false);
+      return;
+    }
     hoverTimer.current = window.setTimeout(() => {
       setHovered(false);
     }, HOVER_CLOSE_MS);
@@ -232,8 +249,7 @@ export function SymbolKey({ symbol, labels, onActivate, player }: SymbolKeyProps
         id={tooltipId}
         anchor={button}
         open={open}
-        onPointerEnter={enter}
-        onPointerLeave={leave}
+        {...(hoverableTooltips ? { onPointerEnter: enter, onPointerLeave: leave } : {})}
       >
         <span className={styles['tipName']}>{symbol.name}</span>
         {example && (

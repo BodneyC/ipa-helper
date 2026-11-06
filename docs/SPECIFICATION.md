@@ -77,7 +77,10 @@ pronounced in British English, at no cost and without signing up for anything.
   show no secondary label, because their chart position already says what they
   are. Their name is still in the tooltip and the accessible name.
   "Focus" means keyboard focus (`:focus-visible`): focus from a click or tap
-  doesn't open the tooltip, so it never stays open after the pointer leaves (#21).*
+  doesn't open the tooltip, so it never stays open after the pointer leaves (#21).
+  By default a hover tooltip closes as soon as the pointer leaves the key, even
+  onto the tooltip. A "Tooltips" setting (default off) keeps it open while the
+  pointer is over the key or the tooltip (ADR-0016).*
 - **FR-3** An inventory switch chooses between **British English (RP)**, the
   default, and **Full IPA**. The RP view hides symbols outside the inventory. It does
   not just grey them out. *As built (M6.1): the choice is remembered. Full IPA
@@ -217,7 +220,9 @@ pronounced in British English, at no cost and without signing up for anything.
   coverage gates as in ADR-0005. Merging is blocked if any gate fails.
 - **NFR-2 Accessibility**: WCAG 2.2 AA. axe-core reports zero violations in
   e2e. Every Gruvbox token pairing used for text meets ≥ 4.5:1 contrast (≥ 3:1 for
-  large text and UI boundaries). A unit test verifies this.
+  large text and UI boundaries). A unit test verifies this. The one exception:
+  by default, palette tooltips aren't hoverable (SC 1.4.13). A setting makes
+  them hoverable (FR-2, ADR-0016).
 - **NFR-3 Performance**: the initial JS is ≤ 100 kB gzipped, excluding fonts and
   audio. Lighthouse performance ≥ 95 and LCP < 1.5 s on simulated "Fast 4G". Symbol
   clicks update the display within one frame.

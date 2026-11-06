@@ -24,6 +24,7 @@ digits.
 | [0013](0013-pwa-service-worker.md) | A hand-written service worker that precaches only the app shell | Accepted |
 | [0014](0014-github-issues-workflow.md) | Track unscheduled work in GitHub Issues with scoped labels and a P0–P3 priority | Accepted |
 | [0015](0015-pull-requests-only.md) | Change `main` only through pull requests with required checks | Accepted |
+| [0016](0016-tooltips-close-when-the-pointer-leaves.md) | Close a key's tooltip when the pointer leaves it, with a setting to keep it open | Accepted |
 
 ## Template
 

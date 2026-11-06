@@ -36,6 +36,8 @@ export interface Settings {
   readonly collapsedGroups: readonly Category[];
   /** FR-34: play each symbol as it is added. */
   readonly soundOnSelect: boolean;
+  /** FR-2 (ADR-0016): keep a key's tooltip open while the pointer is over it. */
+  readonly hoverableTooltips: boolean;
   /** SPEC §6 (#4): on small screens, show the word card's details (Clear, saved words, paste, outputs). */
   readonly wordDetailsOpen: boolean;
 }
@@ -55,6 +57,7 @@ export const DEFAULT_SETTINGS: Settings = {
   tieBars: false,
   collapsedGroups: [],
   soundOnSelect: false,
+  hoverableTooltips: false,
   wordDetailsOpen: true,
 };
 
@@ -88,6 +91,7 @@ const validators: { readonly [K in keyof Settings]: (value: unknown) => value is
   tieBars: isBoolean,
   collapsedGroups: isCategoryList,
   soundOnSelect: isBoolean,
+  hoverableTooltips: isBoolean,
   wordDetailsOpen: isBoolean,
 };
 
@@ -122,6 +126,7 @@ export const parseSettings = (value: unknown, fallback: Settings = DEFAULT_SETTI
     tieBars: pick('tieBars'),
     collapsedGroups: pick('collapsedGroups'),
     soundOnSelect: pick('soundOnSelect'),
+    hoverableTooltips: pick('hoverableTooltips'),
     wordDetailsOpen: pick('wordDetailsOpen'),
   };
 };
