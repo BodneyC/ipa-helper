@@ -3,21 +3,16 @@ import { useMemo, useRef, useState } from 'react';
 import styles from './App.module.css';
 import { SettingsSync } from './SettingsSync';
 import { TopBar } from './TopBar';
+import { Workbench } from './Workbench';
 import { useEditor, useSettings } from '../state/hooks';
 import { AnnouncerProvider } from '../ui/components/Announcer';
-import { Card } from '../ui/components/Card';
-import { TOOLTIP_CEILING } from '../ui/components/Tooltip';
 import { GlobalShortcuts } from '../ui/features/help/GlobalShortcuts';
 import { HelpDialog } from '../ui/features/help/HelpDialog';
-import { OutputPanel } from '../ui/features/output/OutputPanel';
 import { PaletteWithAudio } from '../ui/features/palette/PaletteWithAudio';
 import { SavedWordsDialog } from '../ui/features/saved/SavedWordsDialog';
 import { SettingsDialog } from '../ui/features/settings/SettingsDialog';
 import { UpdateNotice } from '../ui/features/update/UpdateNotice';
 import { PasteDialog } from '../ui/features/word/PasteDialog';
-import { UrlSync } from '../ui/features/word/UrlSync';
-import { WordActions } from '../ui/features/word/WordActions';
-import { WordDisplay } from '../ui/features/word/WordDisplay';
 
 /**
  * Page layout (SPEC §6, ARCHITECTURE §6): the top bar, the workbench card with the
@@ -57,23 +52,14 @@ export function App() {
         }}
       />
       <main className={styles['main']}>
-        <div className={styles['workbench']} {...{ [TOOLTIP_CEILING]: '' }}>
-          <Card title="Word" headingLevel={2} hideTitle>
-            <div className={styles['workbenchBody']}>
-              <UrlSync />
-              <WordDisplay />
-              <WordActions
-                onSaved={() => {
-                  setSavedOpen(true);
-                }}
-                onPaste={() => {
-                  setPasteOpen(true);
-                }}
-              />
-              <OutputPanel />
-            </div>
-          </Card>
-        </div>
+        <Workbench
+          onSaved={() => {
+            setSavedOpen(true);
+          }}
+          onPaste={() => {
+            setPasteOpen(true);
+          }}
+        />
         <PaletteWithAudio
           inventory={settings.inventory}
           query={query}

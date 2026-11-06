@@ -280,14 +280,15 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `replace` (from URL or paste). The reducer is pure and fully unit-tested, with
   exhaustive `switch` statements guarded by `assertNever`.
 - **Settings store**: theme, contrast, inventory, macro name, slash option,
-  collapsed groups, r-display, tie bars, sound-on-select. Persisted through the
+  collapsed groups, r-display, tie bars, sound-on-select, word details open. Persisted through the
   `KeyValueStore` port under a versioned key (`ipa-helper:settings:v1`) and
   validated on load with a hand-written type guard. No `JSON.parse` result is
   trusted without validation. `parseSettings` validates field by field: an invalid
   or missing field falls back to its default (or, in the reducer, its current
   value) without discarding the valid ones. Fields: `theme` (system|dark|light),
   `contrast`, `inventory`, `macroName` (letters only), `ipaSlashes` (FR-20),
-  `tipaSlashes` (Q-2), `rDisplay`, `tieBars` (M6.5), `collapsedGroups` (categories), `soundOnSelect`.
+  `tipaSlashes` (Q-2), `rDisplay`, `tieBars` (M6.5), `collapsedGroups` (categories), `soundOnSelect`,
+  `wordDetailsOpen` (#4).
   `main.tsx` reads them with `loadSettings(store)` before the first render;
   `<SettingsSync>` writes them back with `saveSettings` on every change.
 - **Several tabs** (#2): tabs share local storage but not memory. The
@@ -326,8 +327,16 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 
 ## 6. UI composition
 
-- `<App>` layout: `<TopBar>` · `<WorkbenchCard>` (`<WordDisplay>`,
+- `<App>` layout: `<TopBar>` · `<Workbench>` (`<WordDisplay>`,
   `<OutputPanel>`, word actions) · `<Palette>` (group cards).
+- `<Workbench>` (`src/app/Workbench.tsx`, SPEC §6, #4) reads `useMediaQuery(SMALL_SCREEN)`
+  (`(width < 768px), (height < 500px)`) during render. A large screen gets one
+  card. A small one gets two siblings of `<main>`: a sticky word strip (the word,
+  `<WordActions part="primary">` and the More disclosure) and the details
+  (`part="secondary"` and `<OutputPanel>`), which scroll away. They must be
+  siblings, because a sticky element can't outlive its parent's box. More stores
+  `wordDetailsOpen` in the settings. The CSS media queries for the small layout
+  repeat the `SMALL_SCREEN` query.
 - `<Palette>` renders groups from the inventory registry, filtered by the
   inventory setting and the filter text. Each group picks a layout component:
   `ConsonantChart` (CSS grid: place × manner), `VowelTrapezoid` (absolutely
