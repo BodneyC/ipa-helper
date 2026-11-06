@@ -1,0 +1,73 @@
+name: Bug report
+description: Something doesn't work, or works differently from the specification.
+title: '<imperative summary, e.g. "Copy TIPA drops the stress mark after ŋ">'
+labels: ['type: bug', 'status: triage']
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: One or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the share URL below
+        2. Press …
+        3. Copy the TIPA output
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: Paste the exact output, error text or a screenshot.
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Share URL
+      description: The page URL, including the `#…` part, so the word can be reproduced (FR-15).
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and OS
+      placeholder: Firefox 150 on Windows 11 / Safari on iOS 20 / installed PWA on Android
+    validations:
+      required: true
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact
+      description: Helps triage choose a priority. The maintainer sets the actual priority label.
+      options:
+        - I can't use the app at all
+        - The output I copy is wrong
+        - I lost saved words or settings
+        - It blocks me using a keyboard or screen reader
+        - It's annoying, but there's a workaround
+        - Cosmetic
+    validations:
+      required: true
+  - type: checkboxes
+    id: regression
+    attributes:
+      label: Regression
+      options:
+        - label: This used to work
+  - type: input
+    id: requirement
+    attributes:
+      label: Requirement (if known)
+      description: The spec requirement it breaks, from docs/SPECIFICATION.md.
+      placeholder: FR-21

@@ -1,0 +1,38 @@
+name: Engineering task
+description: Refactor, test, tooling, CI, docs or a spike. Mostly for maintainers and agents.
+title: '<imperative summary>'
+labels: ['status: triage']
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      description: Triage turns this into the matching `type:` label.
+      options:
+        - task (refactor, tests, performance)
+        - chore (tooling, dependencies, CI)
+        - docs
+        - spike (investigation; output is an ADR or findings)
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why is this needed? Link the roadmap task, CI run, issue or ADR that prompted it.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - [ ] …
+        - [ ] All gates green (`pnpm check`, `pnpm test:e2e`)
+    validations:
+      required: true
+  - type: input
+    id: refs
+    attributes:
+      label: refs / deps
+      placeholder: 'refs: NFR-3, ADR-0005 · deps: #12'

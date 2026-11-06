@@ -1,7 +1,8 @@
 # ipa-helper — Roadmap
 
 Tasks are worked **in order** unless a dependency says otherwise. `/next` takes
-the first unchecked task whose dependencies are all done. Each task is meant to
+the first unchecked task whose dependencies are all done, after any open
+`priority: P0`/`P1` issues (see `docs/WORKFLOW.md` §4). Each task is meant to
 fit in one commit or PR. When you finish a task, tick it (`[x]`) and append the
 short commit hash: `- [x] **M1.2** … (abc1234)`.
 
@@ -109,6 +110,9 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 ---
 
 ## Backlog (unscheduled ideas)
+
+> **Frozen (ADR-0014).** New ideas go to GitHub Issues (`/issue`), not here.
+> These items are waiting to be migrated into issues. Delete each bullet once its issue exists.
 
 - More export formats: X-SAMPA, Kirshenbaum, espeak mnemonics, Markdown/HTML snippet.
 - Accent switch for audio (General American), e.g. a second Piper voice (ADR-0009).

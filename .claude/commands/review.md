@@ -21,6 +21,9 @@ Check, citing `file:line` for each finding:
 6. **Theming**: only semantic tokens, no colour literals, works in both themes.
 7. **Dependencies**: anything new? Is it justified, and does its licence fit NFR-8?
 8. **Docs**: roadmap ticked, ADR or spec updates needed?
+9. **Tracking**: if the work is for an issue, does every acceptance criterion in it
+   hold? Does the commit or PR use a Conventional subject with the task ID or `(#N)`
+   and `Closes #N`? Are there out-of-scope follow-ups that should be filed with `/issue`?
 
 Output the findings ranked by severity (blocker / should-fix / nit), then a one-line
 verdict. Don't edit files unless the user asks you to fix the findings.

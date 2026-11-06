@@ -13,6 +13,7 @@ themed in Gruvbox. Later it will speak symbols and words aloud in British Englis
 | `docs/ARCHITECTURE.md` | **How** it is built: layers, modules, data flow, conventions. |
 | `docs/adr/` | **Why** it is built that way. One file per decision. |
 | `docs/ROADMAP.md` | **When**: ordered milestones with task IDs and acceptance criteria. |
+| `docs/WORKFLOW.md` | **Who/what next**: GitHub issues, labels, priorities, branches and PRs. |
 
 When these documents disagree with the code, the documents win, unless an ADR
 supersedes them. If you need to deviate, write or amend an ADR **first**
@@ -23,10 +24,12 @@ supersedes them. If you need to deviate, write or amend an ADR **first**
 | Command | Use |
 | --- | --- |
 | `/bootstrap` | One-off: scaffold the project (roadmap milestone M0). |
-| `/next [task-id]` | Implement the next unchecked roadmap task, or the one named. |
+| `/next [task-id\|#issue]` | Implement the next item (P0/P1 issues, then the roadmap), or the one named. |
+| `/issue <description>` | Check for duplicates, draft, label and file a GitHub issue. |
+| `/triage [#n…\|all]` | Label, prioritise and write acceptance criteria for open issues. |
 | `/check` | Run every quality gate and fix failures. |
 | `/adr <title>` | Write a new Architecture Decision Record. |
-| `/roadmap [status\|add\|reorder]` | Report on or edit the roadmap. |
+| `/roadmap [status\|add\|reorder]` | Report on or edit the roadmap (status includes open issues). |
 | `/spec <change>` | Propose and apply a change to the specification. |
 | `/review` | Review the working tree against the spec, architecture and standards. |
 
@@ -55,16 +58,40 @@ only.** Never use `npm`/`yarn`, and never commit `package-lock.json` or `yarn.lo
    properties (ADR-0006). Hex literals outside `src/styles/tokens.css` fail lint.
 7. **Make small, conventional commits** (`feat:`, `fix:`, `test:`, `docs:`,
    `refactor:`, `chore:`), one roadmap task per commit or PR where practical.
-   Reference the task ID, e.g. `feat(palette): grouped consonant grid [M2.3]`.
+   Reference the task ID and/or issue, e.g. `feat(palette): grouped consonant grid [M2.3]`
+   or `fix(audio): time out resume() (#57)`.
 8. **Don't add dependencies casually.** A new runtime dependency needs a line in
    the PR or commit body explaining why. A significant one needs an ADR.
 
+## Issues, labels and priorities
+
+Full rules are in `docs/WORKFLOW.md`. The essentials:
+
+- **The roadmap is the plan; GitHub Issues are the intake.** Bugs, requests and
+  unscheduled ideas are issues (`/issue`). Never add bullets to the roadmap Backlog.
+  Follow-ups you discover mid-task are filed as issues, not fixed silently in the same change.
+- **Labels are scoped.** A triaged open issue has exactly one `type:`, one
+  `priority:`, one `status:`, and at least one `area:`. Labels are defined in
+  `scripts/github/sync-labels.sh`. Never invent labels ad hoc.
+- **Priority is user impact:** `P0` critical (site broken, data loss, wrong copied
+  output, a11y blocker; drop everything), `P1` high (before the next roadmap task),
+  `P2` planned, `P3` someday.
+- **Status flow:** `triage → ready → in-progress → in-review → closed`, with
+  `needs-info` and `blocked` as side states. Update the label when you start work,
+  open a PR, or stop.
+- **What next:** P0 issues → ready P1 issues → next roadmap task → ready P2 issues.
+  Skip `needs: human`, `needs: decision`, blocked, and other people's issues.
+- **Branches and PRs:** `<type>/<issue>-<slug>`; the PR body says `Closes #N`; the
+  subject is a Conventional Commit with `[Mx.y]` and/or `(#N)`.
+- Creating, editing or closing issues and opening PRs are public actions.
+  Show the draft and get confirmation first, unless the user has told you to go ahead.
+
 ## Working loop
 
-1. Read the roadmap task and the spec sections it cites.
+1. Read the roadmap task or issue, and the spec sections it cites.
 2. Write or extend tests first where practical.
 3. Implement in the layer the architecture assigns.
 4. Run `/check`.
 5. Tick the task in `docs/ROADMAP.md`, and update the spec or architecture if
    reality changed.
-6. Commit.
+6. Commit (and, for an issue, open a PR with `Closes #N` and move it to `status: in-review`).

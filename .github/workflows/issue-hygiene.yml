@@ -1,0 +1,32 @@
+name: Issue hygiene
+
+# Keeps status labels consistent with docs/WORKFLOW.md §2:
+# closed issues carry no `status:` label, and reopened issues go back to triage.
+
+on:
+  issues:
+    types: [closed, reopened]
+
+permissions:
+  issues: write
+
+jobs:
+  status-labels:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      NUMBER: ${{ github.event.issue.number }}
+    steps:
+      - name: Clear status labels on close
+        if: github.event.action == 'closed'
+        run: |
+          gh issue view "$NUMBER" --json labels --jq '.labels[].name | select(startswith("status: "))' |
+            while IFS= read -r label; do
+              gh issue edit "$NUMBER" --remove-label "$label"
+            done
+      - name: Back to triage on reopen
+        if: github.event.action == 'reopened'
+        run: |
+          gh issue edit "$NUMBER" --add-label 'status: triage'
