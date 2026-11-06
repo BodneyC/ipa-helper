@@ -443,10 +443,13 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
     `<base>voice/en_GB-cori-medium.<sha8>.onnx` while reporting progress
     against the model's known size, then stores it in the cache. A failed load
     is forgotten, so the next word retries.
-  - `synth.worker.ts` is the thin wrapper that connects onnxruntime-web
-    (`ort.bundle.min.mjs`, with the glue code inlined, one thread) to the
-    engine. The wasm binary is self-hosted through the `onnxruntime-web-dist`
-    alias in `vite.config.ts`.
+  - `synth.worker.ts` is the thin wrapper that connects onnxruntime-web to the
+    engine. It imports the wasm-only build, `onnxruntime-web/wasm`
+    (`ort.wasm.bundle.min.mjs`, with the glue code inlined, one thread). The
+    default entry expects the WebGPU-capable `.jsep.wasm` binary and hangs if
+    given the plain one. The wasm binary is self-hosted through the
+    `onnxruntime-web-dist` alias in `vite.config.ts`.
+    `scripts/ci/onnxruntime.test.ts` checks that the bundle and the binary match.
   - The model is never committed: `pnpm voice:fetch` puts the SHA-256-checked
     file into `public/voice/` (gitignored), and the deploy workflow runs it
     with an `actions/cache` cache.

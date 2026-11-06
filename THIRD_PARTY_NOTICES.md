@@ -54,43 +54,22 @@ and from M5 as the model itself, run in the browser to speak whole words.
 | [Cori (medium)](https://brycebeattie.com/files/tts/), `en_GB-cori-medium` from [rhasspy/piper-voices](https://huggingface.co/rhasspy/piper-voices) at revision `e7229f7d33a1` | Rendered the symbol clips in `src/assets/audio/symbols/*.opus`. From M5.2 the model is served from the same host and run in the browser | Public domain, as declared by its author; it was trained from scratch on LibriVox recordings. The piper-voices repository is MIT | Voice trained by Bryce Beattie; recordings by LibriVox volunteers (public domain) |
 | Symbol clips, `src/assets/audio/symbols/*.opus` | Played for each symbol (FR-30) | Output of the public-domain voice above. Distributed with this project under GPL-3.0-or-later | ipa-helper contributors |
 | [Piper](https://github.com/rhasspy/piper) (engine) | Defines the voice's model format and the phoneme-ID input encoding the app follows. No Piper code is distributed | MIT | Michael Hansen |
-| [onnxruntime-web](https://github.com/microsoft/onnxruntime) (runtime) | 1.20.1, wasm. Runs the voice in the synthesis worker (`synth.worker-*.js` and `ort-wasm-simd-threaded-*.wasm`), and renders the symbol clips at build time | MIT | Microsoft Corporation |
+| [onnxruntime-web](https://github.com/microsoft/onnxruntime) (runtime) | 1.31.1, wasm-only build (`onnxruntime-web/wasm`). Runs the voice in the synthesis worker (`synth.worker-*.js` and `ort-wasm-simd-threaded-*.wasm`). The committed symbol clips were rendered at build time with 1.20.1 (`src/assets/audio/symbols/manifest.json`) | MIT | Microsoft Corporation |
 
 The model (`voice/en_GB-cori-medium.*.onnx`) is fetched at deploy time from
 the pinned revision above. It is served from the same host and never committed.
 
 ## Bundled in the synthesis worker
 
-onnxruntime-web's prebuilt bundle (`ort.bundle.min.mjs`) embeds these packages.
-They are part of the worker chunk, which loads only when a word is first
-played. This list comes from what is actually in the built
-`synth.worker-*.js`, not from the dependency tree: protobufjs and platform are
-dependencies of onnxruntime-web but are not in the bundle. Re-check whenever
+The worker imports onnxruntime-web's prebuilt wasm-only bundle
+(`ort.wasm.bundle.min.mjs`). As of 1.31.1 it embeds only
+[onnxruntime-common](https://github.com/microsoft/onnxruntime) 1.31.1 (MIT,
+Microsoft Corporation), which is covered by the row above. Earlier versions also
+embedded flatbuffers, long and guid-typescript; 1.31.1's wasm-only bundle doesn't.
+protobufjs and platform are dependencies of onnxruntime-web but are not in
+the bundle. This list comes from what is actually in the built
+`synth.worker-*.js`, not from the dependency tree. Re-check it whenever
 onnxruntime-web is upgraded.
-
-| Package | Version | Licence | Copyright |
-| --- | --- | --- | --- |
-| [onnxruntime-common](https://github.com/microsoft/onnxruntime) | 1.20.1 | MIT | Microsoft Corporation |
-| [flatbuffers](https://github.com/google/flatbuffers) | 1.12.0 | Apache-2.0 ([`LICENSES/Apache-2.0.txt`](LICENSES/Apache-2.0.txt)) | The FlatBuffers project (Google) |
-| [long](https://github.com/dcodeIO/long.js) | 5.3.2 | Apache-2.0 ([`LICENSES/Apache-2.0.txt`](LICENSES/Apache-2.0.txt)) | Daniel Wirtz / The long.js Authors; portions The Closure Library Authors |
-| [guid-typescript](https://github.com/NicolasDeveloper/guid-typescript) | 1.0.9 | ISC | Nicolas (the package's author) |
-
-Apache-2.0 is compatible with GPL-3.0-or-later (but not with GPL-2.0), and so
-is ISC. The ISC terms are:
-
-```text
-Permission to use, copy, modify, and/or distribute this software for any purpose
-with or without fee is hereby granted, provided that the above copyright notice
-and this permission notice appear in all copies.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
-THIS SOFTWARE.
-```
 
 ---
 
