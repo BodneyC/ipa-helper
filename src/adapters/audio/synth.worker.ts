@@ -1,7 +1,10 @@
 // The synthesis worker (M5.2, ADR-0009): runs the Piper voice with
 // onnxruntime-web off the main thread. Vite bundles it as its own chunk,
 // loaded only when a word is first played.
-import * as ort from 'onnxruntime-web';
+// The wasm-only build: its bundle inlines the glue for the plain
+// `ort-wasm-simd-threaded.wasm`. The default entry (WebGPU-capable since 1.2x)
+// expects the 29.5 MB `.jsep.wasm` instead, and hangs if given this one.
+import * as ort from 'onnxruntime-web/wasm';
 // Self-hosted (NFR-6): an alias in vite.config.ts points at the package's dist
 // folder, whose files its `exports` don't list.
 import wasmUrl from 'onnxruntime-web-dist/ort-wasm-simd-threaded.wasm?url';
