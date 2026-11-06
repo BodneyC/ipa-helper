@@ -45,6 +45,27 @@ test.describe('symbol palette (FR-1, FR-2)', () => {
     await expect(key).toBeFocused();
   });
 
+  test('#21: clicking a key does not leave its tooltip open, but keyboard focus shows it', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const key = page.getByRole('button', { name: /^æ\s?,/ });
+    const tooltip = page.getByRole('tooltip');
+    await key.click();
+    await expect(key).toBeFocused();
+    await page.mouse.move(0, 0);
+    await expect(tooltip).toBeHidden();
+    // Arrow keys move the roving focus; keyboard focus shows the next key's tooltip.
+    await page.keyboard.press('ArrowRight');
+    await expect(key).not.toBeFocused();
+    await expect(tooltip).toBeVisible();
+    await expectNoA11yViolations(page);
+    // Tabbing in from outside the palette shows it too.
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Tab');
+    await expect(tooltip).toBeVisible();
+  });
+
   test('FR-1: vowels sit on the trapezoid, close front top left and open back bottom right', async ({
     page,
   }) => {

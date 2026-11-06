@@ -25,14 +25,18 @@ interface SymbolKeyProps {
 export const LONG_PRESS_MS = 500;
 /** Grace period for moving the pointer from the key onto its tooltip. */
 const HOVER_CLOSE_MS = 120;
+/** Keys that don't, on their own, make pointer focus visible. */
+const MODIFIERS: ReadonlySet<string> = new Set(['Alt', 'Control', 'Meta', 'Shift']);
 
 /**
  * A palette key (FR-2): the glyph with a small label under it (the example word,
  * or the name for marks with no example; none for a sound with no example).
- * Hover, focus or a
+ * Hover, keyboard focus or a
  * touch long-press shows a tooltip with the name, a highlighted example word and
  * the TIPA code. The tooltip stays open while hovered and closes on Escape
  * (WCAG 1.4.13). A long-press shows the tooltip without adding the symbol.
+ * Focus from a click or tap doesn't open it (#21), matching the browser's
+ * `:focus-visible` heuristic: the next key press does.
  *
  * FR-30: a sounding key plays on Alt+click, Alt+Enter or long-press, and from
  * a small speaker button that appears while the key is hovered or focused. The
@@ -51,6 +55,7 @@ export function SymbolKey({ symbol, labels, onActivate, player }: SymbolKeyProps
   const tipaId = useId();
   const [button, setButton] = useState<HTMLButtonElement | null>(null);
   const [hovered, setHovered] = useState(false);
+  /** Keyboard focus only (`:focus-visible`); pointer focus leaves the tooltip shut (#21). */
   const [focused, setFocused] = useState(false);
   const [longPressed, setLongPressed] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -60,6 +65,8 @@ export function SymbolKey({ symbol, labels, onActivate, player }: SymbolKeyProps
   const pressTimer = useRef<number | undefined>(undefined);
   const swallowClick = useRef(false);
   const lastPointer = useRef<string>('mouse');
+  /** Set by a press, so the focus it causes doesn't open the tooltip. */
+  const pointerFocus = useRef(false);
 
   const open = (hovered || focused || longPressed) && !dismissed;
 
@@ -101,6 +108,8 @@ export function SymbolKey({ symbol, labels, onActivate, player }: SymbolKeyProps
 
   const pointerDown = (event: PointerEvent) => {
     lastPointer.current = event.pointerType;
+    pointerFocus.current = true;
+    setFocused(false);
     if (event.pointerType !== 'touch') return;
     window.clearTimeout(pressTimer.current);
     pressTimer.current = window.setTimeout(() => {
@@ -159,13 +168,21 @@ export function SymbolKey({ symbol, labels, onActivate, player }: SymbolKeyProps
         }}
         onFocus={() => {
           setDismissed(false);
-          setFocused(true);
+          setFocused(!pointerFocus.current);
+          pointerFocus.current = false;
         }}
         onBlur={() => {
+          pointerFocus.current = false;
           setFocused(false);
           setLongPressed(false);
         }}
         onKeyDown={(event) => {
+          // A key press after pointer focus makes focus visible, as browsers do.
+          // Roving focus may already have moved on (and blurred this key) by now.
+          const stillFocused = document.activeElement === event.currentTarget;
+          if (stillFocused && event.key !== 'Escape' && !MODIFIERS.has(event.key)) {
+            setFocused(true);
+          }
           if (event.key === 'Enter' && event.altKey && play !== undefined) {
             // Without this the browser would also click, adding the symbol.
             event.preventDefault();
