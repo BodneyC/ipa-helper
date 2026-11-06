@@ -103,7 +103,9 @@ pronounced in British English, at no cost and without signing up for anything.
   ←/→ or by clicking between tokens. Insertion happens at the cursor.
 - **FR-13** Editing actions: **Backspace** deletes the token before the cursor,
   **Delete** the token after it, and **Clear** empties the word. Clear can be undone.
-- **FR-14** Undo/redo (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z) cover every word edit.
+- **FR-14** Undo/redo (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z or Ctrl/Cmd+Y) cover every
+  word edit. The keys work from anywhere in the app except text inputs (the
+  filter, the paste field) and dialogs, where the browser's own undo applies.
 - **FR-15** The current word is encoded in the URL fragment as versioned
   symbol IDs (e.g. `#w=1:primary-stress.f.l.turned-script-a.g.small-cap-i.esh`
   for `/ˈflɒɡɪʃ/`, see ADR-0007), so a shared link restores it.
@@ -187,6 +189,7 @@ pronounced in British English, at no cost and without signing up for anything.
   Tab moves between groups).
 - **FR-51** Global shortcuts (shown in a `?` help dialog): Backspace/Delete/←/→
   act on the word whenever focus isn't in a text input. `/` focuses the filter,
+  Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z undo and redo (FR-14),
   `Ctrl+Shift+C` copies the IPA, `Ctrl+Shift+L` copies the TIPA, and `Escape` closes dialogs.
   Inside a palette group, ←/→ move between keys (FR-50) rather than the word
   cursor; Backspace and Delete still edit the word. No shortcut fires while a

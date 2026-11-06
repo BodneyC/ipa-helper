@@ -69,6 +69,32 @@ describe('global shortcuts (FR-51)', () => {
     input.remove();
   });
 
+  it('FR-14: Ctrl/Cmd+Z undoes and Ctrl/Cmd+Shift+Z or Ctrl+Y redoes from a palette key', async () => {
+    const { user, word } = setup();
+    await user.click(screen.getByRole('button', { name: /^ʃ\s?,/ }));
+    expect(word).toHaveTextContent('/sipʃ/');
+    await user.keyboard('{Control>}z{/Control}');
+    expect(word).toHaveTextContent('/sip/');
+    await user.keyboard('{Control>}{Shift>}Z{/Shift}{/Control}');
+    expect(word).toHaveTextContent('/sipʃ/');
+    await user.keyboard('{Meta>}z{/Meta}');
+    expect(word).toHaveTextContent('/sip/');
+    await user.keyboard('{Control>}y{/Control}');
+    expect(word).toHaveTextContent('/sipʃ/');
+  });
+
+  it('FR-14: Ctrl+Z in a text field or a dialog leaves the word alone', async () => {
+    const { user, word } = setup();
+    await user.click(screen.getByRole('button', { name: /^ʃ\s?,/ }));
+    await user.click(screen.getByRole('searchbox', { name: 'Filter symbols' }));
+    await user.keyboard('{Control>}z{/Control}{Control>}y{/Control}');
+    expect(word).toHaveTextContent('/sipʃ/');
+    await user.click(screen.getByRole('button', { name: 'Keyboard shortcuts' }));
+    screen.getByRole('button', { name: 'Close' }).focus();
+    await user.keyboard('{Control>}z{/Control}');
+    expect(word).toHaveTextContent('/sipʃ/');
+  });
+
   it('Ctrl+Shift+C copies the IPA and Ctrl+Shift+L the TIPA, with an announcement', async () => {
     const { user, writeText } = setup(ids('esh', 'i', 'p'));
     await user.click(screen.getByRole('heading', { level: 1 }));

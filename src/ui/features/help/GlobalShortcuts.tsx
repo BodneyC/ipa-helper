@@ -39,11 +39,18 @@ const WORD_KEYS: ReadonlyMap<string, EditorAction> = new Map<string, EditorActio
   ['ArrowRight', { type: 'moveCursor', delta: 1 }],
 ]);
 
+/** FR-14: Ctrl/Cmd+Z undoes; Ctrl/Cmd+Shift+Z and Ctrl/Cmd+Y redo. */
+const historyAction = (key: string, shift: boolean): EditorAction | undefined => {
+  if (key === 'z') return shift ? { type: 'redo' } : { type: 'undo' };
+  if (key === 'y' && !shift) return { type: 'redo' };
+  return undefined;
+};
+
 /**
- * FR-51: page-wide shortcuts. Word keys act whenever focus isn't in a text
- * input, and leave alone keys a widget already handled (`defaultPrevented`:
- * the word display and the palette's arrow keys). Nothing fires from inside a
- * dialog. Renders nothing.
+ * FR-14, FR-51: page-wide shortcuts. Word keys and undo/redo act whenever focus
+ * isn't in a text input (where the browser's own undo applies), and leave alone
+ * keys a widget already handled (`defaultPrevented`: the word display and the
+ * palette's arrow keys). Nothing fires from inside a dialog. Renders nothing.
  */
 export function GlobalShortcuts({ onHelp, onFilter }: GlobalShortcutsProps) {
   const { dispatch } = useEditor();
@@ -75,6 +82,12 @@ export function GlobalShortcuts({ onHelp, onFilter }: GlobalShortcutsProps) {
         void (key === 'c'
           ? copy(outputs.ipaCopied, 'Copied IPA')
           : copy(outputs.tipa, 'Copied TIPA'));
+        return;
+      }
+      const history = mod && !event.altKey ? historyAction(key, event.shiftKey) : undefined;
+      if (history !== undefined) {
+        event.preventDefault();
+        dispatch(history);
         return;
       }
       if (mod || event.altKey) return;
