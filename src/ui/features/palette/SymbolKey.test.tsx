@@ -16,7 +16,7 @@ const get = (id: string): PhoneSymbol => {
 
 const esh = get('esh');
 
-const renderKey = (symbol: PhoneSymbol = esh, withPlay = false) => {
+const renderKey = (symbol: PhoneSymbol = esh, withPlay = false, hoverableTooltips = false) => {
   const onActivate = vi.fn<(s: PhoneSymbol) => void>();
   const onPlay = vi.fn<(s: PhoneSymbol) => void>();
   const { container } = render(
@@ -25,6 +25,7 @@ const renderKey = (symbol: PhoneSymbol = esh, withPlay = false) => {
       labels={labelsOf(symbol, { rDisplay: 'narrow', tieBars: false })}
       onActivate={onActivate}
       player={withPlay ? { canPlay: isSounding, play: onPlay } : undefined}
+      hoverableTooltips={hoverableTooltips}
     />,
   );
   // The speaker is hidden from assistive technology, so find it by its title.
@@ -167,9 +168,23 @@ describe('<SymbolKey>', () => {
     expect(outer).toHaveBeenCalledTimes(2);
   });
 
-  it('WCAG 1.4.13: stays open while the pointer moves onto the tooltip', () => {
+  it('FR-2: by default, closes as soon as the pointer leaves the key', () => {
     vi.useFakeTimers();
     const { key } = renderKey();
+    fireEvent.pointerEnter(key, { pointerType: 'mouse' });
+    const tooltip = screen.getByRole('tooltip');
+    fireEvent.pointerLeave(key);
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    fireEvent.pointerEnter(tooltip);
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
+  it('WCAG 1.4.13: with hoverableTooltips, stays open while the pointer moves onto the tooltip', () => {
+    vi.useFakeTimers();
+    const { key } = renderKey(esh, false, true);
     fireEvent.pointerEnter(key, { pointerType: 'mouse' });
     const tooltip = screen.getByRole('tooltip');
     fireEvent.pointerLeave(key);

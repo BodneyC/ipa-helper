@@ -14,6 +14,8 @@ interface ConsonantChartProps {
   readonly onActivate: (symbol: PhoneSymbol) => void;
   /** FR-30: plays symbols; left out when audio is unavailable. */
   readonly player?: SymbolPlayer | undefined;
+  /** FR-2 (ADR-0016): keep a key's tooltip open while the pointer is over it. */
+  readonly hoverableTooltips?: boolean | undefined;
 }
 
 /**
@@ -21,7 +23,13 @@ interface ConsonantChartProps {
  * down; voiceless left and voiced right in each cell. Empty and impossible cells
  * look different. It's a real table, so screen readers announce the headers.
  */
-export function ConsonantChart({ symbols, glyphs, onActivate, player }: ConsonantChartProps) {
+export function ConsonantChart({
+  symbols,
+  glyphs,
+  onActivate,
+  player,
+  hoverableTooltips,
+}: ConsonantChartProps) {
   const { places, manners, rows } = consonantChart(symbols);
 
   const renderSlot = (slot: ChartSlot, voicing: string) => {
@@ -36,6 +44,7 @@ export function ConsonantChart({ symbols, glyphs, onActivate, player }: Consonan
                 labels={labelsOf(symbol, glyphs)}
                 onActivate={onActivate}
                 player={player}
+                hoverableTooltips={hoverableTooltips}
               />
             ))}
           </span>

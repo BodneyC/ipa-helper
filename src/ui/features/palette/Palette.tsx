@@ -36,6 +36,8 @@ export interface PaletteProps {
   readonly onActivate: (symbol: PhoneSymbol) => void;
   /** FR-30: plays symbols; left out when audio is unavailable. */
   readonly player?: SymbolPlayer | undefined;
+  /** FR-2 (ADR-0016): keep a key's tooltip open while the pointer is over it. */
+  readonly hoverableTooltips?: boolean | undefined;
 }
 
 const isConsonant = (s: PhoneSymbol): s is ConsonantSymbol =>
@@ -54,6 +56,7 @@ export function Palette({
   onToggleGroup,
   onActivate,
   player,
+  hoverableTooltips = false,
 }: PaletteProps) {
   const symbols = symbolsIn(inventory).filter((s) => matchesFilter(s, query, glyphs));
   const filtering = query.trim() !== '';
@@ -65,7 +68,7 @@ export function Palette({
   };
 
   const body = (group: Group, members: readonly PhoneSymbol[]) => {
-    const props = { glyphs, onActivate: activate, player };
+    const props = { glyphs, onActivate: activate, player, hoverableTooltips };
     switch (group.layout) {
       case 'chart':
         return <ConsonantChart symbols={members.filter(isConsonant)} {...props} />;

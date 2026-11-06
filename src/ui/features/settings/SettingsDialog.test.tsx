@@ -123,6 +123,16 @@ describe('<SettingsDialog> (FR-42)', () => {
     expect(onHelp).toHaveBeenCalled();
   });
 
+  it('FR-2: turns hoverable tooltips on and off, off by default', async () => {
+    const { dialog, user } = setup();
+    const toggle = within(dialog).getByRole('checkbox', { name: /tooltip open/ });
+    expect(toggle).not.toBeChecked();
+    await user.click(toggle);
+    expect(current().hoverableTooltips).toBe(true);
+    await user.click(toggle);
+    expect(current().hoverableTooltips).toBe(false);
+  });
+
   it('FR-34: turns Sound on select on and off', async () => {
     const { dialog, user } = setup({}, fakeAudio('idle').audio);
     const toggle = within(dialog).getByRole('checkbox', { name: /Sound on select/ });

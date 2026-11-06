@@ -69,6 +69,7 @@ export function App() {
           }}
           glyphs={glyphs}
           soundOnSelect={settings.soundOnSelect}
+          hoverableTooltips={settings.hoverableTooltips}
           onActivate={(symbol) => {
             dispatch({ type: 'insert', symbolId: symbol.id });
           }}

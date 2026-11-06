@@ -35,6 +35,37 @@ test.describe('symbol palette (FR-1, FR-2)', () => {
     await expect(tooltip).toBeHidden();
   });
 
+  test('FR-2: the tooltip closes when the pointer leaves the key, unless set to stay open', async ({
+    page,
+  }) => {
+    await page.clock.install();
+    await page.goto('/');
+    const key = page.getByRole('button', { name: /^ʃ\s?,/ });
+    const tooltip = page.getByRole('tooltip');
+    const moveOntoTooltip = async () => {
+      await key.hover();
+      await tooltip.hover();
+    };
+
+    await moveOntoTooltip();
+    await expect(tooltip).toBeHidden();
+
+    await page.getByRole('button', { name: 'Settings' }).click();
+    const toggle = page
+      .getByRole('dialog', { name: 'Settings' })
+      .getByRole('checkbox', { name: /tooltip open/ });
+    await expect(toggle).not.toBeChecked();
+    await toggle.check();
+    await expectNoA11yViolations(page);
+    await page.keyboard.press('Escape');
+
+    await moveOntoTooltip();
+    await page.clock.runFor(500); // well past the grace period for reaching the tooltip
+    await expect(tooltip).toBeVisible();
+    await page.mouse.move(0, 0);
+    await expect(tooltip).toBeHidden();
+  });
+
   test('FR-2: focusing a key shows its tooltip, and Escape dismisses it', async ({ page }) => {
     await page.goto('/');
     const key = page.getByRole('button', { name: /^æ\s?,/ });
