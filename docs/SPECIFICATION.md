@@ -238,8 +238,15 @@ restraint, on a clean, spacious layout:
 - **Layout (desktop)**: a sticky top bar (title, inventory switch, filter, theme,
   settings). Below it, the **word display + output panel** sits as a prominent card
   at the top of the page, with the palette in a responsive grid of group cards
-  underneath. On narrow screens the word/output card stays sticky at the top and
-  the palette scrolls.
+  underneath. On small screens (narrower than 768 px, or shorter than 500 px,
+  which includes a phone in landscape) the card splits in two (#4):
+  - a compact **word strip** stays sticky under the top bar while the palette
+    scrolls: the word, Play word, Undo and Redo, and a **More** disclosure button
+    (`aria-expanded`). It covers no more than 40% of the viewport height at
+    360 × 640 or 844 × 390. The word's usage hint is kept for screen readers only.
+  - the **details** below it (Clear, Saved words, Paste IPA, and the IPA/TIPA
+    output rows) scroll away with the page. More shows or hides them; they start
+    shown, and the choice is remembered with the settings (FR-42).
 - **Surfaces**: `bg0` page and `bg1` cards, with 12–16 px radius, soft 1 px `bg2`
   borders and no heavy shadows. Use a subtle elevation shadow only on popovers.
 - **Accent colour coding by group** (from the Gruvbox accent set, used for a
