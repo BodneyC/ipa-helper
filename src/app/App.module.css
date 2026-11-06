@@ -8,20 +8,10 @@
   padding: var(--space-5) var(--page-gutter) var(--space-8);
 }
 
-.workbench {
-  z-index: 10;
-}
-
-.workbenchBody {
-  display: grid;
-  gap: var(--space-3);
-}
-
-/* Narrow screens: the word card stays in view while the palette scrolls (SPEC §6). */
-@media (width < 768px) {
-  .workbench {
-    position: sticky;
-    top: calc(var(--topbar-height) + var(--space-2));
-    box-shadow: 0 var(--space-2) 0 var(--color-bg);
+/* Small screens (SMALL_SCREEN, SPEC §6): start the word strip where it sticks. */
+@media (width < 768px), (height < 500px) {
+  .main {
+    gap: var(--space-3);
+    padding-top: var(--space-2);
   }
 }

@@ -36,6 +36,8 @@ export interface Settings {
   readonly collapsedGroups: readonly Category[];
   /** FR-34: play each symbol as it is added. */
   readonly soundOnSelect: boolean;
+  /** SPEC §6 (#4): on small screens, show the word card's details (Clear, saved words, paste, outputs). */
+  readonly wordDetailsOpen: boolean;
 }
 
 /** Versioned storage key (ARCHITECTURE §5). A breaking schema change bumps it. */
@@ -53,6 +55,7 @@ export const DEFAULT_SETTINGS: Settings = {
   tieBars: false,
   collapsedGroups: [],
   soundOnSelect: false,
+  wordDetailsOpen: true,
 };
 
 const oneOf =
@@ -85,6 +88,7 @@ const validators: { readonly [K in keyof Settings]: (value: unknown) => value is
   tieBars: isBoolean,
   collapsedGroups: isCategoryList,
   soundOnSelect: isBoolean,
+  wordDetailsOpen: isBoolean,
 };
 
 const isRecord = (value: unknown): value is object => typeof value === 'object' && value !== null;
@@ -118,6 +122,7 @@ export const parseSettings = (value: unknown, fallback: Settings = DEFAULT_SETTI
     tieBars: pick('tieBars'),
     collapsedGroups: pick('collapsedGroups'),
     soundOnSelect: pick('soundOnSelect'),
+    wordDetailsOpen: pick('wordDetailsOpen'),
   };
 };
 

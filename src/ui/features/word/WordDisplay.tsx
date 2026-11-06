@@ -32,12 +32,17 @@ const actionFor = (event: KeyboardEvent, length: number): EditorAction | undefin
   }
 };
 
+interface WordDisplayProps {
+  /** Keep the usage hint for screen readers only, to save room on small screens (SPEC §6). */
+  readonly hideHint?: boolean;
+}
+
 /**
  * FR-11–FR-14: the word between slashes, with a token cursor. Focus it to edit
  * with the keyboard; click a token to put the cursor on the nearer side of it.
  * Palette keys insert at the cursor.
  */
-export function WordDisplay() {
+export function WordDisplay({ hideHint = false }: WordDisplayProps = {}) {
   const { state, dispatch } = useEditor();
   const { settings } = useSettings();
   const hintId = useId();
@@ -106,7 +111,7 @@ export function WordDisplay() {
           /
         </span>
       </div>
-      <p id={hintId} className={styles['hint']}>
+      <p id={hintId} className={hideHint ? 'visuallyHidden' : styles['hint']}>
         Click symbols below to add them. ← → move, Backspace and Delete remove, Ctrl+Z undoes.
       </p>
     </div>

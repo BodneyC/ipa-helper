@@ -69,3 +69,11 @@
   color: var(--color-text-muted);
   font-size: 0.8125rem;
 }
+
+/* Short screens, such as a phone in landscape: a smaller word keeps the sticky strip low (SPEC §6). */
+@media (height < 500px) {
+  .display {
+    min-height: 3rem;
+    font-size: 2rem;
+  }
+}
