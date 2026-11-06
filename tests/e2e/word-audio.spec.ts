@@ -109,10 +109,10 @@ test.describe('word audio (FR-31, FR-33)', () => {
     expect(await page.evaluate(() => window.__workers?.length)).toBe(0);
 
     await playWord(page).click();
-    // The real serialiser's text reaches the worker: stress on the vowel, long-word ending.
+    // The real serialiser's text reaches the worker: stress on the vowel, and `!` (#33).
     await expect
       .poll(() => page.evaluate(() => window.__synthRequests))
-      .toEqual([expect.objectContaining({ type: 'synthesise', text: ' flˈɒɡɪʃ.' })]);
+      .toEqual([expect.objectContaining({ type: 'synthesise', text: 'flˈɒɡɪʃ!' })]);
     await expect(playWord(page)).toHaveAccessibleName('Loading voice…');
     await expect(playWord(page)).toHaveAttribute('aria-disabled', 'true');
     await expect(page.getByRole('progressbar', { name: 'Downloading the voice' })).toHaveAttribute(
@@ -147,7 +147,7 @@ test.describe('word audio (FR-31, FR-33)', () => {
     await expect(playWord(page)).not.toHaveAccessibleDescription(message);
     await tellWorker(page, 'release');
     await expect.poll(() => played(page)).toHaveLength(1);
-    // A short word ends in '!' (ADR-0009).
+    // Every word ends in '!' (ADR-0009, #33).
     const requests = await page.evaluate(() => window.__synthRequests ?? []);
     expect(requests).toContainEqual(expect.objectContaining({ type: 'synthesise', text: 'kæt!' }));
   });

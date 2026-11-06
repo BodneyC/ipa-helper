@@ -1,12 +1,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import {
-  createPiperSerialiser,
-  piperPhonemeIds,
-  piperPhonemeSerialiser,
-  SHORT_WORD_SOUNDS,
-} from './piper';
+import { createPiperSerialiser, piperPhonemeIds, piperPhonemeSerialiser } from './piper';
 import { isSounding, SYMBOLS, symbolById } from '../inventory';
 import { symbolId } from '../inventory/symbol-id';
 import type { PhoneSymbol } from '../inventory/types';
@@ -32,8 +27,8 @@ const anyWord = fc
   .array(fc.constantFrom(...SYMBOLS.map((s) => s.id)), { maxLength: 14 })
   .map(wordFromIds);
 const symbolsOf = (word: Word) => word.map((t) => symbolOf(t.symbolId));
-/** The phonemes without the ending: no leading space, no final `!` or `.`. */
-const core = (text: string) => text.replace(/^ /, '').slice(0, -1);
+/** The phonemes without the final `!`. */
+const core = (text: string) => text.slice(0, -1);
 
 describe('Piper phoneme serialiser (M5.1, ADR-0009)', () => {
   it('is the "piper" serialiser', () => {
@@ -42,21 +37,20 @@ describe('Piper phoneme serialiser (M5.1, ADR-0009)', () => {
 
   it('FR-31: moves stress from the syllable onset to just before the vowel', () => {
     expect(say('primary-stress', 'f', 'l', 'turned-script-a', 'g', 'small-cap-i', 'esh')).toBe(
-      ' flˈɒɡɪʃ.',
+      'flˈɒɡɪʃ!',
     );
     expect(
       say('secondary-stress', 's', 't', 'turned-r', 'face', 'primary-stress', 'k', 'schwa'),
-    ).toBe(' stɹˌeɪkˈə.');
+    ).toBe('stɹˌeɪkˈə!');
   });
 
-  it('ends short words in "!" and longer ones in " ….", so the voice stops cleanly', () => {
+  it('#33: ends every word in "!", whatever its length, so the voice stops cleanly', () => {
     expect(say('ash')).toBe('æ!');
     expect(say('primary-stress', 'ash', 't')).toBe('ˈæt!');
     expect(say('k', 'ash', 't', 's')).toBe('kæts!');
-    expect(say('k', 'ash', 't', 's', 'schwa')).toBe(' kætsə.');
-    // An affricate, diphthong or long vowel is one sound.
-    expect(say('tesh', 'face', 'i-long', 'm')).toBe('tʃeɪiːm!');
-    expect(SHORT_WORD_SOUNDS).toBe(5);
+    expect(say('k', 'ash', 't', 's', 'schwa')).toBe('kætsə!');
+    // The word that ran on for seconds as " ɹəʊdʊn.".
+    expect(say('turned-r', 'goat', 'd', 'upsilon', 'n')).toBe('ɹəʊdʊn!');
   });
 
   it('drops syllable breaks and stress with no vowel after it, and keeps length', () => {
@@ -102,13 +96,11 @@ describe('Piper phoneme serialiser (M5.1, ADR-0009)', () => {
     );
   });
 
-  it('property: the ending depends only on how many sounds the word has', () => {
+  it('#33 property: a word with a sound ends in one "!", with no space; one without is empty', () => {
     fc.assert(
       fc.property(anyWord, (word) => {
-        const sounds = symbolsOf(word).filter(isSounding).length;
         const text = piperPhonemeSerialiser.serialise(word);
-        const ending =
-          sounds === 0 ? /^$/u : sounds < SHORT_WORD_SOUNDS ? /^[^ ].*!$/u : /^ .*\.$/u;
+        const ending = symbolsOf(word).some(isSounding) ? /^[^ ][^!]*!$/u : /^$/u;
         expect(text).toMatch(ending);
       }),
     );

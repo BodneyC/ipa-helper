@@ -444,8 +444,8 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   (`src/domain/serialise/piper.ts`), so stress and length carry through. It
   moves each stress mark from the syllable onset to just before the stressed
   vowel, which is how the voice was trained, and drops syllable breaks. It ends
-  a word of 1–4 sounds in `!`, and writes a longer word as ` X.` with a
-  leading space, which stops the voice running on (ADR-0009, "Word endings").
+  every word in `!`, which stops the voice running on (ADR-0009, "Every word
+  ends in `!`").
   `piperPhonemeIds(text, phoneme_id_map)` turns that text into the voice's
   input IDs; the clip scripts and the synthesis worker share it. The UI never
   handles raw synthesis strings.
