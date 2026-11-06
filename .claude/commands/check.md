@@ -16,5 +16,8 @@ Run the full ipa-helper quality gate and get it green.
 4. Re-run until everything passes, then report a concise table: each gate and its result,
    plus coverage numbers for `src/domain` and overall.
 
+Local gates are necessary but not sufficient. CI on the PR also runs all three browsers,
+the TeX compile and Lighthouse (`/pr`, ADR-0015).
+
 If the project hasn't been scaffolded yet (no `package.json`), say so and
 suggest `/bootstrap`.

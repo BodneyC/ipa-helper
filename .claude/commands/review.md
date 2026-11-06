@@ -1,10 +1,11 @@
 ---
 description: Review the working tree against spec, architecture and standards
-argument-hint: "[path or git range, default: uncommitted + last commit]"
+argument-hint: "[#pr | path | git range, default: this branch vs origin/main + uncommitted]"
 ---
 
-Review the ipa-helper changes in `$ARGUMENTS` (default: `git diff HEAD~1` plus any
-uncommitted changes) as a strict senior reviewer.
+Review the ipa-helper changes in `$ARGUMENTS` as a strict senior reviewer. The default is
+`git diff origin/main...HEAD` plus any uncommitted changes. For a PR (`#N`), use
+`gh pr diff N`, the PR body, and `gh pr checks N`.
 
 Check, citing `file:line` for each finding:
 
@@ -24,6 +25,9 @@ Check, citing `file:line` for each finding:
 9. **Tracking**: if the work is for an issue, does every acceptance criterion in it
    hold? Does the commit or PR use a Conventional subject with the task ID or `(#N)`
    and `Closes #N`? Are there out-of-scope follow-ups that should be filed with `/issue`?
+10. **Branch and CI**: the work is on a branch, not `main`; the PR title is a Conventional
+    Commit (it becomes the squash commit); every required check is green, or the failure is explained.
 
 Output the findings ranked by severity (blocker / should-fix / nit), then a one-line
-verdict. Don't edit files unless the user asks you to fix the findings.
+verdict. Don't edit files unless the user asks you to fix the findings. Post findings to the PR
+(`gh pr review N --comment`) only if the user asks.

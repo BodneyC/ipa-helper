@@ -26,8 +26,10 @@ Procedure:
    and the relevant parts of `docs/ARCHITECTURE.md`. Read the existing code you'll touch.
    For an issue, the acceptance criteria are its `- [ ]` checklist. If it has none, or it
    is still `status: triage`, triage it first (`/triage #N`).
-   - **Claim it**: `gh issue edit N --add-assignee @me --add-label "status: in-progress" --remove-label "status: ready"`,
-     and create a branch named `<type>/<N>-<slug>` (WORKFLOW §3).
+   - **Claim it**: `gh issue edit N --add-assignee @me --add-label "status: in-progress" --remove-label "status: ready"`.
+   - **Branch** (roadmap tasks too): `git fetch origin && git switch -c <type>/<id>-<slug> origin/main`,
+     where `<id>` is the issue number or the task ID in lower case (`fix/3-resume-timeout`,
+     `feat/m8.1-accent-switch`). Never work on `main`.
 2. If the task is ambiguous or conflicts with the docs, stop and ask, or write an ADR
    with `/adr` when it is a design decision. Don't guess silently.
 3. Plan briefly: the files to add or change, the tests to write, and how each AC will be shown to hold.
@@ -39,15 +41,14 @@ Procedure:
    Never weaken a lint rule, threshold or type to make it pass. If a rule is
    truly wrong, propose an ADR amendment instead.
 7. Update docs if reality changed (spec, architecture, ADR status).
-8. Tick the task in `docs/ROADMAP.md` (if it is one) and commit using Conventional
-   Commits, with the task ID and/or issue in the subject
+8. Commit using Conventional Commits, with the task ID and/or issue in the subject
    (`fix(audio): time out resume() (#57)`) and `Closes #N` in the body.
-9. **For an issue**, ask before pushing (unless the user has already said to), then push the
-   branch and open a PR from `.github/pull_request_template.md`:
-   `gh pr create --title "<conventional subject>" --body-file <scratchpad file>`. Move the issue to
-   `status: in-review`. If you stop before finishing, move it back to `status: ready`, unassign,
+9. Follow `/pr`: push the branch, open the PR, and watch CI until every required check
+   is green, fixing failures on the branch. Then tick the roadmap task with the PR
+   number (`(#42)`) in a follow-up commit on the same branch. If you stop before finishing,
+   push what you have as a draft PR, move the issue back to `status: ready`, unassign,
    and comment on what's left.
-10. Report: what was done, how each AC was verified, and any follow-ups. File new
-    follow-ups as issues (`/issue`), not as roadmap backlog bullets.
+10. Report: the PR URL, what was done, how each AC was verified, the CI result, and any
+    follow-ups. File new follow-ups as issues (`/issue`). **Don't merge**; that's the user's call.
 
 Only do one task per invocation, unless the user asks for more.

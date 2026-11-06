@@ -31,7 +31,8 @@ supersedes them. If you need to deviate, write or amend an ADR **first**
 | `/adr <title>` | Write a new Architecture Decision Record. |
 | `/roadmap [status\|add\|reorder]` | Report on or edit the roadmap (status includes open issues). |
 | `/spec <change>` | Propose and apply a change to the specification. |
-| `/review` | Review the working tree against the spec, architecture and standards. |
+| `/review [#pr\|range]` | Review a branch or PR against the spec, architecture and standards. |
+| `/pr [#issue] [--draft]` | Branch, commit, push, open or update the PR, and get CI green. |
 
 ## Toolchain
 
@@ -45,7 +46,8 @@ only.** Never use `npm`/`yarn`, and never commit `package-lock.json` or `yarn.lo
    `any`, `as` casts (except `as const`), `@ts-ignore`, or non-null `!` assertions.
    Use `@ts-expect-error` only in tests, and always with a reason.
 2. **Every gate is green before a task is done:** `pnpm check` (typecheck, lint,
-   format check, unit tests with coverage thresholds, build) and `pnpm test:e2e`.
+   format check, unit tests with coverage thresholds, build) and `pnpm test:e2e`
+   locally, and then every required CI check on the PR.
 3. **Tests come with the code.** The domain layer (`src/domain`) needs 100% line and
    branch coverage. Use property-based tests (fast-check) for serialisers.
    Every user-visible behaviour in the spec gets an e2e test.
@@ -57,11 +59,16 @@ only.** Never use `npm`/`yarn`, and never commit `package-lock.json` or `yarn.lo
 6. **Theme only through tokens.** Colours come from Gruvbox CSS custom
    properties (ADR-0006). Hex literals outside `src/styles/tokens.css` fail lint.
 7. **Make small, conventional commits** (`feat:`, `fix:`, `test:`, `docs:`,
-   `refactor:`, `chore:`), one roadmap task per commit or PR where practical.
+   `refactor:`, `chore:`), one roadmap task or issue per PR.
    Reference the task ID and/or issue, e.g. `feat(palette): grouped consonant grid [M2.3]`
-   or `fix(audio): time out resume() (#57)`.
+   or `fix(audio): time out resume() (#57)`. The PR title follows the same rules,
+   because it becomes the squash commit.
 8. **Don't add dependencies casually.** A new runtime dependency needs a line in
    the PR or commit body explaining why. A significant one needs an ADR.
+9. **Never commit or push to `main`.** Every change, docs included, goes on a
+   branch from `origin/main` and through a PR whose required CI checks pass
+   (ADR-0015). `main` is protected: squash merges only, branch up to date. Never bypass
+   the git hooks (`--no-verify`, `LEFTHOOK=0`). Never merge without the user's go-ahead.
 
 ## Issues, labels and priorities
 
@@ -81,17 +88,20 @@ Full rules are in `docs/WORKFLOW.md`. The essentials:
   open a PR, or stop.
 - **What next:** P0 issues → ready P1 issues → next roadmap task → ready P2 issues.
   Skip `needs: human`, `needs: decision`, blocked, and other people's issues.
-- **Branches and PRs:** `<type>/<issue>-<slug>`; the PR body says `Closes #N`; the
-  subject is a Conventional Commit with `[Mx.y]` and/or `(#N)`.
-- Creating, editing or closing issues and opening PRs are public actions.
-  Show the draft and get confirmation first, unless the user has told you to go ahead.
+- **Branches and PRs:** `<type>/<issue-or-task>-<slug>`; the PR body says `Closes #N`; the
+  title is a Conventional Commit with `[Mx.y]` and/or `(#N)`. See `/pr`.
+- **What needs confirmation:** pushing your own branch, opening or updating a PR, and
+  moving `status:` labels as work progresses are routine, so just do them. Creating,
+  closing or re-prioritising issues, and **merging**, need the user's go-ahead.
 
 ## Working loop
 
 1. Read the roadmap task or issue, and the spec sections it cites.
-2. Write or extend tests first where practical.
-3. Implement in the layer the architecture assigns.
-4. Run `/check`.
-5. Tick the task in `docs/ROADMAP.md`, and update the spec or architecture if
-   reality changed.
-6. Commit (and, for an issue, open a PR with `Closes #N` and move it to `status: in-review`).
+2. Create a branch from an up-to-date `origin/main` (and claim the issue).
+3. Write or extend tests first where practical.
+4. Implement in the layer the architecture assigns.
+5. Run `/check`.
+6. Tick the task in `docs/ROADMAP.md` with the PR number, and update the spec or
+   architecture if reality changed.
+7. Commit, push, open the PR, and get every required check green (`/pr`). Then
+   stop and report. The user decides when to merge.

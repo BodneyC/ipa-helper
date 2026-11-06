@@ -3,8 +3,9 @@
 Tasks are worked **in order** unless a dependency says otherwise. `/next` takes
 the first unchecked task whose dependencies are all done, after any open
 `priority: P0`/`P1` issues (see `docs/WORKFLOW.md` §4). Each task is meant to
-fit in one commit or PR. When you finish a task, tick it (`[x]`) and append the
-short commit hash: `- [x] **M1.2** … (abc1234)`.
+fit in one PR. When you finish a task, tick it (`[x]`) on its branch and append the
+PR number: `- [x] **M8.1** … (#42)`. Older tasks carry a commit hash instead,
+from before PRs were required (ADR-0015).
 
 Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 **AC** = acceptance criteria (all must hold, plus all gates green).
