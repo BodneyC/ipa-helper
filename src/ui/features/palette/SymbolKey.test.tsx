@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -103,6 +103,58 @@ describe('<SymbolKey>', () => {
       key.focus();
     });
     expect(screen.getByRole('tooltip')).toBeVisible();
+  });
+
+  it('#21: a click does not leave the tooltip open once the pointer leaves', async () => {
+    const user = userEvent.setup();
+    const { key } = renderKey();
+    await user.click(key);
+    expect(key).toHaveFocus();
+    expect(screen.getByRole('tooltip')).toBeVisible(); // still hovered
+    await user.unhover(key);
+    await waitFor(() => {
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
+    expect(key).toHaveFocus();
+  });
+
+  it('#21: a tap does not leave the tooltip open', () => {
+    const { key } = renderKey();
+    fireEvent.pointerDown(key, { pointerType: 'touch' });
+    act(() => {
+      key.focus();
+    });
+    fireEvent.pointerUp(key, { pointerType: 'touch' });
+    fireEvent.click(key);
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
+  it('#21: a click on a keyboard-focused key closes its tooltip', () => {
+    const { key } = renderKey();
+    act(() => {
+      key.focus();
+    });
+    expect(screen.getByRole('tooltip')).toBeVisible();
+    fireEvent.pointerDown(key, { pointerType: 'touch' });
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
+  it('#21: a key press after pointer focus shows the tooltip, but a modifier alone does not', () => {
+    const { key } = renderKey();
+    fireEvent.pointerDown(key, { pointerType: 'mouse' });
+    act(() => {
+      key.focus();
+    });
+    fireEvent.keyDown(key, { key: 'Alt' });
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    fireEvent.keyDown(key, { key: 'ArrowRight' });
+    expect(screen.getByRole('tooltip')).toBeVisible();
+  });
+
+  it('#21: a key press that has already moved focus away does not reopen the tooltip', () => {
+    const { key } = renderKey();
+    fireEvent.keyDown(key, { key: 'ArrowRight' });
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
 
   it('lets Escape through when no tooltip is open', () => {
