@@ -23,7 +23,7 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:visual": "playwright test --project=visual",
-    "lighthouse": "vite build && lhci autorun --collect.chromePath=\"$(node -p \"require('@playwright/test').chromium.executablePath()\")\"",
+    "lighthouse": "vite build && CHROME_PATH=\"$(node -p \"require('@playwright/test').chromium.executablePath()\")\" lhci autorun",
     "knip": "knip",
     "size": "size-limit",
     "audio:candidates": "node --import jiti/register scripts/audio/candidates.ts",

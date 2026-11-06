@@ -110,10 +110,9 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 ## Backlog (unscheduled ideas)
 
-- **CI is red on `main`, so automatic deploys are blocked.** Since 0f0f1cf moved
-  browser jobs into Playwright's image, the 360 px visual baselines differ and the
-  Lighthouse job fails its healthcheck. The deploy workflow only runs after a green
-  CI (ADR-0010). The first deploy (M2.10) was made by manual dispatch.
+- Since 0f0f1cf moved browser jobs into Playwright's image, the 360 px visual
+  baselines differ (the visual job is reviewed, not gating). Review the diffs and
+  re-baseline with `pnpm test:visual --update-snapshots` if they're only rendering noise.
 - More export formats: X-SAMPA, Kirshenbaum, espeak mnemonics, Markdown/HTML snippet.
 - Accent switch for audio (General American), e.g. a second Piper voice (ADR-0009).
 - Log any words Cori still gets wrong once the terminal `.` (ADR-0009) is in place.

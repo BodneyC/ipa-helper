@@ -147,7 +147,9 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # Chrome won't sandbox itself as root in a container. The sandbox doesn't
+      # The script hands lhci Playwright's Chromium through CHROME_PATH, because
+      # autorun's healthcheck ignores --collect.chromePath and this image has no
+      # system Chrome. Chrome won't sandbox itself as root in a container. The sandbox doesn't
       # change what Lighthouse measures, and the page is our own build.
       - run: pnpm lighthouse '--collect.settings.chromeFlags=--headless=new --no-sandbox'
       - name: Upload Lighthouse reports
