@@ -58,6 +58,23 @@ test.describe('keyboard (FR-50, FR-51)', () => {
     await expect(page.getByRole('status').filter({ hasText: 'Copied TIPA' })).toBeAttached();
   });
 
+  test('FR-14: Ctrl+Z and Ctrl+Shift+Z undo and redo after a palette click', async ({ page }) => {
+    const word = page.getByRole('textbox', { name: 'Word' });
+    await page.getByRole('button', { name: /^ʃ\s?,/ }).click();
+    await page.getByRole('button', { name: /^ɪ\s?,/ }).click();
+    await expect(word).toHaveText('/ʃɪ/');
+    await page.keyboard.press('ControlOrMeta+Z');
+    await expect(word).toHaveText('/ʃ/');
+    await page.keyboard.press('ControlOrMeta+Shift+Z');
+    await expect(word).toHaveText('/ʃɪ/');
+
+    const filter = page.getByRole('searchbox', { name: 'Filter symbols' });
+    await filter.fill('ship');
+    await page.keyboard.press('ControlOrMeta+Z');
+    await expect(word).toHaveText('/ʃɪ/');
+    await expectNoA11yViolations(page);
+  });
+
   test('FR-51: ? opens the shortcuts dialog; Escape closes it and returns focus', async ({
     page,
   }) => {
