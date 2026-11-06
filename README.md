@@ -5,8 +5,8 @@ the matching TIPA LaTeX string for `\ipa{…}`. For example, clicking θ, ɔː, 
 with primary stress gives `/ˈθɔːnɪk/` and `"TO:nIk`. Gruvbox-themed, keyboard-friendly,
 and fully static: nothing leaves your browser. British English audio is planned.
 
-> **Status:** scaffolded (roadmap milestone M0). The domain core (M1) and the UI (M2)
-> are next. See the [roadmap](docs/ROADMAP.md).
+**Live:** <https://bodneyc.github.io/ipa-helper/> · progress is tracked in the
+[roadmap](docs/ROADMAP.md).
 
 ## Disclaimer
 
@@ -16,7 +16,7 @@ This is one where I wanted the end product for a different project but had no in
 
 ## Using it
 
-Once deployed, the app runs on GitHub Pages; no install or sign-up is needed. It
+The app runs on [GitHub Pages](https://bodneyc.github.io/ipa-helper/); no install or sign-up is needed. It
 can also be installed as an app from the browser, and after one visit it works
 offline. Using the TIPA output in LaTeX:
 

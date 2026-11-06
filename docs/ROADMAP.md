@@ -58,7 +58,7 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 - [x] **M2.7** `OutputPanel`: IPA and TIPA rows, copy buttons, full-macro copy, live-region feedback. deps: M1.4, M1.5 · refs: FR-20–FR-23 (6bb3b8f)
 - [x] **M2.8** URL hash sync. deps: M1.6, M2.6 · refs: FR-15 (b628b74)
 - [x] **M2.9** E2E: build `/ˈθɔːnɪk/` by clicking, check both outputs, copy, reload the shared URL, and run axe. deps: M2.5–M2.8 (c45ed04)
-- [ ] **M2.10** First deploy to GitHub Pages. deps: M0.6, M2.9
+- [x] **M2.10** First deploy to GitHub Pages. deps: M0.6, M2.9 (https://bodneyc.github.io/ipa-helper/)
 
 ## M3: Polish and usability
 
@@ -110,6 +110,10 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 ## Backlog (unscheduled ideas)
 
+- **CI is red on `main`, so automatic deploys are blocked.** Since 0f0f1cf moved
+  browser jobs into Playwright's image, the 360 px visual baselines differ and the
+  Lighthouse job fails its healthcheck. The deploy workflow only runs after a green
+  CI (ADR-0010). The first deploy (M2.10) was made by manual dispatch.
 - More export formats: X-SAMPA, Kirshenbaum, espeak mnemonics, Markdown/HTML snippet.
 - Accent switch for audio (General American), e.g. a second Piper voice (ADR-0009).
 - Log any words Cori still gets wrong once the terminal `.` (ADR-0009) is in place.
