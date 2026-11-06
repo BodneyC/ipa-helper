@@ -68,7 +68,7 @@ only.** Never use `npm`/`yarn`, and never commit `package-lock.json` or `yarn.lo
 Full rules are in `docs/WORKFLOW.md`. The essentials:
 
 - **The roadmap is the plan; GitHub Issues are the intake.** Bugs, requests and
-  unscheduled ideas are issues (`/issue`). Never add bullets to the roadmap Backlog.
+  unscheduled ideas are issues (`/issue`). The roadmap has no backlog list; don't start one.
   Follow-ups you discover mid-task are filed as issues, not fixed silently in the same change.
 - **Labels are scoped.** A triaged open issue has exactly one `type:`, one
   `priority:`, one `status:`, and at least one `area:`. Labels are defined in

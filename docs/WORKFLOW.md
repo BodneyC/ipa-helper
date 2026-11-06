@@ -14,8 +14,8 @@ in [ADR-0014](adr/0014-github-issues-workflow.md).
 | Required behaviour | `docs/SPECIFICATION.md` | `FR-13`, `NFR-3` |
 
 - **The roadmap is the plan; issues are the intake.** Anything not already a
-  roadmap task starts as an issue. Don't add ideas to the roadmap's Backlog
-  section. File an issue instead (`/issue`).
+  roadmap task starts as an issue (`/issue`). The roadmap has no list
+  of unscheduled ideas; its Backlog section only points here.
 - An issue is **promoted** to the roadmap when it is scheduled into a milestone:
   `/roadmap add` gives it a task ID with `refs: #42`, the issue gets the matching
   GitHub milestone, and its title gains the ID: `[M8.1] Accent switch for audio`.

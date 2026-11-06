@@ -109,46 +109,9 @@ Legend: `deps:` other tasks that must be done first · `refs:` spec/ADR IDs ·
 
 ---
 
-## Backlog (unscheduled ideas)
+## Backlog
 
-> **Frozen (ADR-0014).** New ideas go to GitHub Issues (`/issue`), not here.
-> These items are waiting to be migrated into issues. Delete each bullet once its issue exists.
-
-- More export formats: X-SAMPA, Kirshenbaum, espeak mnemonics, Markdown/HTML snippet.
-- Accent switch for audio (General American), e.g. a second Piper voice (ADR-0009).
-- Log any words Cori still gets wrong once the terminal `.` (ADR-0009) is in place.
-- int8 Cori is 19.5 MB vs 63.5 MB but ~60% slower on wasm (ADR-0009). Revisit
-  if download size becomes the constraint (M7 PWA precache), or with WebGPU.
-- "Minimal braces" TIPA output mode.
-- Syllable-structure visualisation (onset/nucleus/coda colouring).
-- Import/export saved words as JSON.
-- Compact sticky word card on short phone screens: at 360 × 640 the sticky card
-  (word, actions, both output rows) covers about 70% of the viewport. Collapse the
-  output rows or un-stick below a height threshold.
-- Run WebKit e2e locally on WSL: install its system libraries
-  (`sudo pnpm exec playwright install-deps webkit`). CI's Playwright image has them.
-- Visual baselines were made on WSL with pinned fonts; CI's `visual` job now
-  runs in the Playwright Docker image. Regenerate the baselines in that image
-  (or from CI's uploaded actuals) and commit them, so local and CI agree.
-- `theme-color` follows `prefers-color-scheme` only (M7.1). Have
-  `document-theme.ts` update it when the user overrides the theme, so the
-  browser UI matches.
-- An installed app left open for days only picks up updates on its next launch
-  (ADR-0013). Consider calling `registration.update()` on `visibilitychange`.
-- `pnpm test:visual` fails on the two 360 px page shots, locally and in CI
-  (run 42062459282), before and after M7.1. Regenerate them or explain the
-  difference.
-- With no audio output device, Firefox's `AudioContext.resume()` never settles,
-  so a play silently does nothing (found when CI had no sound card). Give
-  `web-audio-output.ts` a timeout on `resume()` that returns
-  `audio-playback-failed`, so the user is told instead (FR-33).
-- Multi-tab sync for settings and saved words (`storage` event); today the last
-  tab to write wins.
-- Symbol clips for the full-IPA sounds (M6.1 ships them without a play
-  affordance; ADR-0012). The clip scripts in `scripts/audio` only cover RP today.
-- IPA "other symbols" not yet in the full inventory: ɕ ʑ ɥ ɧ ɺ ʜ ʢ ʡ, and
-  the labiodental flap ⱱ once something can typeset it (ADR-0012).
-- Word audio with diacritics: the voice knows only ʰ ʲ ˤ ˞ and six combining
-  marks (SPEC §7.6), so any other diacritic makes Play word fail with "This
-  word can't be spoken". Consider speaking the base sounds and naming the
-  marks that were left out.
+Unscheduled work lives in [GitHub Issues](https://github.com/BodneyC/ipa-helper/issues),
+labelled and prioritised as described in `docs/WORKFLOW.md`. File new ideas with
+`/issue`. An issue gets a task ID here only when it is scheduled into a milestone
+(`/roadmap add #N`). The old Backlog bullets became issues #2–#17 (ADR-0014).

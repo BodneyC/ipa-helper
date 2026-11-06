@@ -14,7 +14,7 @@ Work with `docs/ROADMAP.md`. Argument: `$ARGUMENTS` (default `status`).
   status, every open P0/P1, anything stuck in `status: triage`, and issues that
   have a roadmap ID in their title but no matching task. Keep the output compact (tables).
 - **add <description | #issue>**: Only for *scheduled* work. Unscheduled ideas
-  go to GitHub Issues (`/issue`), not the Backlog section. Decide which milestone the task belongs in,
+  go to GitHub Issues (`/issue`), not the roadmap. Decide which milestone the task belongs in,
   give it the next ID in that milestone, and write it in the house style: bold ID,
   imperative summary, `deps:`, `refs:` (spec FR/NFR and ADR IDs), and an `AC:` line
   with verifiable criteria. If it introduces new behaviour, ask whether a spec
