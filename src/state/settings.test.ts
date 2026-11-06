@@ -9,7 +9,9 @@ import {
   isMacroName,
   isSettings,
   loadSettings,
+  mergeSettings,
   parseSettings,
+  sameSettings,
   saveSettings,
   settingsReducer,
 } from './settings';
@@ -19,7 +21,11 @@ import type { KeyValueStore } from '../domain/ports';
 /** An in-memory KeyValueStore. */
 const memoryStore = (initial: Record<string, string> = {}): KeyValueStore => {
   const data = new Map(Object.entries(initial));
-  return { get: (k) => data.get(k), set: (k, v) => void data.set(k, v) };
+  return {
+    get: (k) => data.get(k),
+    set: (k, v) => void data.set(k, v),
+    subscribe: () => () => undefined,
+  };
 };
 
 const custom: Settings = {
@@ -189,5 +195,47 @@ describe('settings persistence (FR-42)', () => {
       ...DEFAULT_SETTINGS,
       theme: 'light',
     });
+  });
+});
+
+describe('settings in two tabs (FR-42, #2)', () => {
+  it("keeps another tab's change to one field and this tab's change to another", () => {
+    const base = DEFAULT_SETTINGS;
+    const stored = { ...DEFAULT_SETTINGS, theme: 'dark' as const };
+    const next = { ...DEFAULT_SETTINGS, inventory: 'extended' as const };
+    expect(mergeSettings(stored, base, next)).toEqual({
+      ...DEFAULT_SETTINGS,
+      theme: 'dark',
+      inventory: 'extended',
+    });
+  });
+
+  it('lets the stored value win a field both tabs changed', () => {
+    const stored = { ...DEFAULT_SETTINGS, collapsedGroups: ['vowel' as const] };
+    const next = { ...DEFAULT_SETTINGS, collapsedGroups: ['consonant' as const] };
+    expect(mergeSettings(stored, DEFAULT_SETTINGS, next).collapsedGroups).toEqual(['vowel']);
+  });
+
+  it("is this tab's settings when storage hasn't changed (including storage that drops writes)", () => {
+    fc.assert(
+      fc.property(anySettings, anySettings, (base, next) => {
+        expect(mergeSettings(base, base, next)).toEqual(next);
+      }),
+    );
+  });
+
+  it('is the stored settings when this tab has changed nothing since base', () => {
+    fc.assert(
+      fc.property(anySettings, anySettings, (stored, base) => {
+        expect(mergeSettings(stored, base, base)).toEqual(stored);
+      }),
+    );
+  });
+
+  it('compares settings by value', () => {
+    expect(sameSettings(custom, { ...custom, collapsedGroups: [...custom.collapsedGroups] })).toBe(
+      true,
+    );
+    expect(sameSettings(custom, DEFAULT_SETTINGS)).toBe(false);
   });
 });

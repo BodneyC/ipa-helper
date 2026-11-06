@@ -30,7 +30,11 @@ const setup = (settings: Partial<Settings> = {}, audio = fakeAudio('unsupported'
   render(
     <Providers
       initialSettings={{ ...DEFAULT_SETTINGS, ...settings }}
-      services={{ audio, clipboard: { writeText }, store: { get: () => undefined, set } }}
+      services={{
+        audio,
+        clipboard: { writeText },
+        store: { get: () => undefined, set, subscribe: () => () => undefined },
+      }}
     >
       <AnnouncerProvider>
         <SettingsDialog open onClose={onClose} onHelp={onHelp} />

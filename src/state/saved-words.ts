@@ -99,3 +99,18 @@ export const loadSavedWords = (store: KeyValueStore): readonly SavedWord[] => {
 export const saveSavedWords = (store: KeyValueStore, words: readonly SavedWord[]): void => {
   store.set(SAVED_WORDS_STORAGE_KEY, JSON.stringify(words));
 };
+
+/**
+ * Applies one change to the *stored* list and returns the result (FR-16, #2).
+ * It re-reads storage first, so a change made in another tab since this tab
+ * last looked is kept rather than overwritten: adds, renames and removes from
+ * different tabs merge by entry ID.
+ */
+export const updateSavedWords = (
+  store: KeyValueStore,
+  action: SavedWordsAction,
+): readonly SavedWord[] => {
+  const next = savedWordsReducer(loadSavedWords(store), action);
+  saveSavedWords(store, next);
+  return next;
+};

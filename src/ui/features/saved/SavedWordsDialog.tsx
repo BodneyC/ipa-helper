@@ -1,4 +1,4 @@
-import { useEffect, useId, useReducer, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 
 import styles from './SavedWordsDialog.module.css';
@@ -7,11 +7,11 @@ import { createIpaSerialiser } from '../../../domain/serialise/ipa';
 import { useEditor, useServices, useSettings } from '../../../state/hooks';
 import {
   GLOSS_MAX_LENGTH,
+  SAVED_WORDS_STORAGE_KEY,
   loadSavedWords,
-  saveSavedWords,
-  savedWordsReducer,
+  updateSavedWords,
 } from '../../../state/saved-words';
-import type { SavedWord } from '../../../state/saved-words';
+import type { SavedWord, SavedWordsAction } from '../../../state/saved-words';
 import { glyphsOf } from '../../../state/settings';
 import { useAnnounce } from '../../components/Announcer';
 import { Dialog } from '../../components/Dialog';
@@ -28,21 +28,33 @@ const stamp = () => ({ id: crypto.randomUUID(), savedAt: Date.now() });
  * FR-16: save the current word with an optional gloss, and load, rename or
  * delete saved words. The list lives in local storage; loading a word is one
  * undoable edit.
+ *
+ * Storage is the source of truth, shared by every tab (#2): each change is applied
+ * to the stored list ({@link updateSavedWords}), and a change from another tab
+ * reloads the list here.
  */
 export function SavedWordsDialog({ open, onClose }: SavedWordsDialogProps) {
   const { state, dispatch: editorDispatch } = useEditor();
   const { settings } = useSettings();
   const { store } = useServices();
   const announce = useAnnounce();
-  const [list, dispatch] = useReducer(savedWordsReducer, store, loadSavedWords);
+  const [list, setList] = useState(() => loadSavedWords(store));
   const [gloss, setGloss] = useState('');
   const [editing, setEditing] = useState<string | undefined>(undefined);
   const glossId = useId();
   const glossRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    saveSavedWords(store, list);
-  }, [store, list]);
+  useEffect(
+    () =>
+      store.subscribe(SAVED_WORDS_STORAGE_KEY, () => {
+        setList(loadSavedWords(store));
+      }),
+    [store],
+  );
+
+  const dispatch = (action: SavedWordsAction) => {
+    setList(updateSavedWords(store, action));
+  };
 
   const ipa = createIpaSerialiser({ slashes: true, ...glyphsOf(settings) });
   const ipaOf = (entry: SavedWord) => {

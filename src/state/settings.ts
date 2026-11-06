@@ -170,3 +170,27 @@ export const loadSettings = (store: KeyValueStore): Settings => {
 export const saveSettings = (store: KeyValueStore, settings: Settings): void => {
   store.set(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
 };
+
+const sameValue = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
+
+/**
+ * Merges this tab's settings with the stored ones before a write (FR-42, #2).
+ * `base` is what this tab last saw in storage (after its own last write, or a
+ * `storage` event). A field that differs between `stored` and `base` was changed
+ * by another tab since then, so the stored value wins; every other field takes
+ * this tab's value from `next`. Storage that drops writes never changes, so it
+ * never overrides this tab.
+ */
+export const mergeSettings = (stored: Settings, base: Settings, next: Settings): Settings =>
+  parseSettings(
+    Object.fromEntries(
+      Object.keys(validators).map((key) => {
+        const theirs = field(stored, key);
+        return [key, sameValue(theirs, field(base, key)) ? field(next, key) : theirs];
+      }),
+    ),
+    next,
+  );
+
+/** True when two settings objects hold the same values. */
+export const sameSettings = (a: Settings, b: Settings): boolean => sameValue(a, b);

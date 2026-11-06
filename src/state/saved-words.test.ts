@@ -9,13 +9,18 @@ import {
   SAVED_WORDS_STORAGE_KEY,
   saveSavedWords,
   savedWordsReducer,
+  updateSavedWords,
 } from './saved-words';
 import type { SavedWord } from './saved-words';
 import type { KeyValueStore } from '../domain/ports';
 
 const memoryStore = (initial: Record<string, string> = {}): KeyValueStore => {
   const data = new Map(Object.entries(initial));
-  return { get: (k) => data.get(k), set: (k, v) => void data.set(k, v) };
+  return {
+    get: (k) => data.get(k),
+    set: (k, v) => void data.set(k, v),
+    subscribe: () => () => undefined,
+  };
 };
 
 const entry = (id: string, gloss = '', fragment = 'w=1:f.l.turned-script-a.g'): SavedWord => ({
@@ -85,5 +90,53 @@ describe('saved words (FR-16)', () => {
       { ...good, gloss: 'duplicate id' },
     ];
     expect(parseSavedWords(raw)).toEqual([good]);
+  });
+});
+
+describe('saved words in two tabs (FR-16, #2)', () => {
+  const ids = (store: KeyValueStore) => loadSavedWords(store).map((e) => e.id);
+
+  it('keeps an add from each tab', () => {
+    const store = memoryStore();
+    updateSavedWords(store, { type: 'add', entry: entry('a') });
+    updateSavedWords(store, { type: 'add', entry: entry('b') });
+    expect(ids(store)).toEqual(['b', 'a']);
+  });
+
+  it('merges a rename in one tab with an add and a remove in the other', () => {
+    const store = memoryStore();
+    saveSavedWords(store, [entry('a', 'one'), entry('b', 'two')]);
+    // Tab A renames a; tab B, which loaded the same list earlier, adds c and removes b.
+    updateSavedWords(store, { type: 'rename', id: 'a', gloss: 'uno' });
+    updateSavedWords(store, { type: 'add', entry: entry('c') });
+    updateSavedWords(store, { type: 'remove', id: 'b' });
+    expect(loadSavedWords(store).map((e) => [e.id, e.gloss])).toEqual([
+      ['c', ''],
+      ['a', 'uno'],
+    ]);
+  });
+
+  it('ignores renaming or removing an entry another tab already removed', () => {
+    const store = memoryStore();
+    saveSavedWords(store, [entry('a')]);
+    updateSavedWords(store, { type: 'remove', id: 'a' });
+    expect(updateSavedWords(store, { type: 'rename', id: 'a', gloss: 'x' })).toEqual([]);
+    expect(updateSavedWords(store, { type: 'remove', id: 'a' })).toEqual([]);
+  });
+
+  it('returns what it stored', () => {
+    const store = memoryStore();
+    const list = updateSavedWords(store, { type: 'add', entry: entry('a', 'flog') });
+    expect(loadSavedWords(store)).toEqual(list);
+  });
+
+  it('keeps every word added through the store, however many', () => {
+    fc.assert(
+      fc.property(fc.uniqueArray(anyEntry, { selector: (e) => e.id, maxLength: 12 }), (added) => {
+        const store = memoryStore();
+        for (const e of added) updateSavedWords(store, { type: 'add', entry: e });
+        expect(new Set(ids(store))).toEqual(new Set(added.map((e) => e.id)));
+      }),
+    );
   });
 });
