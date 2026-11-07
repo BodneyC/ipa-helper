@@ -37,6 +37,22 @@ describe('IPA tokeniser (FR-17)', () => {
     expect(read('ɪə')).toEqual({ ok: true, value: ids('near') });
   });
 
+  it("FR-17: reads the IPA chart's other symbols (#16)", () => {
+    expect(read('ɥʜʢʡɕʑɺɧ')).toEqual({
+      ok: true,
+      value: ids(
+        'turned-h',
+        'small-cap-h',
+        'barred-reversed-glottal-stop',
+        'barred-glottal-stop',
+        'curly-tail-c',
+        'curly-tail-z',
+        'turned-long-leg-r',
+        'hooktop-heng',
+      ),
+    });
+  });
+
   it('ignores surrounding whitespace and one pair of /…/ or […]', () => {
     const tʃɪp = { ok: true, value: ids('tesh', 'small-cap-i', 'p') };
     expect(read('  /tʃɪp/ ')).toEqual(tʃɪp);
