@@ -1,3 +1,5 @@
+import { parseSymbolId } from '../../domain/inventory/symbol-id';
+import type { SymbolId } from '../../domain/inventory/symbol-id';
 import type { AudioError } from '../../domain/ports';
 
 /** Main thread → synthesis worker (M5.2). */
@@ -21,6 +23,8 @@ export type SynthReply =
       readonly id: number;
       readonly samples: Float32Array;
       readonly sampleRate: number;
+      /** Diacritics left out because the voice can't say them (#15). */
+      readonly dropped: readonly SymbolId[];
     }
   | { readonly type: 'error'; readonly id: number; readonly kind: AudioError['kind'] };
 
@@ -42,6 +46,10 @@ const ERROR_KINDS: readonly unknown[] = [
   'audio-playback-failed',
 ] satisfies readonly AudioError['kind'][];
 
+const isSymbolIdList = (value: unknown): value is readonly SymbolId[] =>
+  Array.isArray(value) &&
+  value.every((item: unknown) => typeof item === 'string' && parseSymbolId(item).ok);
+
 /** Checks a message the main thread received. */
 export const isSynthReply = (value: unknown): value is SynthReply => {
   if (!isRecord(value)) return false;
@@ -52,7 +60,8 @@ export const isSynthReply = (value: unknown): value is SynthReply => {
       return (
         typeof value['id'] === 'number' &&
         value['samples'] instanceof Float32Array &&
-        typeof value['sampleRate'] === 'number'
+        typeof value['sampleRate'] === 'number' &&
+        isSymbolIdList(value['dropped'])
       );
     case 'error':
       return typeof value['id'] === 'number' && ERROR_KINDS.includes(value['kind']);

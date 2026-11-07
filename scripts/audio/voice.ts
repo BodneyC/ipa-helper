@@ -73,7 +73,7 @@ export const loadVoice = async (): Promise<Synthesiser> => {
     synthesise: async (text, scales = config.scales) => {
       const encoded = piperPhonemeIds(text, config.idMap);
       if (!encoded.ok) throw new Error(`"${text}": the voice has no ${encoded.error.join(' ')}`);
-      const ids = encoded.value;
+      const { ids } = encoded.value;
       const out = await session.run({
         input: new ort.Tensor('int64', BigInt64Array.from(ids, BigInt), [1, ids.length]),
         input_lengths: new ort.Tensor('int64', BigInt64Array.of(BigInt(ids.length)), [1]),
