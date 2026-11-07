@@ -3,8 +3,8 @@ import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-import { voiceModelPlugin } from './scripts/audio/dev-plugin';
-import { nextDeployPreviewPlugin, pwaPlugin } from './scripts/pwa/plugin';
+import { voiceModelPlugin } from './scripts/audio/dev-plugin.ts';
+import { nextDeployPreviewPlugin, pwaPlugin } from './scripts/pwa/plugin.ts';
 
 // BASE_PATH lets the same build serve from a sub-path such as /ipa-helper/ on
 // GitHub Pages, or from the root (ADR-0010).

@@ -2,7 +2,10 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "types": ["node"]
+    "types": ["node"],
+    // Vite's native config loader needs explicit extensions on everything the
+    // config imports (vite.config.ts and scripts/). Plumbing, not strictness (ADR-0002).
+    "allowImportingTsExtensions": true
   },
   "include": ["*.config.ts", "types", "scripts"]
 }
