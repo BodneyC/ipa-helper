@@ -113,22 +113,26 @@ ipa-helper/
 │  │  ├─ serialise/
 │  │  │  ├─ serialiser.ts     # interface Serialiser { serialise(word): string }
 │  │  │  ├─ ipa.ts
-│  │  │  ├─ tipa.ts           # boundary-safe joining (FR-22)
+│  │  │  ├─ tipa.ts           # boundary-safe joining (FR-22), minimal braces (FR-24)
+│  │  │  ├─ notation.ts       # FormatSerialiser → { text, unsupported }; the ASCII-notation engine (FR-25)
+│  │  │  ├─ xsampa.ts, kirshenbaum.ts, espeak.ts  # code tables (FR-26 – FR-28)
+│  │  │  ├─ formats.ts        # FORMAT_IDS, names, the HTML snippet (FR-29), formatSerialiser
 │  │  │  ├─ labels.ts         # a key's glyph (diacritics on ◌) and TIPA code (FR-2, Q-3)
 │  │  │  └─ filter.ts         # matchesFilter: the palette filter's matching rule (FR-4)
 │  │  ├─ parse/
 │  │  │  └─ ipa-tokeniser.ts  # M6.3: NFD + greedy longest-match IPA → Result<Word, UnknownCharacter[]>
 │  │  ├─ codec/
 │  │  │  └─ url.ts            # Word ↔ URL fragment: `w=1:id.id.id`, decode → Result
-│  │  ├─ ports.ts             # Clipboard, FragmentStore, KeyValueStore, DocumentTheme, AudioPlayer, AppUpdates interfaces
+│  │  ├─ ports.ts             # Clipboard, Downloads, FragmentStore, KeyValueStore, DocumentTheme, AudioPlayer, AppUpdates interfaces
 │  │  └─ result.ts            # Result<T, E> type and helpers
 │  ├─ state/
 │  │  ├─ editor.ts            # reducer: word, cursor, undo/redo stacks
 │  │  ├─ settings.ts          # reducer and schema for persisted settings
-│  │  ├─ saved-words.ts       # FR-16: saved list reducer, validation, load/save
+│  │  ├─ saved-words.ts       # FR-16, FR-18: saved list reducer, validation, load/save, file import/export
 │  │  └─ hooks.ts             # EditorContext/SettingsContext + useEditor, useSettings (providers in app/providers.tsx)
 │  ├─ adapters/
 │  │  ├─ clipboard.ts         # navigator.clipboard implementation of the Clipboard port
+│  │  ├─ downloads.ts         # Downloads port: a temporary <a download> over a blob URL (FR-18)
 │  │  ├─ local-storage.ts     # KeyValueStore over localStorage; blocked storage reads as empty
 │  │  ├─ document-theme.ts    # DocumentTheme: <html data-theme data-contrast>, follows the system live
 │  │  ├─ url-hash.ts          # sync editor ↔ location.hash
@@ -258,8 +262,9 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 
 - `ipaSerialiser`: concatenates `symbol.ipa`. A slashes option adds `/…/`.
 - `tipaSerialiser`: concatenates encodings and applies a **boundary-safety
-  rule**: after a control word (`\ae`, `\textturnr`) emit `{}` whenever the
-  next character is a letter, or always (simpler, and the default). Also check
+  rule**: after a control word (`\ae`, `\textturnr`) emit `{}` always (the
+  default), or, with `minimalBraces` (FR-24), nothing, or a space when the next
+  character is a letter. Also check
   multi-character shortcut collisions: TIPA reads `""` as secondary stress, so two
   primary-stress tokens in a row must be separated (`"{}"`). Property-based tests
   (fast-check) generate random words and assert:
@@ -267,8 +272,18 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   2. tokenising the TIPA output with a reference TIPA tokeniser (test-only)
      gives back the original symbol sequence (round trip),
   3. no unbalanced braces.
-- Future serialisers (X-SAMPA, Kirshenbaum, espeak phoneme mnemonics for audio)
-  plug in behind the same interface.
+- **Other formats** (FR-25 – FR-29, `notation.ts`): a `FormatSerialiser`
+  returns `{ text, unsupported }`, because a notation may have no code for a
+  symbol. Such a symbol is left out of `text` and listed in `unsupported`,
+  never guessed at. X-SAMPA and Kirshenbaum spell each symbol from its stored
+  IPA, codepoint by codepoint, through a table; eSpeak looks symbols up by ID,
+  since it only has RP mnemonics. One engine joins the codes. Where two codes
+  would read as a different sound, it puts in the notation's separator
+  (X-SAMPA `-`, eSpeak `|`), or, after a diacritic or in a notation without a
+  separator, reports the symbol. A merge that reads as the same sound
+  (`i` + `:`) is allowed. fast-check checks that every output is ASCII, and
+  that a greedy reference reader reads back exactly the sounds that were kept.
+  The HTML snippet wraps the IPA serialiser's output.
 
 ## 5. State management
 
@@ -287,7 +302,7 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   or missing field falls back to its default (or, in the reducer, its current
   value) without discarding the valid ones. Fields: `theme` (system|dark|light),
   `contrast`, `inventory`, `macroName` (letters only), `ipaSlashes` (FR-20),
-  `tipaSlashes` (Q-2), `rDisplay`, `tieBars` (M6.5), `collapsedGroups` (categories), `soundOnSelect`,
+  `tipaSlashes` (Q-2), `minimalBraces` (FR-24), `format` (FR-25), `rDisplay`, `tieBars` (M6.5), `collapsedGroups` (categories), `soundOnSelect`,
   `hoverableTooltips` (FR-2, ADR-0016), `wordDetailsOpen` (#4).
   `main.tsx` reads them with `loadSettings(store)` before the first render;
   `<SettingsSync>` writes them back with `saveSettings` on every change.
@@ -323,6 +338,14 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `<SavedWordsDialog>` holds a copy of the stored list, applies each change
   through `updateSavedWords` (above), reloads it on a `storage` event, and loads
   a word into the editor as one undoable `replace`.
+- **Saved-words files** (FR-18): `exportSavedWords` wraps the list in
+  `{ format: 'ipa-helper/saved-words', version: 1, exportedAt, words }`.
+  `parseSavedWordsFile` treats the file as untrusted: it checks the format and
+  version (a newer version is refused, an older one would be migrated here),
+  and reads `words` through `parseSavedWords`. `importSavedWords` merges into
+  the stored list as `updateSavedWords` does, skipping IDs, and word-plus-gloss
+  pairs, already in it. The dialog downloads through the `Downloads` port, and reads
+  the picked file with `File.text()`.
 - No global state library. If one becomes necessary, write an ADR.
 
 ## 6. UI composition

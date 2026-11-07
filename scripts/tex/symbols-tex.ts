@@ -7,23 +7,25 @@ import { symbolId } from '../../src/domain/inventory/symbol-id';
 import type { SymbolId } from '../../src/domain/inventory/symbol-id';
 import type { DisplayOptions } from '../../src/domain/serialise/serialiser';
 import { createTipaSerialiser } from '../../src/domain/serialise/tipa';
+import type { TipaOptions } from '../../src/domain/serialise/tipa';
 import { wordFromIds } from '../../src/domain/word/word';
 
 const NARROW: DisplayOptions = { slashes: false, rDisplay: 'narrow', tieBars: false };
 const BASES = [symbolId('n'), symbolId('e')];
 
 /** The TIPA the app writes for a word of these symbols. */
-const tipaOf = (ids: readonly SymbolId[], options: DisplayOptions = NARROW): string =>
+const tipaOf = (ids: readonly SymbolId[], options: TipaOptions = NARROW): string =>
   createTipaSerialiser(options).serialise(wordFromIds(ids));
 
 /** One labelled sample, as a table row: the ID(s), then `\ipa{…}`. */
 const row = (label: string, tipa: string) => `\\texttt{${label}} & \\ipa{${tipa}} \\\\`;
 
 /** Samples written as a run of `\ipa{…}` calls, wrapped by TeX. */
-const run = (words: readonly (readonly SymbolId[])[], options: DisplayOptions = NARROW) =>
+const run = (words: readonly (readonly SymbolId[])[], options: TipaOptions = NARROW) =>
   words.map((ids) => `\\ipa{${tipaOf(ids, options)}}`).join(' ');
 
 const TIED: DisplayOptions = { ...NARROW, tieBars: true };
+const MINIMAL: TipaOptions = { ...NARROW, minimalBraces: true };
 
 /**
  * The whole document (M6.4):
@@ -64,6 +66,7 @@ export const symbolsTex = (): string => {
   ].join('\n');
   const stacked = run(marks.flatMap((a) => marks.map((b) => [symbolId('n'), a, b])));
   const pairs = ids.map((a) => run(ids.map((b) => [a, b]))).join('\n\n');
+  const minimal = ids.map((a) => run([[a], ...ids.map((b) => [a, b])], MINIMAL)).join('\n\n');
   const slashed = createTipaSerialiser({ ...NARROW, slashes: true }).serialise(
     wordFromIds(ids.slice(0, 3)),
   );
@@ -88,6 +91,8 @@ ${rows}
 ${stacked}
 \\section*{Tie-bar affricates next to every symbol}
 ${tied}
+\\section*{Minimal braces (FR-24): each symbol alone and before every symbol}
+${minimal}
 \\section*{Every ordered pair of symbols}
 ${pairs}
 \\end{document}

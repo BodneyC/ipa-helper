@@ -4,12 +4,21 @@ import { symbolId } from './inventory/symbol-id';
 import {
   NULL_AUDIO,
   NULL_CLIPBOARD,
+  NULL_DOWNLOADS,
   NULL_FRAGMENTS,
   NULL_STORE,
   NULL_THEME,
   NULL_UPDATES,
 } from './ports';
 import { err } from './result';
+
+describe('NULL_DOWNLOADS', () => {
+  it('saves nothing, quietly', () => {
+    expect(() => {
+      NULL_DOWNLOADS.saveText('a.json', '{}', 'application/json');
+    }).not.toThrow();
+  });
+});
 
 describe('NULL_CLIPBOARD', () => {
   it('reports that no clipboard is available', async () => {

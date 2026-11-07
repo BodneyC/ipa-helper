@@ -219,6 +219,18 @@ export function SettingsDialog({ open, onClose, onHelp }: SettingsDialogProps) {
               Put slashes inside the macro argument, for a macro that doesn’t add them
             </span>
           </label>
+          <label className={styles['option']}>
+            <input
+              type="checkbox"
+              checked={settings.minimalBraces}
+              onChange={(event) => {
+                update({ minimalBraces: event.target.checked });
+              }}
+            />
+            <span className={styles['optionText']}>
+              Minimal braces: <code>tr\ae p</code>, not <code>tr\ae{'{}'}p</code>
+            </span>
+          </label>
         </fieldset>
 
         <div className={styles['field']}>

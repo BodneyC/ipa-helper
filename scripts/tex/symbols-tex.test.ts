@@ -42,6 +42,13 @@ describe('TeX compile fixture (M6.4, FR-22)', () => {
     expect(pairs).toContain('\\ipa{"{}"}');
   });
 
+  it('FR-24: writes every symbol alone and every ordered pair in minimal-braces mode too', () => {
+    const minimal = tex.slice(tex.indexOf('Minimal braces'), tex.indexOf('Every ordered pair'));
+    expect(minimal.match(/\\ipa\{/g)).toHaveLength(SYMBOLS.length * (SYMBOLS.length + 1));
+    expect(minimal).toContain('\\ipa{\\ae p}');
+    expect(minimal).toContain('\\ipa{\\ae"}');
+  });
+
   it('is printable ASCII with balanced braces, so only TeX can find fault with it', () => {
     expect(tex).toMatch(/^[\x20-\x7e\n]*$/);
     expect(balanced(tex)).toBe(true);

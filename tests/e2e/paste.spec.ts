@@ -21,7 +21,7 @@ test.describe('paste IPA (FR-17)', () => {
 
     const outputs = page.getByRole('region', { name: 'Word' }).locator('output');
     await expect(outputs.first()).toHaveText('/ˈθɔːnɪk/');
-    await expect(outputs.last()).toHaveText('"TO:nIk');
+    await expect(outputs.nth(1)).toHaveText('"TO:nIk');
     await expect(page).toHaveURL(/#w=1:primary-stress\.theta\.open-o-long\.n\.small-cap-i\.k$/);
 
     await page.getByRole('button', { name: 'Undo' }).click();
@@ -54,6 +54,6 @@ test.describe('paste IPA (FR-17)', () => {
     await dialog.getByRole('textbox', { name: 'IPA text' }).fill('[tʰẽç]');
     await dialog.getByRole('button', { name: 'Use as word' }).click();
     const outputs = page.getByRole('region', { name: 'Word' }).locator('output');
-    await expect(outputs.last()).toHaveText('t\\super{h}\\~{e}\\c{c}');
+    await expect(outputs.nth(1)).toHaveText('t\\super{h}\\~{e}\\c{c}');
   });
 });

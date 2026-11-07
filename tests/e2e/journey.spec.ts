@@ -21,7 +21,7 @@ test('M2.9: build /ˈθɔːnɪk/ by clicking, copy both outputs, and share it', 
   const workbench = page.getByRole('region', { name: 'Word' });
   await expect(page.getByRole('textbox', { name: 'Word' })).toHaveText('/ˈθɔːnɪk/');
   await expect(workbench.locator('output').first()).toHaveText('/ˈθɔːnɪk/');
-  await expect(workbench.locator('output').last()).toHaveText('"TO:nIk');
+  await expect(workbench.locator('output').nth(1)).toHaveText('"TO:nIk');
 
   // Copy (FR-20, FR-21, FR-23).
   await page.getByRole('button', { name: 'Copy IPA' }).click();
@@ -43,7 +43,7 @@ test('M2.9: build /ˈθɔːnɪk/ by clicking, copy both outputs, and share it', 
   const other = await context.newPage();
   await other.goto(shared);
   await expect(other.getByRole('textbox', { name: 'Word' })).toHaveText('/ˈθɔːnɪk/');
-  await expect(other.getByRole('region', { name: 'Word' }).locator('output').last()).toHaveText(
+  await expect(other.getByRole('region', { name: 'Word' }).locator('output').nth(1)).toHaveText(
     '"TO:nIk',
   );
   await expectNoA11yViolations(other);

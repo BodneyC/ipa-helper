@@ -65,7 +65,7 @@ test.describe('full IPA inventory (FR-3, SPEC §7.6)', () => {
     await page.getByRole('button', { name: /^ç\s?,/ }).click();
     await page.getByRole('button', { name: /^ʘ\s?,/ }).click();
     await expect(page.getByRole('textbox', { name: 'Word' })).toContainText('çʘ');
-    await expect(page.getByRole('region', { name: 'Word' }).locator('output').last()).toHaveText(
+    await expect(page.getByRole('region', { name: 'Word' }).locator('output').nth(1)).toHaveText(
       '\\c{c}\\textbullseye{}',
     );
   });
@@ -83,7 +83,7 @@ test.describe('full IPA inventory (FR-3, SPEC §7.6)', () => {
     await other.getByRole('button', { name: /^ɧ\s?, simultaneous ʃ and x$/ }).click();
     const outputs = page.getByRole('region', { name: 'Word' }).locator('output');
     await expect(outputs.first()).toHaveText('/ɕɧ/');
-    await expect(outputs.last()).toHaveText('\\textctc{}\\texththeng{}');
+    await expect(outputs.nth(1)).toHaveText('\\textctc{}\\texththeng{}');
     await expectNoA11yViolations(page);
   });
 
@@ -101,11 +101,11 @@ test.describe('full IPA inventory (FR-3, SPEC §7.6)', () => {
     await nasalised.click();
     const outputs = page.getByRole('region', { name: 'Word' }).locator('output');
     await expect(outputs.first()).toHaveText('/tʰe\u0303/');
-    await expect(outputs.last()).toHaveText('t\\super{h}\\~{e}');
+    await expect(outputs.nth(1)).toHaveText('t\\super{h}\\~{e}');
 
     // Backspace removes the diacritic alone: it is a token of its own (ADR-0007).
     await page.getByRole('textbox', { name: 'Word' }).press('Backspace');
-    await expect(outputs.last()).toHaveText('t\\super{h}e');
+    await expect(outputs.nth(1)).toHaveText('t\\super{h}e');
     await expectNoA11yViolations(page);
   });
 
