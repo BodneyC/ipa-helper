@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import { vowelPage } from './vowel-page';
-import { parseVowelPicks, VARIANTS, vowelCandidates, vowelSymbols } from './vowels';
+import {
+  chosenRenders,
+  parseVowelPicks,
+  parseVowelRenders,
+  VARIANTS,
+  vowelCandidates,
+  vowelSymbols,
+} from './vowels';
 
 describe('vowel clip candidates', () => {
   it('offers every RP vowel and diphthong, and nothing else', () => {
@@ -77,5 +84,40 @@ describe('vowel listening page', () => {
     expect(html).toContain('name="comment-ash"');
     expect(html.match(/type="radio"/g)).toHaveLength(VARIANTS.length + 1);
     expect(vowelPage([ash], [], [])).toContain('No clip in the app yet.');
+  });
+});
+
+describe('choosing renders', () => {
+  const render = (id: string, key: string) => ({
+    id,
+    key,
+    text: 'ˈæ!',
+    lengthScale: 1,
+    file: `${id}/${key}.opus`,
+  });
+
+  it('takes one render per new pick, and skips current or unpicked vowels', () => {
+    const picks = new Map([
+      ['ash', { pick: 'comma', comment: '' }],
+      ['schwa', { pick: 'current', comment: '' }],
+      ['cure', { pick: undefined, comment: 'later' }],
+    ]);
+    expect(chosenRenders(picks, [render('ash', 'bang-1'), render('ash', 'comma')])).toEqual([
+      render('ash', 'comma'),
+    ]);
+  });
+
+  it('fails on a pick with no render', () => {
+    expect(() => chosenRenders(new Map([['ash', { pick: 'comma', comment: '' }]]), [])).toThrow(
+      'ash/comma: no render',
+    );
+  });
+
+  it('reads vowels.json, and rejects a malformed one', () => {
+    expect(parseVowelRenders({ rendered: [render('ash', 'comma')], current: [] })).toEqual([
+      render('ash', 'comma'),
+    ]);
+    expect(() => parseVowelRenders({ rendered: [{ id: 'ash' }] })).toThrow('malformed');
+    expect(() => parseVowelRenders(null)).toThrow('malformed');
   });
 });

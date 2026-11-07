@@ -134,3 +134,49 @@ export const parseVowelPicks = (
   }
   return problems.length > 0 ? { ok: false, problems } : { ok: true, picks };
 };
+
+/** A render as recorded in `.cache/vowel-clips/vowels.json`. */
+interface RenderRecord {
+  readonly id: string;
+  readonly key: string;
+  readonly text: string;
+  readonly lengthScale: number;
+  readonly file: string;
+}
+
+const isRenderRecord = (value: unknown): value is RenderRecord =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof Reflect.get(value, 'id') === 'string' &&
+  typeof Reflect.get(value, 'key') === 'string' &&
+  typeof Reflect.get(value, 'text') === 'string' &&
+  typeof Reflect.get(value, 'lengthScale') === 'number' &&
+  typeof Reflect.get(value, 'file') === 'string';
+
+/** Reads vowels.json's renders; anything malformed is an error, not a silent skip. */
+export const parseVowelRenders = (json: unknown): RenderRecord[] => {
+  const rendered: unknown =
+    typeof json === 'object' && json !== null ? Reflect.get(json, 'rendered') : undefined;
+  if (!Array.isArray(rendered) || !rendered.every(isRenderRecord)) {
+    throw new Error('vowels.json is malformed; re-run pnpm audio:vowels');
+  }
+  return rendered;
+};
+
+/**
+ * The renders the picks choose, one per vowel that picked a new rendering.
+ * `current`, or no pick, keeps the app's clip. A pick with no render (say,
+ * after `--only` re-rendered other vowels) is an error.
+ */
+export const chosenRenders = (
+  picks: ReadonlyMap<string, VowelPick>,
+  rendered: readonly RenderRecord[],
+): RenderRecord[] =>
+  [...picks].flatMap(([id, { pick }]) => {
+    if (pick === undefined || pick === 'current') return [];
+    const render = rendered.find((r) => r.id === id && r.key === pick);
+    if (render === undefined) {
+      throw new Error(`${id}/${pick}: no render; re-run pnpm audio:vowels --only ${id}`);
+    }
+    return [render];
+  });
