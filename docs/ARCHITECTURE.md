@@ -342,8 +342,8 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `ConsonantChart` (CSS grid: place × manner), `VowelTrapezoid` (absolutely
   positioned keys in an SVG-backed trapezoid, scaling to its container), and
   `KeyGrid` for the rest. In the full IPA (M6.1) the consonant chart uses all
-  twelve place columns and scrolls inside its card, the non-pulmonic group is a
-  `KeyGrid`, and the trapezoid takes the full row and widens
+  twelve place columns and scrolls inside its card, the non-pulmonic and
+  "Other symbols" (ADR-0017) groups are `KeyGrid`s, and the trapezoid takes the full row and widens
   (`data-widest="wide"`) because some points hold three vowels.
 - `<SymbolKey>`: a `<button>` with `aria-label` "ʃ, voiceless postalveolar
   fricative, as in ship". A tooltip/popover shows details. Roving tabindex is

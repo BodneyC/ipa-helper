@@ -6,6 +6,7 @@ import { AFFRICATES, CONSONANTS, EXTENDED_AFFRICATES, EXTENDED_CONSONANTS } from
 import { DIACRITICS } from './diacritics';
 import { DIPHTHONGS } from './diphthongs';
 import { NON_PULMONIC } from './non-pulmonic';
+import { OTHER_SYMBOLS } from './other';
 import { SUPRASEGMENTALS } from './suprasegmentals';
 import type { SymbolId } from './symbol-id';
 import type { InventoryId, PhoneSymbol } from './types';
@@ -18,6 +19,7 @@ export const SYMBOLS: readonly PhoneSymbol[] = [
   ...AFFRICATES,
   ...EXTENDED_AFFRICATES,
   ...NON_PULMONIC,
+  ...OTHER_SYMBOLS,
   ...VOWELS,
   ...EXTENDED_VOWELS,
   ...DIPHTHONGS,

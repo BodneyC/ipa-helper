@@ -55,6 +55,10 @@ jobs:
       fail-fast: false
       matrix:
         browser: [chromium, firefox, webkit]
+        include:
+          # The touch specs (#23) run with WebKit, under the same check.
+          - browser: webkit
+            extra: --project=webkit-touch
     steps:
       - uses: actions/checkout@v7
       - name: Trust the checkout
@@ -79,7 +83,7 @@ jobs:
           pulseaudio --start --exit-idle-time=-1
           pactl load-module module-null-sink sink_name=ci
           pactl set-default-sink ci
-      - run: pnpm test:e2e --project=${{ matrix.browser }}
+      - run: pnpm test:e2e --project=${{ matrix.browser }} ${{ matrix.extra }}
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7

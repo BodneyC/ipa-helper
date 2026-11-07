@@ -23,6 +23,8 @@ export const GROUPS: readonly Group[] = [
     accent: 'consonant',
     layout: 'grid',
   },
+  // Full IPA only: the IPA chart's "Other symbols" with no chart cell (ADR-0017).
+  { category: 'other', title: 'Other symbols', accent: 'consonant', layout: 'grid' },
   { category: 'vowel', title: 'Vowels', accent: 'vowel', layout: 'vowels' },
   { category: 'diphthong', title: 'Diphthongs', accent: 'diphthong', layout: 'grid' },
   { category: 'suprasegmental', title: 'Suprasegmentals', accent: 'supra', layout: 'grid' },

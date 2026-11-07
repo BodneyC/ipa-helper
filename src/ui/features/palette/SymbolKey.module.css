@@ -32,9 +32,26 @@
     background-color var(--duration-fast) var(--ease-out);
 }
 
-.key:hover {
-  background: var(--color-surface-raised);
-  transform: translateY(-1px);
+/*
+ * Hover styles are for devices that can hover. On iOS a :hover rule that shows
+ * something (the speaker below) makes Safari spend the first tap on the hover,
+ * so the symbol isn't added until the second (#23).
+ */
+@media (hover: hover) {
+  .key:hover {
+    background: var(--color-surface-raised);
+    transform: translateY(-1px);
+  }
+
+  /* Muted text isn't a declared pair on the raised fill, so switch to body text. */
+  .key:hover .micro {
+    color: var(--color-text);
+  }
+
+  .wrap:hover .play {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .key:active {
@@ -108,11 +125,6 @@
   text-overflow: ellipsis;
 }
 
-/* Muted text isn't a declared pair on the raised fill, so switch to body text. */
-.key:hover .micro {
-  color: var(--color-text);
-}
-
 .tipName,
 .tipExample,
 .tipTipa {
@@ -140,7 +152,7 @@
 
 /*
  * FR-30: the speaker button, on the key's top-right corner. Hidden until the
- * key is hovered or focused (on touch, a tap focuses the key and reveals it).
+ * key is focused or, on a device that can hover, hovered (see above).
  * 24 px meets WCAG 2.5.8's minimum target size.
  */
 .play {
@@ -162,7 +174,6 @@
   transition: opacity var(--duration-fast) var(--ease-out);
 }
 
-.wrap:hover .play,
 .wrap:focus-within .play {
   opacity: 1;
   pointer-events: auto;
