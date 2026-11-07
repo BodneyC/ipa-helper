@@ -24,7 +24,11 @@ export const useOutputs = (): Outputs => {
   const { word } = state;
   return useMemo(() => {
     const glyphs = glyphsOf(settings);
-    const tipa = createTipaSerialiser({ slashes: settings.tipaSlashes, ...glyphs }).serialise(word);
+    const tipa = createTipaSerialiser({
+      slashes: settings.tipaSlashes,
+      minimalBraces: settings.minimalBraces,
+      ...glyphs,
+    }).serialise(word);
     return {
       empty: word.length === 0,
       ipaShown: createIpaSerialiser({ slashes: true, ...glyphs }).serialise(word),

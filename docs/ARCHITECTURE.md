@@ -287,7 +287,7 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   or missing field falls back to its default (or, in the reducer, its current
   value) without discarding the valid ones. Fields: `theme` (system|dark|light),
   `contrast`, `inventory`, `macroName` (letters only), `ipaSlashes` (FR-20),
-  `tipaSlashes` (Q-2), `rDisplay`, `tieBars` (M6.5), `collapsedGroups` (categories), `soundOnSelect`,
+  `tipaSlashes` (Q-2), `minimalBraces` (FR-24), `rDisplay`, `tieBars` (M6.5), `collapsedGroups` (categories), `soundOnSelect`,
   `hoverableTooltips` (FR-2, ADR-0016), `wordDetailsOpen` (#4).
   `main.tsx` reads them with `loadSettings(store)` before the first render;
   `<SettingsSync>` writes them back with `saveSettings` on every change.

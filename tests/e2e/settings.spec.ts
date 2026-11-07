@@ -71,6 +71,26 @@ test.describe('settings (FR-40 – FR-42, Q-2, Q-3)', () => {
     await expect(outputs.last()).toHaveText('\\t{tS}');
   });
 
+  test('FR-24: minimal braces drops {} after a macro unless a letter follows, and is remembered', async ({
+    page,
+  }) => {
+    await page.goto('/#w=1:t.turned-r.ash.p.ash');
+    const outputs = page.getByRole('region', { name: 'Word' }).locator('output');
+    await expect(outputs.last()).toHaveText('t\\textturnr{}\\ae{}p\\ae{}');
+
+    await page.getByRole('button', { name: 'Settings' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Settings' });
+    const toggle = dialog.getByRole('checkbox', { name: /^Minimal braces/ });
+    await expect(toggle).not.toBeChecked();
+    await toggle.check();
+    await expectNoA11yViolations(page);
+    await page.keyboard.press('Escape');
+
+    await expect(outputs.last()).toHaveText('t\\textturnr\\ae p\\ae');
+    await page.reload();
+    await expect(outputs.last()).toHaveText('t\\textturnr\\ae p\\ae');
+  });
+
   test('FR-40: "Match system" follows the system again after an override', async ({ page }) => {
     await page.getByRole('button', { name: 'Settings' }).click();
     const dialog = page.getByRole('dialog', { name: 'Settings' });

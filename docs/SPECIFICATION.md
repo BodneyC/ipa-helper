@@ -152,6 +152,14 @@ pronounced in British English, at no cost and without signing up for anything.
   by eye.*
 - **FR-23** Copy actions show transient feedback ("Copied") that screen
   readers also announce (ARIA live region).
+- **FR-24** *(#8)* A **Minimal braces** setting (default off) writes TIPA
+  with braces only where they're needed. A letters-only macro is written bare,
+  and followed by a space only when a letter comes next, which TeX swallows:
+  `/træp/` is `tr\ae p` (not `tr\ae{}p`), and `\ae` before `"`, `:`,
+  another macro, a wrap's `}` or the end of the word. A macro whose name isn't
+  letters only keeps `{}`, and the `{}` between literals that would merge
+  (FR-22) stays as it is. The TeX check compiles every symbol and every
+  ordered pair in this mode too.
 
 ### 4.4 Audio (milestones M4–M5)
 

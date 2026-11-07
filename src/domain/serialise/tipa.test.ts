@@ -34,9 +34,15 @@ const keyOf = (t: TipaEncoding): string =>
  * `{}` as a separator; a known command (`\c{c}`) as itself; `\name{}` as a
  * macro; and `\name{…}` as a wrap around its contents. It returns encoding keys
  * in token order (a wrap after the tokens it encloses), and throws on anything
- * it doesn't recognise.
+ * it doesn't recognise. With `minimal` (FR-24) a macro may also be bare, `\ae`,
+ * and TeX's rule applies: the control word takes every letter after the
+ * backslash, and one space after it is skipped.
  */
-const tokenise = (tipa: string, encodings: readonly TipaEncoding[]): readonly string[] => {
+const tokenise = (
+  tipa: string,
+  encodings: readonly TipaEncoding[],
+  minimal = false,
+): readonly string[] => {
   const longestFirst = (texts: readonly string[]) => texts.toSorted((a, b) => b.length - a.length);
   const literals = longestFirst(encodings.flatMap((e) => (e.kind === 'literal' ? [e.text] : [])));
   const commands = longestFirst(encodings.flatMap((e) => (e.kind === 'command' ? [e.text] : [])));
@@ -68,7 +74,8 @@ const tokenise = (tipa: string, encodings: readonly TipaEncoding[]): readonly st
           out.push(...sequence(true), `wrap:${word}`);
           consume('}');
         } else {
-          consume('{}');
+          if (tipa.startsWith('{}', i) || !minimal) consume('{}');
+          else if (tipa[i] === ' ') i += 1;
           out.push(`macro:${word}`);
         }
       } else {
@@ -93,13 +100,18 @@ const canonical = (ids: readonly SymbolId[], rDisplay: RDisplay): readonly Symbo
   rDisplay === 'broad' ? ids.map((id) => (id === symbolId('turned-r') ? symbolId('r') : id)) : ids;
 
 /** Tokenises serialiser output back to symbol IDs. */
-const decode = (tipa: string, rDisplay: RDisplay, tieBars = false): readonly SymbolId[] => {
+const decode = (
+  tipa: string,
+  rDisplay: RDisplay,
+  tieBars = false,
+  minimal = false,
+): readonly SymbolId[] => {
   const glyphs: GlyphOptions = { rDisplay, tieBars };
   const rendered = symbols.map((s) => [rendering(s, glyphs).tipa, s.id] as const);
   const byKey = new Map(rendered.map(([t, id]) => [keyOf(t), id]));
   // Every literal the serialiser can write, as it checks boundaries against them all.
   const encodings = [...rendered.map(([t]) => t), ...symbols.map((s) => s.tipa)];
-  return tokenise(tipa, encodings).map((key) => byKey.get(key) ?? symbolId('unknown'));
+  return tokenise(tipa, encodings, minimal).map((key) => byKey.get(key) ?? symbolId('unknown'));
 };
 
 const anyId = fc.constantFrom(...symbols.map((s) => s.id));
@@ -226,6 +238,60 @@ describe('TIPA serialiser', () => {
         );
       }),
     );
+  });
+
+  it("FR-24: minimal braces writes /træp/ as tr\\ae p, and braces nothing else it needn't", () => {
+    const minimal = (rDisplay: RDisplay = 'narrow') =>
+      createTipaSerialiser({ slashes: false, rDisplay, tieBars: false, minimalBraces: true });
+    expect(minimal('broad').serialise(ids('t', 'turned-r', 'ash', 'p'))).toBe('tr\\ae p');
+    // Before a non-letter, at the end, and before another macro, nothing is needed.
+    expect(minimal().serialise(ids('ash', 'length'))).toBe('\\ae:');
+    expect(minimal().serialise(ids('k', 'ash'))).toBe('k\\ae');
+    expect(minimal().serialise(ids('ash', 'turned-r'))).toBe('\\ae\\textturnr');
+    expect(minimal().serialise(ids('ash', 'primary-stress', 'k'))).toBe('\\ae"k');
+    // A wrap's group ends the macro inside it; literal separators stay `{}`.
+    expect(minimal().serialise(ids('ash', 'nasalised', 'p'))).toBe('\\~{\\ae}p');
+    expect(minimal().serialise(ids('primary-stress', 'primary-stress'))).toBe('"{}"');
+    // Slashes inside the argument (Q-2) end it too.
+    const slashed = createTipaSerialiser({
+      slashes: true,
+      rDisplay: 'narrow',
+      tieBars: false,
+      minimalBraces: true,
+    });
+    expect(slashed.serialise(ids('k', 'ash'))).toBe('/k\\ae/');
+  });
+
+  it('FR-24: in minimal mode, round-trips through the reference tokeniser to the same symbols', () => {
+    fc.assert(
+      fc.property(anyWord, anyRDisplay, fc.boolean(), (word, rDisplay, tieBars) => {
+        const tipa = createTipaSerialiser({
+          slashes: false,
+          rDisplay,
+          tieBars,
+          minimalBraces: true,
+        });
+        const out = tipa.serialise(word);
+        expect(decode(out, rDisplay, tieBars, true)).toEqual(canonical(idsOf(word), rDisplay));
+        expect(balanced(out)).toBe(true);
+        // Never longer than the default output, which braces every macro.
+        const safe = createTipaSerialiser({ slashes: false, rDisplay, tieBars }).serialise(word);
+        expect(out.length).toBeLessThanOrEqual(safe.length);
+      }),
+    );
+  });
+
+  it('FR-24: keeps {} after a macro whose name is not a control word', () => {
+    const accent: PhoneSymbol = {
+      ...tilde,
+      id: symbolId('accent'),
+      tipa: { kind: 'macro', name: "'" },
+    };
+    const tipa = createTipaSerialiser(
+      { slashes: false, rDisplay: 'narrow', tieBars: false, minimalBraces: true },
+      [accent],
+    );
+    expect(tipa.serialise(ids('accent', 'accent'))).toBe("\\'{}\\'{}");
   });
 
   it('FR-22: never merges any run of stress marks', () => {
