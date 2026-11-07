@@ -533,7 +533,7 @@ Test names cite requirement IDs where applicable: `it('FR-13: Backspace deletes 
 | `pnpm tex:check` | Generates the fixture, then compiles it with `pdflatex` (needs TeX Live with `tipa`; CI runs it in the `texlive/texlive:latest-small` image) |
 | `pnpm changelog <version> [--dry-run]` | Prepends release notes built from Conventional Commits since the last `v*` tag to `CHANGELOG.md` (M7.3; see `RELEASING.md`) |
 | `pnpm icons:render` | Draws the PWA icons into `public/icons/` from the IPA font and tokens.css (M7.1); commit the PNGs |
-| `pnpm voice:fetch` | Downloads the pinned voice model (SHA-256 checked) into `public/voice/` for word synthesis (M5.2); the deploy runs it |
+| `pnpm voice:fetch` | Downloads the pinned voice model (SHA-256 checked) into `public/voice/` for word synthesis (M5.2); the deploy and `install-toolchain.sh` run it, and `pnpm dev` warns when it's missing |
 | `pnpm check` | typecheck → lint → format:check → knip → test:coverage → build → size |
 | `pnpm prepare` | Installs the lefthook git hooks (runs automatically on `pnpm install`) |
 

@@ -37,7 +37,7 @@ supersedes them. If you need to deviate, write or amend an ADR **first**
 ## Toolchain
 
 Install everything with `./scripts/install-toolchain.sh` (fnm → Node from
-`.node-version` → pnpm → dependencies → Playwright browsers). **Use `pnpm`
+`.node-version` → pnpm → dependencies → Playwright browsers → voice model). **Use `pnpm`
 only.** Never use `npm`/`yarn`, and never commit `package-lock.json` or `yarn.lock`.
 
 ## Non-negotiable standards

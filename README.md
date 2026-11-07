@@ -35,12 +35,13 @@ Linux (including WSL2) or macOS, with `curl`, `unzip` and `git`. Everything else
 installed user-locally by one script:
 
 ```sh
-./scripts/install-toolchain.sh   # fnm → Node (.node-version) → pnpm → deps → Playwright browsers
+./scripts/install-toolchain.sh   # fnm → Node (.node-version) → pnpm → deps → browsers → voice
 exec $SHELL                      # pick up fnm in your shell
 ```
 
 Run `./scripts/install-toolchain.sh --help` for the options (`--with-tex`, `--no-browsers`,
-`--no-system-deps`, …). Use **pnpm only**; npm and yarn lockfiles are rejected.
+`--no-voice`, `--no-system-deps`, …). Play word needs the voice model; if you skipped it,
+run `pnpm voice:fetch` (`pnpm dev` reminds you). Use **pnpm only**; npm and yarn lockfiles are rejected.
 
 ### Everyday commands
 
