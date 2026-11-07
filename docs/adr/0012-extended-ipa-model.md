@@ -77,6 +77,13 @@ We will extend the model as follows (options 2 and 4, not 3):
   and the word isn't changed.
 - **Playable symbols**: the `AudioPlayer` port gains `canPlaySymbol(id)`, true
   only for symbols with a clip. Keys without one show no play affordance.
+  *Update (#14): every one of the 73 full-IPA-only sounds now has a clip, so
+  none is listed as one the voice can't produce. Cori was trained on English,
+  so many are approximations. The maintainer chose defaults rather than
+  picking each one by ear: schwas either side with a comma (`əçˈə,`) for
+  consonants, and stressed with a comma (`ˈy,`) for vowels. Any can be
+  re-picked with `pnpm audio:extended`, and one picked NONE there loses its
+  clip and is listed here.*
 
 ## Consequences
 - The serialiser, labels, filter and the TIPA reference tokeniser each handle

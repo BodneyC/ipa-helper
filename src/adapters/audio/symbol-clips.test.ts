@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 
 import { clipUrls, createSymbolClipSource, SYMBOL_CLIP_IDS } from './symbol-clips';
-import { isSounding, symbolsIn } from '../../domain/inventory/index';
+import { isSounding, SYMBOLS, symbolsIn } from '../../domain/inventory/index';
 import { symbolId } from '../../domain/inventory/symbol-id';
 import { err, ok } from '../../domain/result';
 
@@ -64,10 +64,9 @@ describe('symbol clip source', () => {
     expect(offline).not.toHaveBeenCalled();
   });
 
-  it('ADR-0012: has a committed clip for every sounding RP symbol and nothing else', () => {
-    const sounding = symbolsIn('rp')
-      .filter(isSounding)
-      .map((s) => s.id);
+  it('ADR-0012, #14: has a committed clip for every sounding symbol, RP and full IPA, and nothing else', () => {
+    // No full-IPA sound is listed as one the voice can't produce (ADR-0012), so all have clips.
+    const sounding = SYMBOLS.filter(isSounding).map((s) => s.id);
     expect([...SYMBOL_CLIP_IDS].toSorted()).toEqual(sounding.toSorted());
   });
 
@@ -156,11 +155,18 @@ describe('committed symbol clips', () => {
   const sounding = symbolsIn('rp')
     .filter(isSounding)
     .map((s) => s.id);
+  const soundingAnywhere = new Set<string>(SYMBOLS.filter(isSounding).map((s) => s.id));
 
-  it('FR-30: has exactly one clip per sounding RP symbol, and no others', () => {
-    expect(entries.map(([id]) => id).sort()).toEqual([...sounding].sort());
+  it('FR-30: has a clip for every sounding RP symbol, and clips only for sounding symbols', () => {
+    const ids = entries.map(([id]) => id);
+    expect(sounding.filter((id) => !ids.includes(id))).toEqual([]);
+    // Full-IPA sounds have clips where the voice can produce them (#14, ADR-0012).
+    expect(ids.filter((id) => !soundingAnywhere.has(id))).toEqual([]);
+  });
+
+  it('has a manifest entry for every clip file, and a file for every entry', () => {
     const files = readdirSync(dir).filter((f) => f.endsWith('.opus'));
-    expect(files.sort()).toEqual(sounding.map((id) => `${id}.opus`).sort());
+    expect(files.sort()).toEqual(entries.map(([id]) => `${id}.opus`).sort());
   });
 
   it('matches every clip to the SHA-256 the manifest recorded', () => {

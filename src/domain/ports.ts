@@ -116,7 +116,7 @@ export interface AudioPlayer {
   subscribe(listener: () => void): () => void;
   /**
    * True when `id` has a sound this player can play (FR-30). Symbols without a
-   * clip, such as most of the full IPA (ADR-0012), get no play affordance.
+   * clip, such as full-IPA sounds the voice can't produce (#14, ADR-0012), get no play affordance.
    */
   canPlaySymbol(id: SymbolId): boolean;
   /** Resolves when the sound ends or a newer one cuts it off. */
