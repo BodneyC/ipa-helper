@@ -557,8 +557,8 @@ Test names cite requirement IDs where applicable: `it('FR-13: Backspace deletes 
 | `pnpm size` | size-limit: initial JS ≤ 100 kB gzipped (NFR-3), measured on `dist/` |
 | `pnpm audio:candidates [--only id,…]` | Renders candidate symbol clips and a listening page into `.cache/symbol-clips/` (M4.3) |
 | `pnpm audio:select <picks.json>` | Copies the picked renders to `src/assets/audio/symbols/` and writes `manifest.json` |
-| `pnpm audio:vowels [--only id,…]` | Renders 25 ways of saying each RP vowel and diphthong beside the app's current clip, with a listening page (pick, compare, comment) in `.cache/vowel-clips/` |
-| `pnpm audio:select-vowels <vowel-picks.json>` | Replaces only the re-picked vowel clips and their manifest entries (frames `vowel-…`); `current` keeps a clip |
+| `pnpm audio:vowels [--only id,…]` · `pnpm audio:extended [--only id,…]` | Renders many ways of saying each sound in a set (the RP vowels; the full-IPA-only sounds, #14) beside the app's current clip, with a listening page (pick, compare, comment, or NONE when the voice can't say it) in `.cache/<set>-clips/` (`scripts/audio/repick*.ts`) |
+| `pnpm audio:select-vowels <file>` · `pnpm audio:select-extended <file>` | Adds or replaces only the picked clips and their manifest entries (frames `vowel-…`, `extended-…`); `current` keeps a clip, `none` gets none and is listed |
 | `pnpm tex:generate` | Writes `tests/tex/out/symbols.tex` from the inventory and the TIPA serialiser (M6.4) |
 | `pnpm tex:check` | Generates the fixture, then compiles it with `pdflatex` (needs TeX Live with `tipa`; CI runs it in the `texlive/texlive:latest-small` image) |
 | `pnpm changelog <version> [--dry-run]` | Prepends release notes built from Conventional Commits since the last `v*` tag to `CHANGELOG.md` (M7.3; see `RELEASING.md`) |

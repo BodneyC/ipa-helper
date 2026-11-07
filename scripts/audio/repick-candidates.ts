@@ -1,25 +1,28 @@
-// Renders many ways of saying each RP vowel and diphthong, beside the clip the
-// app plays now, and a page to compare them and pick.
-// Usage: pnpm audio:vowels [--only id,id,…]
-// Output: .cache/vowel-clips/ (listen.html, vowels.json, current/<id>.opus, <id>/<key>.opus)
+// Renders many ways of saying each sound in a set, beside the clip the app
+// plays now (if any), and a page to compare them and pick.
+// Usage: pnpm audio:vowels | pnpm audio:extended   [--only id,id,…]
+//   (node … repick-candidates.ts --set vowels|extended)
+// Output: .cache/<set>-clips/ (listen.html, renders.json, current/<id>.opus, <id>/<key>.opus)
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 
+import { candidatesFor, SETS, symbolsOf } from './repick';
+import { repickPage } from './repick-page';
+import type { CurrentClip, RenderedCandidate } from './repick-page';
 import { CACHE, encodeOpus, loadVoice, ROOT } from './voice';
-import { vowelPage } from './vowel-page';
-import type { CurrentClip, RenderedVowel } from './vowel-page';
-import { vowelCandidates, vowelSymbols } from './vowels';
 
-const OUT = join(CACHE, 'vowel-clips');
+const { values } = parseArgs({ options: { only: { type: 'string' }, set: { type: 'string' } } });
+const set = SETS.find((name) => name === values.set);
+if (set === undefined) throw new Error(`--set must be one of: ${SETS.join(', ')}`);
+const OUT = join(CACHE, `${set}-clips`);
 const CLIPS = join(ROOT, 'src', 'assets', 'audio', 'symbols');
 
-const { values } = parseArgs({ options: { only: { type: 'string' } } });
 const only = values.only === undefined ? undefined : new Set(values.only.split(','));
-const symbols = vowelSymbols().filter((s) => only === undefined || only.has(s.id));
+const symbols = symbolsOf(set).filter((s) => only === undefined || only.has(s.id));
 if (only !== undefined && symbols.length !== only.size) {
   const known = new Set<string>(symbols.map((s) => s.id));
-  throw new Error(`--only: not RP vowels: ${[...only].filter((id) => !known.has(id)).join(', ')}`);
+  throw new Error(`--only: not in ${set}: ${[...only].filter((id) => !known.has(id)).join(', ')}`);
 }
 
 // The app's clips, copied beside the page so it plays them from the same folder.
@@ -45,8 +48,8 @@ const current: CurrentClip[] = symbols.flatMap((symbol) => {
 });
 
 const voice = await loadVoice();
-const rendered: RenderedVowel[] = [];
-for (const candidate of vowelCandidates(symbols)) {
+const rendered: RenderedCandidate[] = [];
+for (const candidate of candidatesFor(symbols)) {
   const [noise, , noiseW] = voice.scales;
   const samples = await voice.synthesise(candidate.text, [noise, candidate.lengthScale, noiseW]);
   const file = join(candidate.id, `${candidate.key}.opus`);
@@ -59,8 +62,8 @@ for (const candidate of vowelCandidates(symbols)) {
   );
 }
 
-writeFileSync(join(OUT, 'vowels.json'), `${JSON.stringify({ rendered, current }, null, 2)}\n`);
-writeFileSync(join(OUT, 'listen.html'), vowelPage(symbols, rendered, current));
+writeFileSync(join(OUT, 'renders.json'), `${JSON.stringify({ rendered, current }, null, 2)}\n`);
+writeFileSync(join(OUT, 'listen.html'), repickPage(set, symbols, rendered, current));
 console.log(
   `\n${String(rendered.length)} clips rendered. Listen and pick: ${join(OUT, 'listen.html')}`,
 );
