@@ -9,13 +9,15 @@
 #   4. Project dependencies       (pnpm install)         — if package.json exists,
 #                                  including the dev-only ffmpeg-static binary
 #   5. Playwright browsers + libs (pnpm exec playwright) — if Playwright is a dependency
-#   6. Optional: TeX Live + tipa for the TIPA compile test (--with-tex)
+#   6. The word voice model (pnpm voice:fetch, 63.5 MB)   — for Play word in dev
+#   7. Optional: TeX Live + tipa for the TIPA compile test (--with-tex)
 #
 # Idempotent: safe to re-run; already-installed pieces are skipped.
 #
 # Usage: ./scripts/install-toolchain.sh [options]
 #   --no-project      Only install fnm/Node/pnpm (skip deps and browsers)
 #   --no-browsers     Skip Playwright browser installation
+#   --no-voice        Skip downloading the voice model (Play word then fails in dev)
 #   --no-system-deps  Never invoke sudo/apt/brew (browsers installed without OS libs)
 #   --with-tex        Also install pdflatex + tipa (for roadmap task M6.4)
 #   --no-shell-config Do not modify ~/.zshrc / ~/.bashrc
@@ -35,6 +37,7 @@ readonly SHELL_MARKER="# >>> ipa-helper: fnm >>>"
 
 opt_project=1
 opt_browsers=1
+opt_voice=1
 opt_system=1
 opt_tex=0
 opt_shell=1
@@ -74,6 +77,7 @@ while (( $# )); do
   case "$1" in
     --no-project)      opt_project=0 ;;
     --no-browsers)     opt_browsers=0 ;;
+    --no-voice)        opt_voice=0 ;;
     --no-system-deps)  opt_system=0 ;;
     --with-tex)        opt_tex=1 ;;
     --no-shell-config) opt_shell=0 ;;
@@ -247,10 +251,22 @@ if (( opt_project )); then
     fi
     ok "Playwright browsers ready"
   fi
+
+  # --------------------------------------------------------------------------
+  # 6. Voice model (gitignored; Play word needs it, ADR-0009)
+  # --------------------------------------------------------------------------
+  if (( opt_voice )) && [[ -f package.json ]] && grep -q '"voice:fetch"' package.json; then
+    step "Fetching the voice model"
+    if pnpm voice:fetch; then
+      ok "voice model ready"
+    else
+      warn "couldn't fetch the voice model; Play word won't work until you run: pnpm voice:fetch"
+    fi
+  fi
 fi
 
 # ----------------------------------------------------------------------------
-# 6. Optional TeX (TIPA compile test)
+# 7. Optional TeX (TIPA compile test)
 # ----------------------------------------------------------------------------
 if (( opt_tex )); then
   step "Installing TeX Live + tipa"

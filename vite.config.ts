@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+import { voiceModelPlugin } from './scripts/audio/dev-plugin';
 import { nextDeployPreviewPlugin, pwaPlugin } from './scripts/pwa/plugin';
 
 // BASE_PATH lets the same build serve from a sub-path such as /ipa-helper/ on
@@ -11,7 +12,7 @@ const base = process.env['BASE_PATH'] ?? '/';
 
 export default defineConfig({
   base,
-  plugins: [react(), pwaPlugin(), nextDeployPreviewPlugin()],
+  plugins: [react(), pwaPlugin(), nextDeployPreviewPlugin(), voiceModelPlugin()],
   resolve: {
     alias: {
       // The synthesis worker self-hosts onnxruntime-web's wasm binary (NFR-6,

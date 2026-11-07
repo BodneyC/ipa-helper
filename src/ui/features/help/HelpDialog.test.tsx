@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { HelpDialog } from './HelpDialog';
 
@@ -28,6 +28,15 @@ function Fixture() {
 }
 
 describe('<HelpDialog> (FR-51)', () => {
+  it('lists both Redo shortcuts without a React key warning', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    render(<HelpDialog open onClose={() => undefined} />);
+    const redo = screen.getAllByRole('cell', { name: 'Redo' });
+    expect(redo).toHaveLength(2);
+    expect(error).not.toHaveBeenCalled();
+    error.mockRestore();
+  });
+
   it('opens as a named dialog listing the shortcuts', async () => {
     const user = userEvent.setup();
     render(<Fixture />);

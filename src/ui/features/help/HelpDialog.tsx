@@ -21,7 +21,8 @@ export function HelpDialog({ open, onClose }: HelpDialogProps) {
         </thead>
         <tbody>
           {SHORTCUTS.map(({ keys, join, does }) => (
-            <tr key={does}>
+            // Two rows can share an action (Redo), so key by the keys as well.
+            <tr key={`${keys.join('+')} ${does}`}>
               <th scope="row" className={styles['keys']}>
                 {keys.map((k, i) => (
                   <span key={k}>
