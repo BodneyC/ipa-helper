@@ -6,7 +6,7 @@ import { join } from 'node:path';
 
 import type { Plugin } from 'vite';
 
-import { VOICE } from '../../src/adapters/audio/voice';
+import { VOICE } from '../../src/adapters/audio/voice-pin.ts';
 
 /** The warning to print, or `undefined` when the model is in `publicDir`. */
 export const missingVoiceWarning = (publicDir: string): string | undefined =>

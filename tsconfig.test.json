@@ -2,7 +2,10 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
-    "types": ["vite/client", "node"]
+    "types": ["vite/client", "node"],
+    // tests/e2e/pwa.spec.ts imports scripts/pwa/plugin.ts, whose imports carry
+    // the extensions Vite's native config loader needs (see tsconfig.node.json).
+    "allowImportingTsExtensions": true
   },
   "include": ["src", "tests"]
 }
