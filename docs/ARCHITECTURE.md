@@ -136,7 +136,7 @@ ipa-helper/
 │  │  ├─ local-storage.ts     # KeyValueStore over localStorage; blocked storage reads as empty
 │  │  ├─ document-theme.ts    # DocumentTheme: <html data-theme data-contrast>, follows the system live; theme-color follows overrides (#5)
 │  │  ├─ url-hash.ts          # sync editor ↔ location.hash
-│  │  ├─ service-worker.ts    # AppUpdates: registers sw.js (production only), reports a waiting version (FR-62)
+│  │  ├─ service-worker.ts    # AppUpdates: registers sw.js (production only), reports a waiting version (FR-62), re-checks hourly when visible (#6)
 │  │  └─ audio/               # web-audio-output (AudioContext playback), audio-player (port over clip sources),
 │  │                          #   symbol-clips (lazy fetch + Cache API), cache, voice (pin + config parser),
 │  │                          #   word-source + synth-protocol + synth-engine + synth.worker (M5.2)
