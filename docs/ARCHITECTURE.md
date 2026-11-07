@@ -414,7 +414,8 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 - Port (`src/domain/ports.ts`): `interface AudioPlayer { readonly status:
   Record<'symbols' | 'words', AudioStatus>; subscribe(listener): unsubscribe;
   canPlaySymbol(id): boolean; playSymbol(id): Promise<Result<void, AudioError>>;
-  playWord(word): … }`. `canPlaySymbol` is true only for symbols with a clip
+  playWord(word): Promise<Result<SpokenWord, AudioError>> }`, where
+  `SpokenWord` lists the diacritics the voice left out (#15). `canPlaySymbol` is true only for symbols with a clip
   (`SYMBOL_CLIP_IDS`, the sounding RP symbols), so the palette offers no play
   affordance for full-IPA sounds (ADR-0012).
   Each channel has its own status (`unsupported | idle | loading | ready`),
@@ -447,10 +448,13 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   every word in `!`, which stops the voice running on (ADR-0009, "Every word
   ends in `!`").
   `piperPhonemeIds(text, phoneme_id_map)` turns that text into the voice's
-  input IDs; the clip scripts and the synthesis worker share it. The UI never
+  input IDs; the clip scripts and the synthesis worker share it. It leaves
+  out any diacritic the voice has no ID for and returns those as `dropped`, so the
+  worker's `audio` reply carries them back to Play word (#15). Any other
+  codepoint the voice lacks still fails. The UI never
   handles raw synthesis strings.
 - **Word synthesis (M5.2).** These pieces live in `src/adapters/audio/`:
-  - `word-source.ts` is the main-thread `ClipSource<Word>`. It serialises the
+  - `word-source.ts` is the main-thread `WordSource` (a clip plus its dropped marks). It serialises the
     word and starts `synth.worker.ts` on the first word (a module worker,
     bundled as its own chunk). It matches each reply to its request by ID. If
     the worker crashes, every waiting word fails and the next word starts a

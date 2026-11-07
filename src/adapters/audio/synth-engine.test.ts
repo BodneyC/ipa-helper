@@ -6,7 +6,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { createSynthEngine } from './synth-engine';
 import type { SynthDeps, SynthSession } from './synth-engine';
 import { VOICE } from './voice';
-import { err } from '../../domain/result';
+import { symbolId } from '../../domain/inventory/symbol-id';
+import { err, ok } from '../../domain/result';
 
 const CONFIG = readFileSync(
   join(import.meta.dirname, '..', '..', 'assets', 'voice', VOICE.config.name),
@@ -62,7 +63,7 @@ describe('synthesis engine (M5.2)', () => {
     const first = await engine.synthesise({ text: 'æ!', ...URLS }, (f) => progress.push(f));
     expect(first).toEqual({
       ok: true,
-      value: { samples: new Float32Array([0.1, -0.1]), sampleRate: 22050 },
+      value: { samples: new Float32Array([0.1, -0.1]), sampleRate: 22050, dropped: [] },
     });
     expect(createSession).toHaveBeenCalledWith(MODEL);
     // BOS PAD æ PAD ! PAD EOS, with Cori's IDs.
@@ -72,6 +73,19 @@ describe('synthesis engine (M5.2)', () => {
     await engine.synthesise({ text: 'æ!', ...URLS }, () => undefined);
     expect(createSession).toHaveBeenCalledTimes(1);
     expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('#15: speaks a word without the marks the voice lacks, and names them', async () => {
+    const { engine, run } = setup();
+    const result = await engine.synthesise({ text: 'æ\u0330!', ...URLS }, () => undefined);
+    expect(result).toEqual(
+      ok({
+        samples: new Float32Array([0.1, -0.1]),
+        sampleRate: 22050,
+        dropped: [symbolId('creaky-voiced')],
+      }),
+    );
+    expect(run).toHaveBeenCalledWith([1, 0, 39, 0, 4, 0, 2], [0.667, 1, 0.8]);
   });
 
   it('FR-33: caches the model, and a fresh engine loads it from the cache', async () => {

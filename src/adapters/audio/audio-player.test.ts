@@ -1,14 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { createAudioPlayer } from './audio-player';
-import type { ClipSource } from './audio-player';
+import type { ClipSource, WordClip, WordSource } from './audio-player';
 import type { AudioClip, AudioOutput } from './web-audio-output';
 import { symbolId } from '../../domain/inventory/symbol-id';
 import type { AudioError } from '../../domain/ports';
 import { err, ok } from '../../domain/result';
 import type { Result } from '../../domain/result';
 import { wordFromIds } from '../../domain/word/word';
-import type { Word } from '../../domain/word/word';
 
 const CLIP: AudioClip = { kind: 'encoded', data: new ArrayBuffer(1) };
 const ESH = symbolId('esh');
@@ -44,12 +43,13 @@ describe('audio player', () => {
     expect(play).toHaveBeenCalledWith(CLIP);
   });
 
-  it('FR-31: plays a word from its source through the output', async () => {
+  it('FR-31: plays a word from its source through the output, and says what it left out', async () => {
     const { output, play } = fakeOutput();
     const word = wordFromIds([ESH]);
-    const words = vi.fn<ClipSource<typeof word>>(() => Promise.resolve(ok(CLIP)));
+    const dropped = [symbolId('creaky-voiced')];
+    const words = vi.fn<WordSource>(() => Promise.resolve(ok({ clip: CLIP, dropped })));
     const player = createAudioPlayer({ output, words });
-    await expect(player.playWord(word)).resolves.toEqual(ok(undefined));
+    await expect(player.playWord(word)).resolves.toEqual(ok({ dropped }));
     expect(words).toHaveBeenCalledWith(word, expect.any(Function));
     expect(play).toHaveBeenCalledWith(CLIP);
   });
@@ -150,8 +150,8 @@ describe('audio player', () => {
 
   it('FR-33: reports a loading channel’s download progress, clamped, and clears it once ready', async () => {
     let report: (fraction: number) => void = () => undefined;
-    let finish: (result: Result<AudioClip, AudioError>) => void = () => undefined;
-    const words = vi.fn<ClipSource<Word>>(
+    let finish: (result: Result<WordClip, AudioError>) => void = () => undefined;
+    const words = vi.fn<WordSource>(
       (_word, onProgress) =>
         new Promise((resolve) => {
           report = onProgress ?? (() => undefined);
@@ -171,7 +171,7 @@ describe('audio player', () => {
     expect(player.progress.words).toBe(1);
     report(-1);
     expect(player.progress.words).toBe(0);
-    finish(ok(CLIP));
+    finish(ok({ clip: CLIP, dropped: [] }));
     await playing;
     expect(player.status.words).toBe('ready');
     expect(player.progress.words).toBeUndefined();
@@ -182,7 +182,7 @@ describe('audio player', () => {
     const again = player.playWord(wordFromIds([ESH]));
     report(0.5);
     expect(player.progress.words).toBeUndefined();
-    finish(ok(CLIP));
+    finish(ok({ clip: CLIP, dropped: [] }));
     await again;
   });
 });

@@ -18,6 +18,8 @@ declare global {
  * reports half the download, then waits for the test to `release` (answer
  * with 0.4 s of tone) or `fail` (answer with a load error). Each later word is
  * answered straight away, as the real worker does once the voice is loaded.
+ * Like the real voice, it can't say the creaky-voice mark, so it leaves it out
+ * and names it (#15).
  */
 const FAKE_WORKER = `
 let pending = [];
@@ -27,21 +29,22 @@ const tone = () => {
   for (let i = 0; i < samples.length; i++) samples[i] = 0.2 * Math.sin((2 * Math.PI * 440 * i) / 22050);
   return samples;
 };
-const answer = (id) => {
+const answer = ({ id, text }) => {
   const samples = tone();
-  self.postMessage({ type: 'audio', id, samples, sampleRate: 22050 }, [samples.buffer]);
+  const dropped = text.includes('\\u0330') ? ['creaky-voiced'] : [];
+  self.postMessage({ type: 'audio', id, samples, sampleRate: 22050, dropped }, [samples.buffer]);
 };
 self.onmessage = ({ data }) => {
   if (data.type === 'synthesise') {
-    if (ready) return answer(data.id);
-    pending.push(data.id);
+    if (ready) return answer(data);
+    pending.push(data);
     self.postMessage({ type: 'progress', fraction: 0.5 });
   } else if (data.type === 'release') {
     ready = true;
     pending.forEach(answer);
     pending = [];
   } else if (data.type === 'fail') {
-    for (const id of pending) self.postMessage({ type: 'error', id, kind: 'audio-load-failed' });
+    for (const { id } of pending) self.postMessage({ type: 'error', id, kind: 'audio-load-failed' });
     pending = [];
   }
 };
@@ -150,5 +153,28 @@ test.describe('word audio (FR-31, FR-33)', () => {
     // Every word ends in '!' (ADR-0009, #33).
     const requests = await page.evaluate(() => window.__synthRequests ?? []);
     expect(requests).toContainEqual(expect.objectContaining({ type: 'synthesise', text: 'kæt!' }));
+  });
+
+  test('#15: a word with a mark the voice lacks is spoken without it, and says so', async ({
+    page,
+  }) => {
+    await page.getByRole('combobox', { name: 'Inventory' }).selectOption('extended');
+    await key(page, 'k').click();
+    await key(page, 'æ').click();
+    await key(page, '◌\u0330').click();
+    await playWord(page).click();
+    await tellWorker(page, 'release');
+    await expect.poll(() => played(page)).toHaveLength(1);
+
+    const note = 'Played without: creaky voiced';
+    await expect(playWord(page)).toHaveAccessibleDescription(note);
+    await expect(page.getByRole('status').filter({ hasText: note })).toBeAttached();
+    await expectNoA11yViolations(page);
+
+    // A word the voice can say in full has no note.
+    await page.getByRole('textbox', { name: 'Word' }).press('Backspace');
+    await playWord(page).click();
+    await expect.poll(() => played(page)).toHaveLength(2);
+    await expect(playWord(page)).toHaveAccessibleDescription('');
   });
 });
