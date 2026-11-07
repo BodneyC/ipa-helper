@@ -451,7 +451,8 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `AudioClip` (encoded bytes, or PCM samples) at a time, and a new clip cuts
   off the old one. It creates the `AudioContext` on the first play (inside a
   user gesture, which satisfies autoplay policy), resumes it if the browser
-  suspended it, and decodes a copy of encoded data so that cached clips stay
+  suspended it (failing the play with `audio-playback-failed` if `resume()`
+  hasn't settled within `RESUME_TIMEOUT_MS`, as with no output device, #3), and decodes a copy of encoded data so that cached clips stay
   playable. `createAudioPlayer({ output, symbols?, words? })` combines the
   output with one `ClipSource` per channel: the M4.3 clip loader and the M5.2
   worker. A channel without a source reports `unsupported`.

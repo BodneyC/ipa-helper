@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { createBrowserAudioOutput, createWebAudioOutput } from './web-audio-output';
+import {
+  createBrowserAudioOutput,
+  createWebAudioOutput,
+  RESUME_TIMEOUT_MS,
+} from './web-audio-output';
 import type { AudioClip, PlaybackContext } from './web-audio-output';
 import { err, ok } from '../../domain/result';
 
@@ -197,6 +201,47 @@ describe('Web Audio output', () => {
     ctx.state = 'suspended';
     ctx.resume.mockImplementation(() => Promise.reject(new Error('NotAllowedError')));
     await expect(output.play(pcm([0]))).resolves.toEqual(failed);
+  });
+
+  it('#3: fails visibly when resume() never settles (no output device), and can recover', async () => {
+    vi.useFakeTimers();
+    try {
+      const { ctx, output } = setup();
+      ctx.state = 'suspended';
+      ctx.resume.mockImplementation(() => new Promise<void>(() => undefined));
+      const first = output.play(pcm([0.1]));
+      await vi.advanceTimersByTimeAsync(RESUME_TIMEOUT_MS);
+      await expect(first).resolves.toEqual(err({ kind: 'audio-playback-failed' }));
+
+      // The device appears: the next play resumes the same context and plays.
+      ctx.resume.mockImplementation(() => {
+        ctx.state = 'running';
+        return Promise.resolve();
+      });
+      const second = output.play(pcm([0.1]));
+      await vi.advanceTimersByTimeAsync(0);
+      expect(ctx.resume).toHaveBeenCalledTimes(2);
+      expect(ctx.sources).toHaveLength(1);
+      ctx.sources[0]?.finish();
+      await expect(second).resolves.toEqual(ok(undefined));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('#3: a resume() that settles in time plays as before, with its timer cleared', async () => {
+    vi.useFakeTimers();
+    try {
+      const { ctx, output } = setup();
+      ctx.state = 'suspended';
+      const playing = output.play(pcm([0.1]));
+      await vi.advanceTimersByTimeAsync(0);
+      expect(vi.getTimerCount()).toBe(0);
+      ctx.sources[0]?.finish();
+      await expect(playing).resolves.toEqual(ok(undefined));
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('uses the browser AudioContext when there is one', async () => {
