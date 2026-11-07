@@ -134,7 +134,7 @@ ipa-helper/
 │  │  ├─ clipboard.ts         # navigator.clipboard implementation of the Clipboard port
 │  │  ├─ downloads.ts         # Downloads port: a temporary <a download> over a blob URL (FR-18)
 │  │  ├─ local-storage.ts     # KeyValueStore over localStorage; blocked storage reads as empty
-│  │  ├─ document-theme.ts    # DocumentTheme: <html data-theme data-contrast>, follows the system live
+│  │  ├─ document-theme.ts    # DocumentTheme: <html data-theme data-contrast>, follows the system live; theme-color follows overrides (#5)
 │  │  ├─ url-hash.ts          # sync editor ↔ location.hash
 │  │  ├─ service-worker.ts    # AppUpdates: registers sw.js (production only), reports a waiting version (FR-62)
 │  │  └─ audio/               # web-audio-output (AudioContext playback), audio-player (port over clip sources),
