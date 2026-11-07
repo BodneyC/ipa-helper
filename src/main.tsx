@@ -7,6 +7,7 @@ import { createBrowserAudioOutput } from './adapters/audio/web-audio-output';
 import { createWordSource } from './adapters/audio/word-source';
 import { createBrowserClipboard } from './adapters/clipboard';
 import { createDocumentTheme } from './adapters/document-theme';
+import { createBrowserDownloads } from './adapters/downloads';
 import { createLocalStore } from './adapters/local-storage';
 import { createServiceWorkerUpdates } from './adapters/service-worker';
 import { createUrlFragmentStore } from './adapters/url-hash';
@@ -34,6 +35,7 @@ const services = {
     words: typeof Worker === 'undefined' ? undefined : createWordSource(),
   }),
   clipboard: createBrowserClipboard(),
+  downloads: createBrowserDownloads(),
   fragments: createUrlFragmentStore(),
   store: createLocalStore(),
   theme: createDocumentTheme(),

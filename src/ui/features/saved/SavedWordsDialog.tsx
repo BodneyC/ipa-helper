@@ -6,12 +6,15 @@ import { decodeWord, encodeWord } from '../../../domain/codec/url';
 import { createIpaSerialiser } from '../../../domain/serialise/ipa';
 import { useEditor, useServices, useSettings } from '../../../state/hooks';
 import {
+  exportSavedWords,
   GLOSS_MAX_LENGTH,
-  SAVED_WORDS_STORAGE_KEY,
+  importSavedWords,
   loadSavedWords,
+  parseSavedWordsFile,
+  SAVED_WORDS_STORAGE_KEY,
   updateSavedWords,
 } from '../../../state/saved-words';
-import type { SavedWord, SavedWordsAction } from '../../../state/saved-words';
+import type { SavedWord, SavedWordsAction, SavedWordsFileError } from '../../../state/saved-words';
 import { glyphsOf } from '../../../state/settings';
 import { useAnnounce } from '../../components/Announcer';
 import { Dialog } from '../../components/Dialog';
@@ -24,10 +27,38 @@ interface SavedWordsDialogProps {
 /** A fresh entry's ID and timestamp. Only called from event handlers. */
 const stamp = () => ({ id: crypto.randomUUID(), savedAt: Date.now() });
 
+/** `1 word`, `2 words`. */
+const words = (n: number) => `${String(n)} word${n === 1 ? '' : 's'}`;
+
+/** What an import did (FR-18), as shown and announced. */
+export const importSummary = ({
+  added,
+  skipped,
+  invalid,
+}: {
+  readonly added: number;
+  readonly skipped: number;
+  readonly invalid: number;
+}): string =>
+  [
+    `Imported ${words(added)}.`,
+    ...(skipped > 0 ? [`Skipped ${words(skipped)} already saved.`] : []),
+    ...(invalid > 0 ? [`Left out ${words(invalid)} that couldn’t be read.`] : []),
+  ].join(' ');
+
+const FILE_ERRORS: Readonly<Record<SavedWordsFileError['kind'], string>> = {
+  'not-saved-words': 'That file isn’t a saved-words export from ipa-helper.',
+  'newer-version':
+    'That file is from a newer version of ipa-helper. Reload to update, then try again.',
+};
+
 /**
  * FR-16: save the current word with an optional gloss, and load, rename or
  * delete saved words. The list lives in local storage; loading a word is one
  * undoable edit.
+ *
+ * FR-18: Export downloads the list as a versioned JSON file, and Import merges
+ * one back in, skipping words already saved, and says what it did.
  *
  * Storage is the source of truth, shared by every tab (#2): each change is applied
  * to the stored list ({@link updateSavedWords}), and a change from another tab
@@ -36,13 +67,15 @@ const stamp = () => ({ id: crypto.randomUUID(), savedAt: Date.now() });
 export function SavedWordsDialog({ open, onClose }: SavedWordsDialogProps) {
   const { state, dispatch: editorDispatch } = useEditor();
   const { settings } = useSettings();
-  const { store } = useServices();
+  const { downloads, store } = useServices();
   const announce = useAnnounce();
   const [list, setList] = useState(() => loadSavedWords(store));
   const [gloss, setGloss] = useState('');
   const [editing, setEditing] = useState<string | undefined>(undefined);
   const glossId = useId();
   const glossRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [transfer, setTransfer] = useState<string | undefined>(undefined);
 
   useEffect(
     () =>
@@ -79,6 +112,46 @@ export function SavedWordsDialog({ open, onClose }: SavedWordsDialogProps) {
     editorDispatch({ type: 'replace', word: word.value });
     announce(`Loaded ${ipaOf(entry)}`);
     onClose();
+  };
+
+  const report = (message: string) => {
+    setTransfer(message);
+    announce(message);
+  };
+
+  const exportList = () => {
+    const now = Date.now();
+    const date = new Date(now).toISOString().slice(0, 10);
+    downloads.saveText(
+      `ipa-helper-saved-words-${date}.json`,
+      exportSavedWords(list, now),
+      'application/json',
+    );
+    report(`Exported ${words(list.length)}.`);
+  };
+
+  const importFile = async (file: File) => {
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      report('Couldn’t read that file.');
+      return;
+    }
+    const read = parseSavedWordsFile(text);
+    if (!read.ok) {
+      report(FILE_ERRORS[read.error.kind]);
+      return;
+    }
+    const merged = importSavedWords(store, read.value.entries);
+    setList(merged.list);
+    report(
+      importSummary({
+        added: merged.added,
+        skipped: merged.skipped + read.value.repeated,
+        invalid: read.value.invalid,
+      }),
+    );
   };
 
   const remove = (entry: SavedWord) => {
@@ -149,6 +222,42 @@ export function SavedWordsDialog({ open, onClose }: SavedWordsDialogProps) {
           ))}
         </ul>
       )}
+
+      <div className={styles['transfer']}>
+        <button
+          type="button"
+          className={styles['button']}
+          disabled={list.length === 0}
+          onClick={exportList}
+        >
+          Export
+        </button>
+        <button
+          type="button"
+          className={styles['button']}
+          onClick={() => {
+            fileRef.current?.click();
+          }}
+        >
+          Import…
+        </button>
+        {/* The picker behind Import…; it is not a control of its own. */}
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          aria-hidden="true"
+          tabIndex={-1}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            // Clear it, so picking the same file again still imports it.
+            event.target.value = '';
+            if (file !== undefined) void importFile(file);
+          }}
+        />
+        {transfer !== undefined && <p className={styles['hint']}>{transfer}</p>}
+      </div>
     </Dialog>
   );
 }

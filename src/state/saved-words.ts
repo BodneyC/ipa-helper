@@ -1,6 +1,7 @@
 import { decodeWord } from '../domain/codec/url';
 import type { KeyValueStore } from '../domain/ports';
-import { assertNever } from '../domain/result';
+import { assertNever, err, ok } from '../domain/result';
+import type { Result } from '../domain/result';
 
 /** One saved word (FR-16). */
 export interface SavedWord {
@@ -113,4 +114,111 @@ export const updateSavedWords = (
   const next = savedWordsReducer(loadSavedWords(store), action);
   saveSavedWords(store, next);
   return next;
+};
+
+/** What a saved-words file says it is (FR-18). */
+const SAVED_WORDS_FILE_FORMAT = 'ipa-helper/saved-words';
+/** The file version this build writes; it reads this one and older (ARCHITECTURE §5). */
+const SAVED_WORDS_FILE_VERSION = 1;
+/** Largest file read, in characters, so a wrong pick can't hang the tab. */
+export const SAVED_WORDS_FILE_MAX_LENGTH = 5_000_000;
+
+/** The exported file: the saved list in a versioned envelope (FR-18). */
+export const exportSavedWords = (words: readonly SavedWord[], exportedAt: number): string =>
+  `${JSON.stringify(
+    {
+      format: SAVED_WORDS_FILE_FORMAT,
+      version: SAVED_WORDS_FILE_VERSION,
+      exportedAt: new Date(exportedAt).toISOString(),
+      words,
+    },
+    null,
+    2,
+  )}\n`;
+
+/** Why a file couldn't be imported at all (FR-18). */
+export type SavedWordsFileError =
+  /** Not JSON, too big, or not a saved-words file. */
+  | { readonly kind: 'not-saved-words' }
+  /** A saved-words file from a newer version of the app. */
+  | { readonly kind: 'newer-version'; readonly version: number };
+
+/** The words read from a file. */
+export interface SavedWordsFile {
+  /** Valid entries, each ID once (via {@link parseSavedWords}). */
+  readonly entries: readonly SavedWord[];
+  /** Entries that aren't saved words, or whose word no longer decodes. */
+  readonly invalid: number;
+  /** Entries that repeat an ID earlier in the file. */
+  readonly repeated: number;
+}
+
+/** Reads an exported file (FR-18). The text is untrusted: every entry goes through {@link parseSavedWords}. */
+export const parseSavedWordsFile = (text: string): Result<SavedWordsFile, SavedWordsFileError> => {
+  if (text.length > SAVED_WORDS_FILE_MAX_LENGTH) return err({ kind: 'not-saved-words' });
+  let value: unknown;
+  try {
+    value = JSON.parse(text);
+  } catch {
+    return err({ kind: 'not-saved-words' });
+  }
+  if (!isRecord(value) || get(value, 'format') !== SAVED_WORDS_FILE_FORMAT) {
+    return err({ kind: 'not-saved-words' });
+  }
+  const version = get(value, 'version');
+  if (typeof version !== 'number' || !Number.isInteger(version) || version < 1) {
+    return err({ kind: 'not-saved-words' });
+  }
+  if (version > SAVED_WORDS_FILE_VERSION) return err({ kind: 'newer-version', version });
+  const words = get(value, 'words');
+  if (!Array.isArray(words)) return err({ kind: 'not-saved-words' });
+  const entries = parseSavedWords(words);
+  const invalid = words.filter((item: unknown) => parseSavedWords([item]).length === 0).length;
+  return ok({ entries, invalid, repeated: words.length - invalid - entries.length });
+};
+
+/** The result of merging imported words into the list. */
+export interface SavedWordsMerge {
+  readonly list: readonly SavedWord[];
+  readonly added: number;
+  /** Entries already in the list. */
+  readonly skipped: number;
+}
+
+/**
+ * Merges imported entries into the list (FR-18). An entry is already there
+ * when the list has its ID, or the same word with the same gloss (an entry
+ * repeating an ID earlier in the import counts too); it is skipped, so the list's own copy (and any rename) wins. The result is newest
+ * first, by when each word was saved.
+ */
+export const mergeSavedWords = (
+  list: readonly SavedWord[],
+  entries: readonly SavedWord[],
+): SavedWordsMerge => {
+  const ids = new Set(list.map((e) => e.id));
+  const words = new Set(list.map((e) => `${e.fragment}\n${e.gloss}`));
+  // Only the list's words count: a file may hold the same word twice, as the list can.
+  const fresh = entries.filter((e) => {
+    if (ids.has(e.id) || words.has(`${e.fragment}\n${e.gloss}`)) return false;
+    ids.add(e.id);
+    return true;
+  });
+  return {
+    list: [...list, ...fresh].toSorted((a, b) => b.savedAt - a.savedAt),
+    added: fresh.length,
+    skipped: entries.length - fresh.length,
+  };
+};
+
+/**
+ * Imports entries into the *stored* list (FR-18), re-reading it first as
+ * {@link updateSavedWords} does, so another tab's changes are kept.
+ */
+export const importSavedWords = (
+  store: KeyValueStore,
+  entries: readonly SavedWord[],
+): SavedWordsMerge => {
+  const merged = mergeSavedWords(loadSavedWords(store), entries);
+  saveSavedWords(store, merged.list);
+  return merged;
 };

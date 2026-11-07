@@ -1,11 +1,11 @@
-import { act, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { SavedWordsDialog } from './SavedWordsDialog';
+import { importSummary, SavedWordsDialog } from './SavedWordsDialog';
 import { Providers } from '../../../app/providers';
 import { symbolId } from '../../../domain/inventory/symbol-id';
-import type { KeyValueStore } from '../../../domain/ports';
+import type { Downloads, KeyValueStore } from '../../../domain/ports';
 import { wordFromIds } from '../../../domain/word/word';
 import type { Word } from '../../../domain/word/word';
 import { useEditor } from '../../../state/hooks';
@@ -54,8 +54,9 @@ function WordProbe() {
 
 const setup = (word: Word = ids('f', 'l', 'turned-script-a', 'g'), stored = memoryStore()) => {
   let closed = 0;
+  const saveText = vi.fn<Downloads['saveText']>();
   const view = render(
-    <Providers initialWord={word} services={{ store: stored.store }}>
+    <Providers initialWord={word} services={{ store: stored.store, downloads: { saveText } }}>
       <AnnouncerProvider>
         <SavedWordsDialog
           open
@@ -68,7 +69,7 @@ const setup = (word: Word = ids('f', 'l', 'turned-script-a', 'g'), stored = memo
     </Providers>,
   );
   const dialog = screen.getByRole('dialog', { name: 'Saved words' });
-  return { dialog, stored, view, user: userEvent.setup(), closedCount: () => closed };
+  return { dialog, stored, view, saveText, user: userEvent.setup(), closedCount: () => closed };
 };
 
 /**
@@ -208,5 +209,98 @@ describe('<SavedWordsDialog> (FR-16)', () => {
       view.unmount();
       expect(stored.listeners.size).toBe(0);
     });
+  });
+});
+
+describe('<SavedWordsDialog> export and import (FR-18)', () => {
+  /** The announcer's live region (the probe's `<output>` is a status too). */
+  const announced = () => document.querySelector('[aria-live]')?.textContent;
+  const saved = (id: string, fragment: string, gloss = '') => ({ id, fragment, gloss, savedAt: 1 });
+  const pick = (dialog: HTMLElement, text: string, name = 'words.json') => {
+    const input = dialog.querySelector('input[type="file"]');
+    if (!(input instanceof HTMLInputElement)) throw new Error('no file input');
+    fireEvent.change(input, { target: { files: [new File([text], name)] } });
+  };
+
+  it('exports the list as a dated, versioned JSON file, and says so', async () => {
+    const stored = memoryStore({
+      [SAVED_WORDS_STORAGE_KEY]: JSON.stringify([saved('a', 'w=1:f', 'eff')]),
+    });
+    const { dialog, saveText, user } = setup(ids('f'), stored);
+    await user.click(within(dialog).getByRole('button', { name: 'Export' }));
+    expect(saveText).toHaveBeenCalledWith(
+      expect.stringMatching(/^ipa-helper-saved-words-\d{4}-\d{2}-\d{2}\.json$/),
+      expect.stringContaining('"format": "ipa-helper/saved-words"'),
+      'application/json',
+    );
+    expect(within(dialog).getByText('Exported 1 word.')).toBeInTheDocument();
+    expect(announced()).toBe('Exported 1 word.');
+  });
+
+  it('cannot export an empty list', () => {
+    const { dialog } = setup();
+    expect(within(dialog).getByRole('button', { name: 'Export' })).toBeDisabled();
+  });
+
+  it('imports a file, skipping words already saved, and reports the counts', async () => {
+    const stored = memoryStore({
+      [SAVED_WORDS_STORAGE_KEY]: JSON.stringify([saved('a', 'w=1:f', 'eff')]),
+    });
+    const { dialog } = setup(ids('f'), stored);
+    // An exported file with one broken entry added by hand.
+    const words = [saved('a', 'w=1:f', 'eff'), saved('b', 'w=1:k'), { id: 'broken' }];
+    pick(dialog, JSON.stringify({ format: 'ipa-helper/saved-words', version: 1, words }));
+    const summary =
+      'Imported 1 word. Skipped 1 word already saved. Left out 1 word that couldn’t be read.';
+    expect(await within(dialog).findByText(summary)).toBeInTheDocument();
+    expect(announced()).toBe(summary);
+    const list = within(dialog).getByRole('list', { name: 'Saved words' });
+    expect(
+      within(list)
+        .getAllByRole('listitem')
+        .map((li) => li.firstChild?.textContent),
+    ).toEqual(['/f/', '/k/']);
+    expect(savedJson(stored.data)).toHaveLength(2);
+  });
+
+  it("says why a file can't be imported, and changes nothing", async () => {
+    const { dialog, stored } = setup();
+    pick(dialog, 'not json');
+    expect(
+      await within(dialog).findByText('That file isn’t a saved-words export from ipa-helper.'),
+    ).toBeInTheDocument();
+    pick(dialog, JSON.stringify({ format: 'ipa-helper/saved-words', version: 9, words: [] }));
+    expect(
+      await within(dialog).findByText(/from a newer version of ipa-helper/),
+    ).toBeInTheDocument();
+    expect(stored.data.has(SAVED_WORDS_STORAGE_KEY)).toBe(false);
+  });
+
+  it("says so when the file can't be read", async () => {
+    const { dialog } = setup();
+    const input = dialog.querySelector('input[type="file"]');
+    if (!(input instanceof HTMLInputElement)) throw new Error('no file input');
+    const broken = new File([''], 'x.json');
+    vi.spyOn(broken, 'text').mockRejectedValue(new Error('gone'));
+    fireEvent.change(input, { target: { files: [broken] } });
+    expect(await within(dialog).findByText('Couldn’t read that file.')).toBeInTheDocument();
+  });
+
+  it('Import… opens the file picker, and an empty pick does nothing', async () => {
+    const { dialog, user } = setup();
+    const input = dialog.querySelector('input[type="file"]');
+    if (!(input instanceof HTMLInputElement)) throw new Error('no file input');
+    const click = vi.spyOn(input, 'click');
+    await user.click(within(dialog).getByRole('button', { name: 'Import…' }));
+    expect(click).toHaveBeenCalledOnce();
+    fireEvent.change(input, { target: { files: [] } });
+    expect(announced()).toBe('');
+  });
+
+  it('summarises counts in words', () => {
+    expect(importSummary({ added: 2, skipped: 0, invalid: 0 })).toBe('Imported 2 words.');
+    expect(importSummary({ added: 0, skipped: 3, invalid: 0 })).toBe(
+      'Imported 0 words. Skipped 3 words already saved.',
+    );
   });
 });

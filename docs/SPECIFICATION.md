@@ -119,6 +119,18 @@ pronounced in British English, at no cost and without signing up for anything.
   an optional gloss/label to a local list (browser storage), then reload,
   rename or delete entries. There is no account. Tabs of the app share the
   list: a change in one tab shows in the others, and never overwrites theirs.
+- **FR-18** *(#9)* **Export and import saved words**: in the Saved words
+  dialog, **Export** downloads the list as a JSON file
+  (`ipa-helper-saved-words-YYYY-MM-DD.json`) and **Import…** reads one back.
+  The file is versioned: `{ "format": "ipa-helper/saved-words", "version": 1,
+  "exportedAt", "words": [{ id, fragment, gloss, savedAt }] }`. A file that
+  isn't one, or is from a newer version, is refused with a message, and nothing
+  changes. Otherwise each entry is validated like stored data; invalid entries
+  are left out. An entry is skipped when the list already has its ID, or
+  already has the same word with the same gloss, so importing the same file
+  twice adds nothing (the list's copy, and any rename, wins). The rest are
+  added, and the list stays newest first. The dialog says, and announces, how
+  many words were added, skipped and left out.
 - **FR-17** *(M6)* **Paste IPA**: the user pastes an IPA string and the app
   tokenises it into known symbols using greedy longest-match. Unknown characters
   are reported, not silently dropped. *As built (M6.3): a "Paste IPA…" word

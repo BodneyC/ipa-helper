@@ -8,6 +8,7 @@ import type {
   AudioPlayer,
   Clipboard,
   DocumentTheme,
+  Downloads,
   FragmentStore,
   KeyValueStore,
 } from '../domain/ports';
@@ -44,6 +45,8 @@ export interface Services {
   /** Speaks symbols and words (FR-30, FR-31). */
   readonly audio: AudioPlayer;
   readonly clipboard: Clipboard;
+  /** Hands the user a file to save (FR-18). */
+  readonly downloads: Downloads;
   readonly fragments: FragmentStore;
   /** Where settings persist (FR-42). */
   readonly store: KeyValueStore;

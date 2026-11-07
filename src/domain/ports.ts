@@ -18,6 +18,15 @@ export const NULL_CLIPBOARD: Clipboard = {
   writeText: () => Promise.resolve(err({ kind: 'clipboard-unavailable' })),
 };
 
+/** Hands the user a file to save (FR-18). Implemented in src/adapters. */
+export interface Downloads {
+  /** Offers `text` as a file called `name`, of media type `type`. */
+  saveText(name: string, text: string, type: string): void;
+}
+
+/** Downloads that go nowhere, for tests and environments without a page. */
+export const NULL_DOWNLOADS: Downloads = { saveText: () => undefined };
+
 /** The URL fragment, without its `#` (FR-15). Implemented in src/adapters. */
 export interface FragmentStore {
   read(): string;

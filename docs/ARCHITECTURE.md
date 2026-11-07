@@ -120,15 +120,16 @@ ipa-helper/
 │  │  │  └─ ipa-tokeniser.ts  # M6.3: NFD + greedy longest-match IPA → Result<Word, UnknownCharacter[]>
 │  │  ├─ codec/
 │  │  │  └─ url.ts            # Word ↔ URL fragment: `w=1:id.id.id`, decode → Result
-│  │  ├─ ports.ts             # Clipboard, FragmentStore, KeyValueStore, DocumentTheme, AudioPlayer, AppUpdates interfaces
+│  │  ├─ ports.ts             # Clipboard, Downloads, FragmentStore, KeyValueStore, DocumentTheme, AudioPlayer, AppUpdates interfaces
 │  │  └─ result.ts            # Result<T, E> type and helpers
 │  ├─ state/
 │  │  ├─ editor.ts            # reducer: word, cursor, undo/redo stacks
 │  │  ├─ settings.ts          # reducer and schema for persisted settings
-│  │  ├─ saved-words.ts       # FR-16: saved list reducer, validation, load/save
+│  │  ├─ saved-words.ts       # FR-16, FR-18: saved list reducer, validation, load/save, file import/export
 │  │  └─ hooks.ts             # EditorContext/SettingsContext + useEditor, useSettings (providers in app/providers.tsx)
 │  ├─ adapters/
 │  │  ├─ clipboard.ts         # navigator.clipboard implementation of the Clipboard port
+│  │  ├─ downloads.ts         # Downloads port: a temporary <a download> over a blob URL (FR-18)
 │  │  ├─ local-storage.ts     # KeyValueStore over localStorage; blocked storage reads as empty
 │  │  ├─ document-theme.ts    # DocumentTheme: <html data-theme data-contrast>, follows the system live
 │  │  ├─ url-hash.ts          # sync editor ↔ location.hash
@@ -323,6 +324,14 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `<SavedWordsDialog>` holds a copy of the stored list, applies each change
   through `updateSavedWords` (above), reloads it on a `storage` event, and loads
   a word into the editor as one undoable `replace`.
+- **Saved-words files** (FR-18): `exportSavedWords` wraps the list in
+  `{ format: 'ipa-helper/saved-words', version: 1, exportedAt, words }`.
+  `parseSavedWordsFile` treats the file as untrusted: it checks the format and
+  version (a newer version is refused, an older one would be migrated here),
+  and reads `words` through `parseSavedWords`. `importSavedWords` merges into
+  the stored list as `updateSavedWords` does, skipping IDs, and word-plus-gloss
+  pairs, already in it. The dialog downloads through the `Downloads` port, and reads
+  the picked file with `File.text()`.
 - No global state library. If one becomes necessary, write an ADR.
 
 ## 6. UI composition

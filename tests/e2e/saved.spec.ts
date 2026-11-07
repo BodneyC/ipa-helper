@@ -105,3 +105,51 @@ test.describe('two tabs (FR-16, FR-42, #2)', () => {
     expect(JSON.parse(stored ?? '{}')).toMatchObject({ theme: 'light', contrast: 'hard' });
   });
 });
+
+test('FR-18: export the saved words, clear storage, and import them back', async ({ page }) => {
+  await page.goto('/');
+  const dialog = page.getByRole('dialog', { name: 'Saved words' });
+  for (const [glyphs, gloss] of [
+    [['ʃ', 'ɪ', 'p'], 'boat'],
+    [['k', 'æ', 't'], 'pet'],
+  ] as const) {
+    await build(page, glyphs);
+    await page.getByRole('button', { name: 'Saved words…' }).click();
+    await dialog.getByRole('textbox', { name: /^Gloss for/ }).fill(gloss);
+    await dialog.getByRole('button', { name: 'Save current word' }).click();
+    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: 'Clear' }).click();
+  }
+
+  await page.getByRole('button', { name: 'Saved words…' }).click();
+  const downloading = page.waitForEvent('download');
+  await dialog.getByRole('button', { name: 'Export' }).click();
+  const download = await downloading;
+  expect(download.suggestedFilename()).toMatch(/^ipa-helper-saved-words-\d{4}-\d{2}-\d{2}\.json$/);
+  const file = await download.path();
+  await expect(dialog.getByText('Exported 2 words.')).toBeVisible();
+
+  await page.evaluate(() => {
+    localStorage.clear();
+  });
+  await page.reload();
+  await page.getByRole('button', { name: 'Saved words…' }).click();
+  await expect(dialog.getByText('No saved words yet.')).toBeVisible();
+
+  const choosing = page.waitForEvent('filechooser');
+  await dialog.getByRole('button', { name: 'Import…' }).click();
+  await (await choosing).setFiles(file);
+  await expect(dialog.getByText('Imported 2 words.')).toBeVisible();
+  const list = dialog.getByRole('list', { name: 'Saved words' });
+  await expect(list).toContainText('/ʃɪp/');
+  await expect(list).toContainText('boat');
+  await expect(list).toContainText('/kæt/');
+  await expectNoA11yViolations(page);
+
+  // Importing the same file again adds nothing, and says why.
+  const again = page.waitForEvent('filechooser');
+  await dialog.getByRole('button', { name: 'Import…' }).click();
+  await (await again).setFiles(file);
+  await expect(dialog.getByText('Imported 0 words. Skipped 2 words already saved.')).toBeVisible();
+  await expect(list.getByRole('listitem')).toHaveCount(2);
+});

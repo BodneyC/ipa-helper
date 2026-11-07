@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import {
   NULL_AUDIO,
   NULL_CLIPBOARD,
+  NULL_DOWNLOADS,
   NULL_FRAGMENTS,
   NULL_STORE,
   NULL_THEME,
@@ -20,6 +21,7 @@ import type { Settings } from '../state/settings';
 const NULL_SERVICES: Services = {
   audio: NULL_AUDIO,
   clipboard: NULL_CLIPBOARD,
+  downloads: NULL_DOWNLOADS,
   fragments: NULL_FRAGMENTS,
   store: NULL_STORE,
   theme: NULL_THEME,
@@ -45,13 +47,13 @@ export function Providers({
   services = NULL_SERVICES,
   children,
 }: ProvidersProps) {
-  const { audio, clipboard, fragments, store, theme, updates } = {
+  const { audio, clipboard, downloads, fragments, store, theme, updates } = {
     ...NULL_SERVICES,
     ...services,
   };
   const allServices = useMemo(
-    () => ({ audio, clipboard, fragments, store, theme, updates }),
-    [audio, clipboard, fragments, store, theme, updates],
+    () => ({ audio, clipboard, downloads, fragments, store, theme, updates }),
+    [audio, clipboard, downloads, fragments, store, theme, updates],
   );
   const [state, dispatch] = useReducer(editorReducer, initialWord, initialEditorState);
   const [settings, settingsDispatch] = useReducer(settingsReducer, initialSettings);
