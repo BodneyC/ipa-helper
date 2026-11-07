@@ -159,7 +159,9 @@ pronounced in British English, at no cost and without signing up for anything.
   or a modifier: Alt+click / long-press, with the plain click still appending). Playing
   pronounces the sound in a British English voice. *As built (M4.4): both. A
   speaker button appears on a key's corner while it is hovered or focused, and
-  Alt+click, Alt+Enter or a touch long-press also play the sound. Suprasegmental
+  Alt+click, Alt+Enter or a touch long-press also play the sound. Hover only
+  counts on a device that can hover: on iOS a hover-revealed speaker made the
+  first tap on a key a hover, not a press (#23). Suprasegmental
   marks have no sound, so they have no play affordance.*
 - **FR-31** A "Play word" button pronounces the whole built word in British English.
   Stress marks and length must audibly change the output. *As built (M5.3): the
