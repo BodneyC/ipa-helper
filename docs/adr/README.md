@@ -25,6 +25,7 @@ digits.
 | [0014](0014-github-issues-workflow.md) | Track unscheduled work in GitHub Issues with scoped labels and a P0–P3 priority | Accepted |
 | [0015](0015-pull-requests-only.md) | Change `main` only through pull requests with required checks | Accepted |
 | [0016](0016-tooltips-close-when-the-pointer-leaves.md) | Close a key's tooltip when the pointer leaves it, with a setting to keep it open | Accepted |
+| [0017](0017-other-symbols-group.md) | Put the IPA's remaining "other symbols" in a group of their own | Accepted |
 
 ## Template
 

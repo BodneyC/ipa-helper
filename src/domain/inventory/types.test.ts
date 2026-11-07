@@ -24,6 +24,7 @@ import type {
   Height,
   InventoryId,
   Manner,
+  OtherSymbol,
   PhoneSymbol,
   Place,
   SecondaryArticulation,
@@ -93,6 +94,14 @@ const fixtures = [
     voiced: true,
   },
   {
+    id: symbolId('curly-tail-c'),
+    ipa: 'ɕ',
+    tipa: { kind: 'macro', name: 'textctc' },
+    name: 'voiceless alveolo-palatal fricative',
+    inventories: ['extended'],
+    category: 'other',
+  },
+  {
     id: symbolId('i-long'),
     ipa: 'iː',
     tipa: { kind: 'literal', text: 'i:' },
@@ -139,6 +148,8 @@ const placement = (symbol: PhoneSymbol): string => {
     case 'affricate':
     case 'non-pulmonic':
       return `${symbol.place} ${symbol.manner}`;
+    case 'other':
+      return symbol.name;
     case 'vowel':
       return `${symbol.height} ${symbol.backness}`;
     case 'diphthong':
@@ -176,6 +187,7 @@ describe('inventory types', () => {
       'postalveolar affricate',
       'palatal fricative',
       'bilabial implosive',
+      'voiceless alveolo-palatal fricative',
       'close front',
       'closing',
       'primary-stress',
@@ -190,6 +202,7 @@ describe('inventory types', () => {
       'tS',
       '\\c{c}',
       '\\texthtb{}',
+      '\\textctc{}',
       'i:',
       'eI',
       '"',
@@ -241,6 +254,7 @@ describe('inventory types', () => {
     expectTypeOf<
       Narrow<'consonant' | 'affricate' | 'non-pulmonic'>
     >().toEqualTypeOf<ConsonantSymbol>();
+    expectTypeOf<Narrow<'other'>>().toEqualTypeOf<OtherSymbol>();
     expectTypeOf<Narrow<'vowel'>>().toEqualTypeOf<VowelSymbol>();
     expectTypeOf<Narrow<'diphthong'>>().toEqualTypeOf<DiphthongSymbol>();
     expectTypeOf<Narrow<'suprasegmental'>>().toEqualTypeOf<SuprasegmentalSymbol>();
