@@ -54,8 +54,8 @@ self.addEventListener('message', (event: MessageEvent<unknown>) => {
     })
     .then((result) => {
       if (result.ok) {
-        const { samples, sampleRate } = result.value;
-        post({ type: 'audio', id: request.id, samples, sampleRate }, [samples.buffer]);
+        const { samples, sampleRate, dropped } = result.value;
+        post({ type: 'audio', id: request.id, samples, sampleRate, dropped }, [samples.buffer]);
       } else {
         post({ type: 'error', id: request.id, kind: result.error.kind });
       }

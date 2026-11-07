@@ -1,6 +1,7 @@
 import type { AudioCache } from './cache';
 import { parseVoiceConfig } from './voice';
 import type { VoiceConfig } from './voice';
+import type { SymbolId } from '../../domain/inventory/symbol-id';
 import type { AudioError } from '../../domain/ports';
 import { err, ok } from '../../domain/result';
 import type { Result } from '../../domain/result';
@@ -29,6 +30,8 @@ interface Voice {
 export interface Speech {
   readonly samples: Float32Array;
   readonly sampleRate: number;
+  /** Diacritics the voice had no sound for, so left out (#15). */
+  readonly dropped: readonly SymbolId[];
 }
 
 const loadFailed = err({ kind: 'audio-load-failed' as const });
@@ -113,11 +116,11 @@ export const createSynthEngine = (deps: SynthDeps) => {
       const { session, config } = loaded.value;
       const ids = piperPhonemeIds(request.text, config.idMap);
       // Every RP codepoint is in the voice's map (a unit test checks), so this
-      // only fails for text the voice can't say.
+      // only fails for text the voice can't say. Marks it can't say are dropped.
       if (!ids.ok) return err({ kind: 'audio-unsupported' });
       try {
-        const samples = await session.run(ids.value, config.scales);
-        return ok({ samples, sampleRate: config.sampleRate });
+        const samples = await session.run(ids.value.ids, config.scales);
+        return ok({ samples, sampleRate: config.sampleRate, dropped: ids.value.dropped });
       } catch {
         return err({ kind: 'audio-playback-failed' });
       }

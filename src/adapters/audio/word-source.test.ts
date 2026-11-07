@@ -50,8 +50,11 @@ describe('word source (M5.2)', () => {
       { type: 'synthesise', id: 1, text: 'kˈæt!', modelUrl: URLS.model, configUrl: URLS.config },
     ]);
     const samples = new Float32Array([0.5]);
-    fake.reply({ type: 'audio', id: 1, samples, sampleRate: 22050 });
-    await expect(playing).resolves.toEqual(ok({ kind: 'pcm', samples, sampleRate: 22050 }));
+    const dropped = [symbolId('creaky-voiced')];
+    fake.reply({ type: 'audio', id: 1, samples, sampleRate: 22050, dropped });
+    await expect(playing).resolves.toEqual(
+      ok({ clip: { kind: 'pcm', samples, sampleRate: 22050 }, dropped }),
+    );
 
     void source(word('ash'));
     expect(createWorker).toHaveBeenCalledTimes(1);
@@ -66,7 +69,7 @@ describe('word source (M5.2)', () => {
     const first = source(word('ash'), a);
     const second = source(word('k'), b);
     fake.reply({ type: 'progress', fraction: 0.5 });
-    fake.reply({ type: 'audio', id: 99, samples: new Float32Array(1), sampleRate: 1 });
+    fake.reply({ type: 'audio', id: 99, samples: new Float32Array(1), sampleRate: 1, dropped: [] });
     fake.reply('noise');
     expect(a).toHaveBeenCalledWith(0.5);
     expect(b).toHaveBeenCalledWith(0.5);

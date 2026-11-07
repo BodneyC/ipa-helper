@@ -1,6 +1,7 @@
 import { createResolver } from './serialiser';
 import type { Serialiser } from './serialiser';
-import { isSounding } from '../inventory';
+import { isSounding, SYMBOLS } from '../inventory';
+import type { SymbolId } from '../inventory/symbol-id';
 import type { PhoneSymbol } from '../inventory/types';
 import { err, ok } from '../result';
 import type { Result } from '../result';
@@ -62,16 +63,31 @@ export const piperPhonemeSerialiser: Serialiser = createPiperSerialiser();
 /** A Piper voice's `phoneme_id_map`: one codepoint → its IDs. */
 export type PhonemeIdMap = Readonly<Record<string, readonly number[] | undefined>>;
 
+/** What the voice is given for a word, and the diacritics left out of it (#15). */
+export interface PiperInput {
+  readonly ids: readonly number[];
+  /** Each diacritic the voice has no ID for, once, in the order they first appear. */
+  readonly dropped: readonly SymbolId[];
+}
+
+/** Diacritics by their (single) codepoint. */
+const MARKS: ReadonlyMap<string, SymbolId> = new Map(
+  SYMBOLS.filter((s) => s.category === 'diacritic').map((s) => [s.ipa, s.id]),
+);
+
 /**
  * Piper's input encoding (ADR-0009): BOS `^` then PAD `_`, then each codepoint
- * followed by PAD, then EOS `$`. Fails with the codepoints the voice lacks
- * (including any missing control symbol), so nothing is silently skipped.
+ * followed by PAD, then EOS `$`. A diacritic the voice lacks is left out, so
+ * the base sound is still spoken, and reported in `dropped` (#15). Any other
+ * codepoint the voice lacks (including a missing control symbol) fails, with
+ * every such codepoint, so nothing else is silently skipped.
  */
 export const piperPhonemeIds = (
   text: string,
   map: PhonemeIdMap,
-): Result<readonly number[], readonly string[]> => {
+): Result<PiperInput, readonly string[]> => {
   const missing: string[] = [];
+  const dropped = new Set<SymbolId>();
   const idsOf = (symbol: string): readonly number[] => {
     const ids = map[symbol];
     if (ids === undefined) missing.push(symbol);
@@ -79,7 +95,14 @@ export const piperPhonemeIds = (
   };
   const [bos, pad, eos] = [idsOf('^'), idsOf('_'), idsOf('$')];
   const ids = [...bos, ...pad];
-  for (const symbol of text) ids.push(...idsOf(symbol), ...pad);
+  for (const symbol of text) {
+    const mark = MARKS.get(symbol);
+    if (mark !== undefined && map[symbol] === undefined) {
+      dropped.add(mark);
+      continue;
+    }
+    ids.push(...idsOf(symbol), ...pad);
+  }
   ids.push(...eos);
-  return missing.length > 0 ? err(missing) : ok(ids);
+  return missing.length > 0 ? err(missing) : ok({ ids, dropped: [...dropped] });
 };

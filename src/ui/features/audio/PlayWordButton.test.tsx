@@ -72,6 +72,29 @@ describe('<PlayWordButton>', () => {
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
 
+  it('#15: plays a word with marks the voice lacks, and says which it left out', async () => {
+    const { button, playWord, user } = setup(word('k', 'creaky-voiced', 'ash', 'voiceless'));
+    playWord.mockResolvedValueOnce(
+      ok({ dropped: [symbolId('creaky-voiced'), symbolId('voiceless')] }),
+    );
+    await user.click(button());
+    const note = 'Played without: creaky voiced, voiceless';
+    expect(button()).toHaveAccessibleDescription(note);
+    expect(screen.getByRole('status')).toHaveTextContent(note);
+    const shown = document.getElementById(button().getAttribute('aria-describedby') ?? '');
+    expect(shown).toHaveTextContent('Played without: ◌\u0330 creaky voiced, ◌\u0325 voiceless');
+
+    await user.click(button());
+    expect(button()).not.toHaveAccessibleDescription();
+  });
+
+  it('says nothing more when the voice could say every mark', async () => {
+    const { button, user } = setup(word('k', 'nasalised', 'ash'));
+    await user.click(button());
+    expect(button()).not.toHaveAccessibleDescription();
+    expect(screen.queryByText(/^Played without/)).not.toBeInTheDocument();
+  });
+
   it('shows and announces a failure, and clears it on the next try', async () => {
     const { button, playWord, user } = setup(undefined, err({ kind: 'audio-load-failed' }));
     await user.click(button());
@@ -79,7 +102,7 @@ describe('<PlayWordButton>', () => {
     expect(button()).toHaveAccessibleDescription(message);
     expect(screen.getByRole('status')).toHaveTextContent(message);
 
-    playWord.mockResolvedValueOnce(ok(undefined));
+    playWord.mockResolvedValueOnce(ok({ dropped: [] }));
     await user.click(button());
     expect(button()).not.toHaveAccessibleDescription();
   });

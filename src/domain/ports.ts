@@ -77,6 +77,12 @@ export interface AudioError {
   readonly kind: 'audio-unsupported' | 'audio-load-failed' | 'audio-playback-failed';
 }
 
+/** A word that was spoken (FR-31). */
+export interface SpokenWord {
+  /** Diacritics the voice can't say, left out so the rest is still spoken (#15). */
+  readonly dropped: readonly SymbolId[];
+}
+
 /** The two kinds of sound, which load independently (ADR-0009): symbol clips and the word voice. */
 export type AudioChannel = 'symbols' | 'words';
 
@@ -107,7 +113,7 @@ export interface AudioPlayer {
   /** Resolves when the sound ends or a newer one cuts it off. */
   playSymbol(id: SymbolId): Promise<Result<void, AudioError>>;
   /** Resolves when the sound ends or a newer one cuts it off. */
-  playWord(word: Word): Promise<Result<void, AudioError>>;
+  playWord(word: Word): Promise<Result<SpokenWord, AudioError>>;
 }
 
 /** A player with no audio, for tests and environments without Web Audio. */

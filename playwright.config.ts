@@ -5,7 +5,8 @@ const isCI = process.env['CI'] !== undefined;
 
 // E2E runs against the production build served by `vite preview` (ADR-0005).
 // The `visual` project holds the screenshot baselines (M3.8): Chromium only, and
-// not part of the per-browser e2e runs.
+// not part of the per-browser e2e runs. tests/e2e/touch.spec.ts only runs in
+// `webkit-touch`.
 export default defineConfig({
   fullyParallel: true,
   forbidOnly: isCI,
@@ -32,9 +33,31 @@ export default defineConfig({
   // One baseline per screenshot, whatever the OS: the visual tests pin fonts.
   snapshotPathTemplate: '{testDir}/__screenshots__/{arg}{ext}',
   projects: [
-    { name: 'chromium', testDir: './tests/e2e', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', testDir: './tests/e2e', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', testDir: './tests/e2e', use: { ...devices['Desktop Safari'] } },
+    {
+      name: 'chromium',
+      testDir: './tests/e2e',
+      testIgnore: 'touch.spec.ts',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      testDir: './tests/e2e',
+      testIgnore: 'touch.spec.ts',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      testDir: './tests/e2e',
+      testIgnore: 'touch.spec.ts',
+      use: { ...devices['Desktop Safari'] },
+    },
+    // A phone: touch, no hover (#23). CI runs it in the webkit job.
+    {
+      name: 'webkit-touch',
+      testDir: './tests/e2e',
+      testMatch: 'touch.spec.ts',
+      use: { ...devices['iPhone 15'] },
+    },
     { name: 'visual', testDir: './tests/visual', use: { ...devices['Desktop Chrome'] } },
   ],
   webServer: {

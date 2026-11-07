@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 
 import type { AudioChannel, AudioError, AudioPlayer, AudioStatus } from '../../src/domain/ports';
-import { ok } from '../../src/domain/result';
+import { mapResult, ok } from '../../src/domain/result';
 import type { Result } from '../../src/domain/result';
 
 /**
@@ -20,7 +20,9 @@ export const fakeAudio = (
     for (const listener of listeners) listener();
   };
   const playSymbol = vi.fn<AudioPlayer['playSymbol']>(() => Promise.resolve(result));
-  const playWord = vi.fn<AudioPlayer['playWord']>(() => Promise.resolve(result));
+  const playWord = vi.fn<AudioPlayer['playWord']>(() =>
+    Promise.resolve(mapResult(result, () => ({ dropped: [] }))),
+  );
   /** Every symbol has a clip unless a test says otherwise (`mockImplementation`). */
   const canPlaySymbol = vi.fn<AudioPlayer['canPlaySymbol']>(() => status.symbols !== 'unsupported');
   const audio: AudioPlayer = {

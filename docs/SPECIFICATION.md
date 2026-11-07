@@ -159,7 +159,9 @@ pronounced in British English, at no cost and without signing up for anything.
   or a modifier: Alt+click / long-press, with the plain click still appending). Playing
   pronounces the sound in a British English voice. *As built (M4.4): both. A
   speaker button appears on a key's corner while it is hovered or focused, and
-  Alt+click, Alt+Enter or a touch long-press also play the sound. Suprasegmental
+  Alt+click, Alt+Enter or a touch long-press also play the sound. Hover only
+  counts on a device that can hover: on iOS a hover-revealed speaker made the
+  first tap on a key a hover, not a press (#23). Suprasegmental
   marks have no sound, so they have no play affordance.*
 - **FR-31** A "Play word" button pronounces the whole built word in British English.
   Stress marks and length must audibly change the output. *As built (M5.3): the
@@ -167,7 +169,10 @@ pronounced in British English, at no cost and without signing up for anything.
   and is absent where the browser can't run the voice. The first play
   downloads the voice; until it's ready the button reads "Loading voice…" and a
   progress bar shows the download. A failure is shown under the button and
-  announced, and the next click retries.*
+  announced, and the next click retries. A diacritic the voice can't say
+  (SPEC §7.6) is left out, and the rest of the word is spoken. The button then
+  names the marks it left out, in the same place and with the same
+  announcement, e.g. "Played without: ◌̰ creaky voiced" (#15).*
 - **FR-32** Audio must be **free and require no sign-up, API key or account**,
   for both the user and the maintainer. Prefer approaches that run entirely in the
   browser or use static assets (see ADR-0009).
@@ -430,8 +435,9 @@ preceding token in TIPA (`\textsubring{n}`); spacing ones follow it (`t\super{h}
 | ◌̚ | no audible release | `\textcorner{}` | | ◌ʼ | ejective | `'` |
 
 The word voice (FR-31) knows only some of these marks (ʰ ʲ ˤ ˞ and the
-syllabic, non-syllabic, dental, apical, laminal and nasalised marks). A word
-with any other diacritic can't be spoken, and Play word says so.
+syllabic, non-syllabic, dental, apical, laminal and nasalised marks). Play
+word leaves out any other diacritic, speaks the rest, and names what it left
+out (FR-31, #15).
 
 ## 8. Out of scope (v1)
 

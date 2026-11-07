@@ -1,14 +1,12 @@
-import type { ClipSource } from './audio-player';
+import type { WordClip, WordSource } from './audio-player';
 import { isSynthReply } from './synth-protocol';
 import type { SynthRequest } from './synth-protocol';
 import { VOICE } from './voice';
-import type { AudioClip } from './web-audio-output';
 import configUrl from '../../assets/voice/en_GB-cori-medium.onnx.json?url';
 import type { AudioError } from '../../domain/ports';
 import { err, ok } from '../../domain/result';
 import type { Result } from '../../domain/result';
 import { piperPhonemeSerialiser } from '../../domain/serialise/piper';
-import type { Word } from '../../domain/word/word';
 
 /** The parts of a `Worker` the source uses. */
 export interface SynthWorker {
@@ -25,7 +23,7 @@ interface WordSourceOptions {
 }
 
 interface Pending {
-  readonly resolve: (result: Result<AudioClip, AudioError>) => void;
+  readonly resolve: (result: Result<WordClip, AudioError>) => void;
   readonly onProgress: ((fraction: number) => void) | undefined;
 }
 
@@ -46,7 +44,7 @@ const createSynthWorker = (): SynthWorker =>
 export const createWordSource = ({
   createWorker = createSynthWorker,
   urls,
-}: WordSourceOptions = {}): ClipSource<Word> => {
+}: WordSourceOptions = {}): WordSource => {
   let worker: SynthWorker | undefined;
   let nextId = 0;
   const pending = new Map<number, Pending>();
@@ -72,7 +70,10 @@ export const createWordSource = ({
       pending.delete(reply.id);
       waiting.resolve(
         reply.type === 'audio'
-          ? ok({ kind: 'pcm', samples: reply.samples, sampleRate: reply.sampleRate })
+          ? ok({
+              clip: { kind: 'pcm', samples: reply.samples, sampleRate: reply.sampleRate },
+              dropped: reply.dropped,
+            })
           : err({ kind: reply.kind }),
       );
     });

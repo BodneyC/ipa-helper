@@ -1,7 +1,13 @@
 import type { AudioClip, AudioOutput } from './web-audio-output';
 import type { SymbolId } from '../../domain/inventory/symbol-id';
-import type { AudioChannel, AudioError, AudioPlayer, AudioStatus } from '../../domain/ports';
-import { err } from '../../domain/result';
+import type {
+  AudioChannel,
+  AudioError,
+  AudioPlayer,
+  AudioStatus,
+  SpokenWord,
+} from '../../domain/ports';
+import { err, mapResult } from '../../domain/result';
 import type { Result } from '../../domain/result';
 import type { Word } from '../../domain/word/word';
 
@@ -10,10 +16,21 @@ import type { Word } from '../../domain/word/word';
  * failures are `Result`s. A source with a slow first load (the word voice)
  * reports how much has arrived, from 0 to 1, through `onProgress`.
  */
-export type ClipSource<K> = (
+type Source<K, T> = (
   key: K,
   onProgress?: (fraction: number) => void,
-) => Promise<Result<AudioClip, AudioError>>;
+) => Promise<Result<T, AudioError>>;
+
+/** A source of plain clips (the symbol channel). */
+export type ClipSource<K> = Source<K, AudioClip>;
+
+/** A spoken word's clip, and what the voice left out of it (#15). */
+export interface WordClip extends SpokenWord {
+  readonly clip: AudioClip;
+}
+
+/** A source of spoken words (the word channel). */
+export type WordSource = Source<Word, WordClip>;
 
 interface AudioPlayerOptions {
   readonly output: AudioOutput;
@@ -22,7 +39,7 @@ interface AudioPlayerOptions {
   /** The symbols `symbols` has a clip for. Left out, every symbol is assumed to have one. */
   readonly symbolIds?: ReadonlySet<SymbolId> | undefined;
   /** Word synthesis (M5.2). Without it, `playWord` reports `audio-unsupported`. */
-  readonly words?: ClipSource<Word> | undefined;
+  readonly words?: WordSource | undefined;
 }
 
 /**
@@ -36,7 +53,7 @@ export const createAudioPlayer = ({
   symbolIds,
   words,
 }: AudioPlayerOptions): AudioPlayer => {
-  const initial = (source: ClipSource<never> | undefined): AudioStatus =>
+  const initial = (source: Source<never, unknown> | undefined): AudioStatus =>
     output.supported && source !== undefined ? 'idle' : 'unsupported';
   let status: Readonly<Record<AudioChannel, AudioStatus>> = {
     symbols: initial(symbols),
@@ -66,11 +83,12 @@ export const createAudioPlayer = ({
     notify();
   };
 
-  const play = async <K>(
+  const play = async <K, T>(
     channel: AudioChannel,
-    source: ClipSource<K> | undefined,
+    source: Source<K, T> | undefined,
     key: K,
-  ): Promise<Result<void, AudioError>> => {
+    clipOf: (fetched: T) => AudioClip,
+  ): Promise<Result<T, AudioError>> => {
     if (source === undefined || status[channel] === 'unsupported') {
       return err({ kind: 'audio-unsupported' });
     }
@@ -85,7 +103,8 @@ export const createAudioPlayer = ({
       return clip;
     }
     setStatus(channel, 'ready');
-    return output.play(clip.value);
+    const played = await output.play(clipOf(clip.value));
+    return mapResult(played, () => clip.value);
   };
 
   return {
@@ -102,7 +121,11 @@ export const createAudioPlayer = ({
       };
     },
     canPlaySymbol: (id) => status.symbols !== 'unsupported' && (symbolIds?.has(id) ?? true),
-    playSymbol: (id) => play('symbols', symbols, id),
-    playWord: (word) => play('words', words, word),
+    playSymbol: async (id) =>
+      mapResult(await play('symbols', symbols, id, (clip) => clip), () => undefined),
+    playWord: async (word) =>
+      mapResult(await play('words', words, word, ({ clip }) => clip), ({ dropped }) => ({
+        dropped,
+      })),
   };
 };

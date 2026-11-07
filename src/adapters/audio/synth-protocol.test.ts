@@ -13,10 +13,13 @@ describe('synthesis worker protocol', () => {
   it('accepts well-formed replies only', () => {
     expect(isSynthReply({ type: 'progress', fraction: 0.5 })).toBe(true);
     expect(isSynthReply({ type: 'progress' })).toBe(false);
-    expect(
-      isSynthReply({ type: 'audio', id: 1, samples: new Float32Array(2), sampleRate: 22050 }),
-    ).toBe(true);
-    expect(isSynthReply({ type: 'audio', id: 1, samples: [0], sampleRate: 22050 })).toBe(false);
+    const audio = { type: 'audio', id: 1, samples: new Float32Array(2), sampleRate: 22050 };
+    expect(isSynthReply({ ...audio, dropped: [] })).toBe(true);
+    expect(isSynthReply({ ...audio, dropped: ['creaky-voiced'] })).toBe(true);
+    expect(isSynthReply(audio)).toBe(false);
+    expect(isSynthReply({ ...audio, dropped: ['Not an ID'] })).toBe(false);
+    expect(isSynthReply({ ...audio, dropped: [1] })).toBe(false);
+    expect(isSynthReply({ ...audio, samples: [0], dropped: [] })).toBe(false);
     expect(isSynthReply({ type: 'error', id: 1, kind: 'audio-load-failed' })).toBe(true);
     expect(isSynthReply({ type: 'error', id: 1, kind: 'nope' })).toBe(false);
     expect(isSynthReply({ type: 'other' })).toBe(false);

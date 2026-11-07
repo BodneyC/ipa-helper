@@ -5,7 +5,8 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { parseVoiceConfig, VOICE } from './voice';
-import { symbolsIn } from '../../domain/inventory/index';
+import { SYMBOLS, symbolsIn } from '../../domain/inventory/index';
+import { piperPhonemeIds } from '../../domain/serialise/piper';
 
 const configPath = join(import.meta.dirname, '..', '..', 'assets', 'voice', VOICE.config.name);
 const bytes = readFileSync(configPath);
@@ -25,6 +26,19 @@ describe('pinned voice (ADR-0009)', () => {
     ]);
     // Syllable breaks are dropped before the voice sees them; '.' is needed anyway as an ending.
     expect([...needed].filter((c) => map[c] === undefined)).toEqual([]);
+  });
+
+  it('#15: says ʰ ʲ ˤ ˞ and six combining marks, and leaves out every other diacritic', () => {
+    const map = parsed.ok ? parsed.value.idMap : {};
+    const marks = SYMBOLS.filter((s) => s.category === 'diacritic');
+    const result = piperPhonemeIds(`a${marks.map((m) => m.ipa).join('')}!`, map);
+    const said = marks.filter((m) => result.ok && !result.value.dropped.includes(m.id));
+    // prettier-ignore
+    expect(said.map((m) => m.id)).toEqual([
+      'aspirated', 'syllabic', 'non-syllabic', 'rhoticity', 'palatalised', 'pharyngealised',
+      'dental', 'apical', 'laminal', 'nasalised',
+    ]);
+    expect(result.ok && result.value.dropped).toHaveLength(marks.length - said.length);
   });
 
   it('reads the sample rate and scales the worker needs', () => {
