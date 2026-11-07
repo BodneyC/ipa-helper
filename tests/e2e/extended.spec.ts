@@ -34,6 +34,7 @@ test.describe('full IPA inventory (FR-3, SPEC §7.6)', () => {
       'Consonants',
       'Affricates',
       'Non-pulmonic consonants',
+      'Other symbols',
       'Vowels',
       'Diphthongs',
       'Suprasegmentals',
@@ -67,6 +68,23 @@ test.describe('full IPA inventory (FR-3, SPEC §7.6)', () => {
     await expect(page.getByRole('region', { name: 'Word' }).locator('output').last()).toHaveText(
       '\\c{c}\\textbullseye{}',
     );
+  });
+
+  test('FR-1: the other symbols have a group of their own, and ɕ writes \\textctc (#16)', async ({
+    page,
+  }) => {
+    await showFullIpa(page);
+    const other = page.getByRole('region', { name: 'Other symbols' });
+    await expect(other.getByRole('button')).toHaveCount(8 + 1); // + the collapse toggle
+    const key = other.getByRole('button', { name: /^ɕ\s?, voiceless alveolo-palatal fricative$/ });
+    await key.hover();
+    await expect(page.getByRole('tooltip')).toContainText('TIPA \\textctc{}');
+    await key.click();
+    await other.getByRole('button', { name: /^ɧ\s?, simultaneous ʃ and x$/ }).click();
+    const outputs = page.getByRole('region', { name: 'Word' }).locator('output');
+    await expect(outputs.first()).toHaveText('/ɕɧ/');
+    await expect(outputs.last()).toHaveText('\\textctc{}\\texththeng{}');
+    await expectNoA11yViolations(page);
   });
 
   test('FR-1, M6.2: diacritics sit on ◌ and attach to the token before them', async ({ page }) => {

@@ -80,6 +80,7 @@ export const CATEGORIES = [
   'consonant',
   'affricate',
   'non-pulmonic',
+  'other',
   'vowel',
   'diphthong',
   'suprasegmental',
@@ -184,6 +185,14 @@ export interface DiphthongSymbol extends BaseSymbol {
   readonly glide: Glide;
 }
 
+/**
+ * A consonant from the IPA chart's "Other symbols" that the place × manner
+ * chart has no cell for, e.g. `ɕ` or `ɧ` (ADR-0017). Its name says what it is.
+ */
+export interface OtherSymbol extends BaseSymbol {
+  readonly category: 'other';
+}
+
 /** A stress, length or syllable-boundary mark. */
 export interface SuprasegmentalSymbol extends BaseSymbol {
   readonly category: 'suprasegmental';
@@ -197,4 +206,9 @@ export interface DiacriticSymbol extends BaseSymbol {
 
 /** Any symbol in an inventory. Narrow on `category`. */
 export type PhoneSymbol =
-  ConsonantSymbol | VowelSymbol | DiphthongSymbol | SuprasegmentalSymbol | DiacriticSymbol;
+  | ConsonantSymbol
+  | OtherSymbol
+  | VowelSymbol
+  | DiphthongSymbol
+  | SuprasegmentalSymbol
+  | DiacriticSymbol;

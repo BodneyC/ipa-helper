@@ -5,6 +5,7 @@ import { AFFRICATES, CONSONANTS, EXTENDED_AFFRICATES, EXTENDED_CONSONANTS } from
 import { DIACRITICS } from './diacritics';
 import { DIPHTHONGS } from './diphthongs';
 import { NON_PULMONIC } from './non-pulmonic';
+import { OTHER_SYMBOLS } from './other';
 import { SUPRASEGMENTALS } from './suprasegmentals';
 import { symbolId } from './symbol-id';
 import type { TipaEncoding } from './types';
@@ -189,6 +190,22 @@ describe('extended inventory (SPEC §7.6)', () => {
     expect(ipaOf(NON_PULMONIC)).toEqual(['ʘ', 'ǀ', 'ǃ', 'ǂ', 'ǁ', 'ɓ', 'ɗ', 'ʄ', 'ɠ', 'ʛ']);
   });
 
+  it("FR-1: holds the IPA chart's other symbols that have no chart cell (#16, ADR-0017)", () => {
+    expect(ipaOf(OTHER_SYMBOLS)).toEqual(['ɥ', 'ʜ', 'ʢ', 'ʡ', 'ɕ', 'ʑ', 'ɺ', 'ɧ']);
+    expect(extended.filter((s) => s.category === 'other')).toEqual(OTHER_SYMBOLS);
+    expect(OTHER_SYMBOLS.map((s) => written(s.tipa))).toEqual([
+      '\\textturnh{}',
+      '\\textsch{}',
+      '\\textbarrevglotstop{}',
+      '\\textbarglotstop{}',
+      '\\textctc{}',
+      '\\textctz{}',
+      '\\textturnlonglegr{}',
+      '\\texththeng{}',
+    ]);
+    expect(OTHER_SYMBOLS.every(isSounding)).toBe(true);
+  });
+
   it('FR-1: has every vowel of the IPA chart', () => {
     // prettier-ignore
     const chart = [
@@ -204,6 +221,7 @@ describe('extended inventory (SPEC §7.6)', () => {
       ...EXTENDED_CONSONANTS,
       ...EXTENDED_AFFRICATES,
       ...NON_PULMONIC,
+      ...OTHER_SYMBOLS,
       ...EXTENDED_VOWELS,
     ];
     expect(added.filter((s) => rp.includes(s))).toEqual([]);
@@ -253,6 +271,7 @@ const categoryOrder = [
   'consonant',
   'affricate',
   'non-pulmonic',
+  'other',
   'vowel',
   'diphthong',
   'suprasegmental',

@@ -58,13 +58,15 @@ pronounced in British English, at no cost and without signing up for anything.
   2. **Affricates**: `tʃ dʒ` (plus `ts dz` in `extended`).
   3. **Non-pulmonic consonants** (`extended` only): clicks and implosives, as
      in the IPA chart's separate table.
-  4. **Vowels (monophthongs)**: shown on a **vowel trapezoid** (front–central–back
+  4. **Other symbols** (`extended` only): the IPA chart's other symbols that
+     have no place × manner cell, `ɥ ʜ ʢ ʡ ɕ ʑ ɺ ɧ` (ADR-0017).
+  5. **Vowels (monophthongs)**: shown on a **vowel trapezoid** (front–central–back
      × close–open), with rounded/unrounded pairs side by side. Long variants (`iː`, `ɑː`,
      `ɔː`, `uː`, `ɜː`) are offered next to their short counterparts.
-  5. **Diphthongs**: `eɪ aɪ ɔɪ əʊ aʊ ɪə eə ʊə` (British set).
-  6. **Suprasegmentals**: primary stress `ˈ`, secondary stress `ˌ`, length `ː`,
+  6. **Diphthongs**: `eɪ aɪ ɔɪ əʊ aʊ ɪə eə ʊə` (British set).
+  7. **Suprasegmentals**: primary stress `ˈ`, secondary stress `ˌ`, length `ː`,
      half-length `ˑ`, syllable break `.`.
-  7. **Diacritics** (`extended` only, milestone M6): syllabic, nasalised,
+  8. **Diacritics** (`extended` only, milestone M6): syllabic, nasalised,
      voiceless, aspirated, and so on. *As built (M6.2): each is a token of its
      own that marks the token just before it (so in `tʰ̥` the ring is under
      the ʰ). Keys show the mark on a dotted circle, `◌̃`.*
@@ -349,7 +351,7 @@ tooltip shows the meaning instead.
 ### 7.6 Extended inventory (M6)
 
 This adds the rest of the IPA pulmonic consonants, the remaining cardinal
-vowels, the non-pulmonic consonants and the diacritics. For anything outside TIPA's
+vowels, the non-pulmonic consonants, the other symbols and the diacritics. For anything outside TIPA's
 single-character shortcuts, prefer the **long-form macros** (`\textturnh`,
 `\textbeltl`, `\textrtailn`, …). Every entry needs a compile test.
 
@@ -384,6 +386,16 @@ left out. `ç` is `\c{c}`, because TIPA's shortcut `C` is `ɕ`.
 | ǁ | `\textdoublepipe{}` | alveolar lateral click | | ʛ | `\texthtscg{}` | uvular implosive |
 
 Ejectives are written with the ejective diacritic `ʼ` (`'`), e.g. `pʼ`.
+
+**Other symbols** (#16, ADR-0017), in the IPA chart's order. w and ʍ, also
+"other symbols" on the IPA chart, are in the consonant chart's labial-velar column.
+
+| IPA | TIPA | Name | | IPA | TIPA | Name |
+| --- | --- | --- | --- | --- | --- | --- |
+| ɥ | `\textturnh{}` | voiced labial-palatal approximant | | ɕ | `\textctc{}` | voiceless alveolo-palatal fricative |
+| ʜ | `\textsch{}` | voiceless epiglottal fricative | | ʑ | `\textctz{}` | voiced alveolo-palatal fricative |
+| ʢ | `\textbarrevglotstop{}` | voiced epiglottal fricative | | ɺ | `\textturnlonglegr{}` | voiced alveolar lateral flap |
+| ʡ | `\textbarglotstop{}` | epiglottal plosive | | ɧ | `\texththeng{}` | simultaneous ʃ and x |
 
 **Vowels** added to §7.3:
 
