@@ -32,7 +32,10 @@ const SYMBOL_CLIP_URLS = clipUrls(
   }),
 );
 
-/** The symbols that have a committed clip: the sounding RP symbols (ADR-0012). */
+/**
+ * The symbols that have a committed clip: every sounding RP symbol, and the
+ * full-IPA sounds the voice can produce (#14, ADR-0012).
+ */
 export const SYMBOL_CLIP_IDS: ReadonlySet<SymbolId> = new Set(SYMBOL_CLIP_URLS.keys());
 
 interface SymbolClipOptions {
