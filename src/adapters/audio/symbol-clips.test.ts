@@ -64,10 +64,9 @@ describe('symbol clip source', () => {
     expect(offline).not.toHaveBeenCalled();
   });
 
-  it('ADR-0012: has a committed clip for every sounding RP symbol and nothing else', () => {
-    const sounding = symbolsIn('rp')
-      .filter(isSounding)
-      .map((s) => s.id);
+  it('ADR-0012, #14: has a committed clip for every sounding symbol, RP and full IPA, and nothing else', () => {
+    // No full-IPA sound is listed as one the voice can't produce (ADR-0012), so all have clips.
+    const sounding = SYMBOLS.filter(isSounding).map((s) => s.id);
     expect([...SYMBOL_CLIP_IDS].toSorted()).toEqual(sounding.toSorted());
   });
 

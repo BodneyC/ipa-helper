@@ -154,7 +154,7 @@ ipa-helper/
 │  │     ├─ saved/            # SavedWordsDialog (FR-16)
 │  │     ├─ update/           # UpdateNotice: "A new version… Reload / Later" (FR-62)
 │  │     └─ help/
-│  ├─ assets/audio/symbols/   # <symbol id>.opus clips + manifest.json, written by `pnpm audio:select` (vowels re-picked by `audio:select-vowels`)
+│  ├─ assets/audio/symbols/   # <symbol id>.opus clips + manifest.json, written by `pnpm audio:select` (vowels re-picked, and full-IPA sounds added, by `audio:select-vowels` / `audio:select-extended`)
 │  ├─ assets/voice/           # the pinned Cori .onnx.json (byte for byte; the model itself is fetched)
 │  └─ styles/
 │     ├─ tokens.css           # THE ONLY place hex colours may appear

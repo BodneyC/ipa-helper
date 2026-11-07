@@ -82,6 +82,28 @@ test.describe('symbol audio (FR-30, FR-33, FR-34)', () => {
     await expect(page.locator('button[title="Listen to ˈ"]')).toHaveCount(0);
   });
 
+  test('#14: a full-IPA key has a speaker too, and plays its own clip lazily', async ({ page }) => {
+    const clips: string[] = [];
+    page.on('request', (request) => {
+      if (request.url().endsWith('.opus')) clips.push(request.url());
+    });
+    await page.getByRole('combobox', { name: 'Inventory' }).selectOption('extended');
+    const key = page.getByRole('button', { name: /^ç\s?, voiceless palatal fricative/ });
+    const speaker = page.locator('button[title="Listen to ç"]');
+    await key.hover();
+    await expect(speaker).toHaveCSS('opacity', '1');
+    expect(clips).toEqual([]);
+
+    await speaker.click();
+    await expect.poll(() => played(page)).toHaveLength(1);
+    expect(clips).toHaveLength(1);
+    expect(clips[0]).toMatch(/\/c-cedilla-[\w-]+\.opus$/);
+    await key.click({ modifiers: ['Alt'] });
+    await expect.poll(() => played(page)).toHaveLength(2);
+    await expect(word(page)).toHaveText('/…/');
+    await expectNoA11yViolations(page);
+  });
+
   test('FR-34: Sound on select plays each symbol as it is added, and persists', async ({
     page,
   }) => {
