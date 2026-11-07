@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { createServiceWorkerUpdates } from './service-worker';
+import { createServiceWorkerUpdates, UPDATE_CHECK_INTERVAL_MS } from './service-worker';
 
 /** A `ServiceWorker` whose state we move by hand. */
 const fakeWorker = (initial: string) => {
@@ -27,20 +27,24 @@ const setup = ({
   waiting = null,
   fails = false,
   loaded = true,
+  update = () => Promise.resolve(),
 }: {
   controlled?: boolean;
   waiting?: FakeWorker | null;
   fails?: boolean;
   loaded?: boolean;
+  update?: () => Promise<unknown>;
 } = {}) => {
   const registrationEvents = new EventTarget();
   const registration: {
     waiting: FakeWorker | null;
     installing: FakeWorker | null;
     addEventListener: (type: 'updatefound', listener: () => void) => void;
+    update: () => Promise<unknown>;
   } = {
     waiting,
     installing: null,
+    update: vi.fn(update),
     addEventListener: (type: 'updatefound', listener: () => void) => {
       registrationEvents.addEventListener(type, listener);
     },
@@ -58,6 +62,7 @@ const setup = ({
   };
   const reload = vi.fn();
   let start: (() => void) | undefined;
+  const visible = new EventTarget();
   const updates = createServiceWorkerUpdates({
     container,
     scriptUrl: '/app/sw.js',
@@ -66,6 +71,9 @@ const setup = ({
     afterLoad: (begin) => {
       start = begin;
       if (loaded) begin();
+    },
+    onVisible: (listener) => {
+      visible.addEventListener('visible', listener);
     },
   });
   const listener = vi.fn();
@@ -85,6 +93,8 @@ const setup = ({
     settle,
     findUpdate,
     takeOver,
+    registration,
+    becomeVisible: () => visible.dispatchEvent(new Event('visible')),
     load: () => start?.(),
   };
 };
@@ -186,5 +196,99 @@ describe('createServiceWorkerUpdates (FR-61, FR-62)', () => {
     const container = { controller: null, register, addEventListener: vi.fn() };
     createServiceWorkerUpdates({ container, scriptUrl: '/sw.js', scope: '/' });
     expect(register).toHaveBeenCalledOnce();
+  });
+
+  describe('update checks when visible (#6)', () => {
+    it('checks when the page becomes visible, at most once per interval', async () => {
+      vi.useFakeTimers();
+      try {
+        const { registration, becomeVisible } = setup();
+        await vi.advanceTimersByTimeAsync(0);
+        // Registration has just checked, so a quick return to the tab doesn't.
+        becomeVisible();
+        await vi.advanceTimersByTimeAsync(0);
+        expect(registration.update).not.toHaveBeenCalled();
+
+        await vi.advanceTimersByTimeAsync(UPDATE_CHECK_INTERVAL_MS);
+        becomeVisible();
+        becomeVisible();
+        await vi.advanceTimersByTimeAsync(0);
+        expect(registration.update).toHaveBeenCalledOnce();
+
+        await vi.advanceTimersByTimeAsync(UPDATE_CHECK_INTERVAL_MS - 1);
+        becomeVisible();
+        await vi.advanceTimersByTimeAsync(0);
+        expect(registration.update).toHaveBeenCalledOnce();
+        await vi.advanceTimersByTimeAsync(1);
+        becomeVisible();
+        await vi.advanceTimersByTimeAsync(0);
+        expect(registration.update).toHaveBeenCalledTimes(2);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('ignores a check that fails or throws, as when offline', async () => {
+      vi.useFakeTimers();
+      try {
+        const rejecting = setup({ update: () => Promise.reject(new TypeError('offline')) });
+        await vi.advanceTimersByTimeAsync(UPDATE_CHECK_INTERVAL_MS);
+        rejecting.becomeVisible();
+        await vi.advanceTimersByTimeAsync(0);
+        expect(rejecting.registration.update).toHaveBeenCalledOnce();
+
+        const throwing = setup({
+          update: () => {
+            throw new Error('InvalidStateError');
+          },
+        });
+        await vi.advanceTimersByTimeAsync(UPDATE_CHECK_INTERVAL_MS);
+        expect(() => throwing.becomeVisible()).not.toThrow();
+        await vi.advanceTimersByTimeAsync(0);
+        expect(throwing.registration.update).toHaveBeenCalledOnce();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('does not check when registration failed', async () => {
+      vi.useFakeTimers();
+      try {
+        const { registration, becomeVisible } = setup({ fails: true });
+        await vi.advanceTimersByTimeAsync(UPDATE_CHECK_INTERVAL_MS);
+        becomeVisible();
+        await vi.advanceTimersByTimeAsync(0);
+        expect(registration.update).not.toHaveBeenCalled();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('listens for the document becoming visible by default', async () => {
+      vi.useFakeTimers();
+      const visibility = vi.spyOn(document, 'visibilityState', 'get');
+      try {
+        const update = vi.fn(() => Promise.resolve());
+        const registration = { waiting: null, installing: null, addEventListener: vi.fn(), update };
+        const container = {
+          controller: {},
+          register: vi.fn(() => Promise.resolve(registration)),
+          addEventListener: vi.fn(),
+        };
+        createServiceWorkerUpdates({ container, scriptUrl: '/sw.js', scope: '/' });
+        await vi.advanceTimersByTimeAsync(UPDATE_CHECK_INTERVAL_MS);
+        visibility.mockReturnValue('hidden');
+        document.dispatchEvent(new Event('visibilitychange'));
+        await vi.advanceTimersByTimeAsync(0);
+        expect(update).not.toHaveBeenCalled();
+        visibility.mockReturnValue('visible');
+        document.dispatchEvent(new Event('visibilitychange'));
+        await vi.advanceTimersByTimeAsync(0);
+        expect(update).toHaveBeenCalledOnce();
+      } finally {
+        visibility.mockRestore();
+        vi.useRealTimers();
+      }
+    });
   });
 });

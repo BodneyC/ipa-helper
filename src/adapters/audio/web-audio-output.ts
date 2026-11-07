@@ -39,6 +39,25 @@ export interface PlaybackContext<B extends PlaybackBuffer, D> {
   createBufferSource(): PlaybackSource<B, D>;
 }
 
+/**
+ * How long `resume()` may take (#3). With no output device, Firefox's never
+ * settles, so play would otherwise do nothing and show nothing.
+ */
+export const RESUME_TIMEOUT_MS = 2000;
+
+/** Resolves true when `resume` settles in time, false after the timeout. Rejects as it does. */
+const resumedInTime = (resume: Promise<void>): Promise<boolean> => {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<boolean>((resolve) => {
+    timer = setTimeout(() => {
+      resolve(false);
+    }, RESUME_TIMEOUT_MS);
+  });
+  return Promise.race([resume.then(() => true), timeout]).finally(() => {
+    clearTimeout(timer);
+  });
+};
+
 const unsupported = err({ kind: 'audio-unsupported' as const });
 const loadFailed = err({ kind: 'audio-load-failed' as const });
 const playbackFailed = err({ kind: 'audio-playback-failed' as const });
@@ -47,6 +66,8 @@ const playbackFailed = err({ kind: 'audio-playback-failed' as const });
  * An AudioOutput over Web Audio (ARCHITECTURE §8). The context is created on
  * the first `play`, which is always inside a user gesture, so the browser's
  * autoplay policy lets it start; it is resumed if the browser suspended it.
+ * A resume that hasn't settled after {@link RESUME_TIMEOUT_MS} fails the play
+ * (#3); the context is kept, so the next play tries to resume it again.
  *
  * @param createContext Makes the context, or `undefined` when there is no Web Audio.
  */
@@ -84,7 +105,9 @@ export const createWebAudioOutput = <B extends PlaybackBuffer, D>(
       current?.stop();
       current = undefined;
       try {
-        if (ctx.state === 'suspended') await ctx.resume();
+        if (ctx.state === 'suspended' && !(await resumedInTime(ctx.resume()))) {
+          return playbackFailed;
+        }
       } catch {
         return playbackFailed;
       }

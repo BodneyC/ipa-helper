@@ -81,6 +81,8 @@ We will write the service worker ourselves (option 2).
   runtime files into a cache that isn't versioned and prune it by manifest.
 - Browsers re-check `sw.js` on navigation, so an installed app that's never
   reloaded only sees updates on its next launch. Periodic `registration.update()`
-  calls can be added if that proves too slow.
+  calls can be added if that proves too slow. *Update (#6): the adapter now
+  calls `registration.update()` when the page becomes visible, at most once an
+  hour (`UPDATE_CHECK_INTERVAL_MS`), ignoring failures.*
 - If the app gains lazy-loaded JS chunks, they must be added to the precache rule
   in `rules.ts`, or they'll only work offline after first use.

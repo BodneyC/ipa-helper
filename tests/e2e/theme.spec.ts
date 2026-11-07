@@ -59,4 +59,25 @@ test.describe('theme (FR-40, FR-41, ADR-0006)', () => {
     await page.emulateMedia({ colorScheme: 'light' });
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   });
+
+  test('#5: theme-color follows an override, and goes back to the system colours', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('/');
+    const colours = () =>
+      page.evaluate(() =>
+        [...document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')].map(
+          (m) => m.content,
+        ),
+      );
+    expect(await colours()).toEqual(['#282828', '#fbf1c7']);
+
+    await page.getByRole('button', { name: 'Settings' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Settings' });
+    await dialog.getByRole('radio', { name: 'Light' }).check();
+    await expect.poll(colours).toEqual(['#fbf1c7', '#fbf1c7']);
+    await dialog.getByRole('radio', { name: 'Match system' }).check();
+    await expect.poll(colours).toEqual(['#282828', '#fbf1c7']);
+  });
 });

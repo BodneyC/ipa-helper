@@ -134,9 +134,9 @@ ipa-helper/
 │  │  ├─ clipboard.ts         # navigator.clipboard implementation of the Clipboard port
 │  │  ├─ downloads.ts         # Downloads port: a temporary <a download> over a blob URL (FR-18)
 │  │  ├─ local-storage.ts     # KeyValueStore over localStorage; blocked storage reads as empty
-│  │  ├─ document-theme.ts    # DocumentTheme: <html data-theme data-contrast>, follows the system live
+│  │  ├─ document-theme.ts    # DocumentTheme: <html data-theme data-contrast>, follows the system live; theme-color follows overrides (#5)
 │  │  ├─ url-hash.ts          # sync editor ↔ location.hash
-│  │  ├─ service-worker.ts    # AppUpdates: registers sw.js (production only), reports a waiting version (FR-62)
+│  │  ├─ service-worker.ts    # AppUpdates: registers sw.js (production only), reports a waiting version (FR-62), re-checks hourly when visible (#6)
 │  │  └─ audio/               # web-audio-output (AudioContext playback), audio-player (port over clip sources),
 │  │                          #   symbol-clips (lazy fetch + Cache API), cache, voice (pin + config parser),
 │  │                          #   word-source + synth-protocol + synth-engine + synth.worker (M5.2)
@@ -451,7 +451,8 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   `AudioClip` (encoded bytes, or PCM samples) at a time, and a new clip cuts
   off the old one. It creates the `AudioContext` on the first play (inside a
   user gesture, which satisfies autoplay policy), resumes it if the browser
-  suspended it, and decodes a copy of encoded data so that cached clips stay
+  suspended it (failing the play with `audio-playback-failed` if `resume()`
+  hasn't settled within `RESUME_TIMEOUT_MS`, as with no output device, #3), and decodes a copy of encoded data so that cached clips stay
   playable. `createAudioPlayer({ output, symbols?, words? })` combines the
   output with one `ClipSource` per channel: the M4.3 clip loader and the M5.2
   worker. A channel without a source reports `unsupported`.
