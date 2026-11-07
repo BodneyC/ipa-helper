@@ -154,7 +154,7 @@ ipa-helper/
 │  │     ├─ saved/            # SavedWordsDialog (FR-16)
 │  │     ├─ update/           # UpdateNotice: "A new version… Reload / Later" (FR-62)
 │  │     └─ help/
-│  ├─ assets/audio/symbols/   # <symbol id>.opus clips + manifest.json, written by `pnpm audio:select`
+│  ├─ assets/audio/symbols/   # <symbol id>.opus clips + manifest.json, written by `pnpm audio:select` (vowels re-picked by `audio:select-vowels`)
 │  ├─ assets/voice/           # the pinned Cori .onnx.json (byte for byte; the model itself is fetched)
 │  └─ styles/
 │     ├─ tokens.css           # THE ONLY place hex colours may appear
@@ -556,6 +556,8 @@ Test names cite requirement IDs where applicable: `it('FR-13: Backspace deletes 
 | `pnpm size` | size-limit: initial JS ≤ 100 kB gzipped (NFR-3), measured on `dist/` |
 | `pnpm audio:candidates [--only id,…]` | Renders candidate symbol clips and a listening page into `.cache/symbol-clips/` (M4.3) |
 | `pnpm audio:select <picks.json>` | Copies the picked renders to `src/assets/audio/symbols/` and writes `manifest.json` |
+| `pnpm audio:vowels [--only id,…]` | Renders 25 ways of saying each RP vowel and diphthong beside the app's current clip, with a listening page (pick, compare, comment) in `.cache/vowel-clips/` |
+| `pnpm audio:select-vowels <vowel-picks.json>` | Replaces only the re-picked vowel clips and their manifest entries (frames `vowel-…`); `current` keeps a clip |
 | `pnpm tex:generate` | Writes `tests/tex/out/symbols.tex` from the inventory and the TIPA serialiser (M6.4) |
 | `pnpm tex:check` | Generates the fixture, then compiles it with `pdflatex` (needs TeX Live with `tipa`; CI runs it in the `texlive/texlive:latest-small` image) |
 | `pnpm changelog <version> [--dry-run]` | Prepends release notes built from Conventional Commits since the last `v*` tag to `CHANGELOG.md` (M7.3; see `RELEASING.md`) |
