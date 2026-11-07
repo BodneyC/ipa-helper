@@ -21,7 +21,7 @@ test.describe('output panel (FR-20 – FR-23)', () => {
     await build(page, ['ˈ', 'θ', 'ɔː', 'n', 'ɪ', 'k']);
     const word = page.getByRole('region', { name: 'Word' });
     await expect(word.locator('output').first()).toHaveText('/ˈθɔːnɪk/');
-    await expect(word.locator('output').last()).toHaveText('"TO:nIk');
+    await expect(word.locator('output').nth(1)).toHaveText('"TO:nIk');
     await expectNoA11yViolations(page);
   });
 
@@ -45,7 +45,7 @@ test.describe('output panel (FR-20 – FR-23)', () => {
 
   test('FR-22: two primary stresses stay apart in TIPA', async ({ page }) => {
     await build(page, ['ˈ', 'ˈ']);
-    await expect(page.getByRole('region', { name: 'Word' }).locator('output').last()).toHaveText(
+    await expect(page.getByRole('region', { name: 'Word' }).locator('output').nth(1)).toHaveText(
       '"{}"',
     );
   });
@@ -53,5 +53,41 @@ test.describe('output panel (FR-20 – FR-23)', () => {
   test('copy buttons are disabled while the word is empty', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'Copy IPA' })).toBeDisabled();
     await expect(page.getByRole('button', { name: 'Copy TIPA' })).toBeDisabled();
+  });
+
+  test('FR-25 – FR-29: the More row writes the word in another format, and copies it', async ({
+    page,
+  }) => {
+    await build(page, ['ˈ', 'θ', 'ɔː', 'n', 'ɪ', 'k']);
+    const outputs = page.getByRole('region', { name: 'Word' }).locator('output');
+    const format = page.getByRole('combobox', { name: 'Format' });
+    await expect(format).toHaveValue('xsampa');
+    await expect(outputs.nth(2)).toHaveText('"TO:nIk');
+
+    await format.selectOption({ label: 'Kirshenbaum' });
+    await expect(outputs.nth(2)).toHaveText("'TO:nIk");
+    await format.selectOption({ label: 'eSpeak' });
+    await expect(outputs.nth(2)).toHaveText("[[T'O:nIk]]");
+    await format.selectOption({ label: 'HTML' });
+    await expect(outputs.nth(2)).toHaveText('<span lang="und-fonipa">/ˈθɔːnɪk/</span>');
+    await page.getByRole('button', { name: 'Copy HTML' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Copied HTML' })).toBeAttached();
+    expect(await copiedTexts(page)).toEqual(['<span lang="und-fonipa">/ˈθɔːnɪk/</span>']);
+    await expectNoA11yViolations(page);
+
+    // The choice is remembered (FR-42).
+    await page.reload();
+    await expect(format).toHaveValue('html');
+  });
+
+  test("FR-25: names the symbols a format can't write", async ({ page }) => {
+    await page.goto('/#w=1:k.y.k');
+    await page.getByRole('combobox', { name: 'Format' }).selectOption({ label: 'eSpeak' });
+    const outputs = page.getByRole('region', { name: 'Word' }).locator('output');
+    await expect(outputs.nth(2)).toHaveText('[[kk]]');
+    await expect(page.getByText(/^eSpeak can’t write/)).toHaveText(
+      'eSpeak can’t write y close front rounded vowel, so it is left out.',
+    );
+    await expectNoA11yViolations(page);
   });
 });

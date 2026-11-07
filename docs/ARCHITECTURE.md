@@ -113,7 +113,10 @@ ipa-helper/
 │  │  ├─ serialise/
 │  │  │  ├─ serialiser.ts     # interface Serialiser { serialise(word): string }
 │  │  │  ├─ ipa.ts
-│  │  │  ├─ tipa.ts           # boundary-safe joining (FR-22)
+│  │  │  ├─ tipa.ts           # boundary-safe joining (FR-22), minimal braces (FR-24)
+│  │  │  ├─ notation.ts       # FormatSerialiser → { text, unsupported }; the ASCII-notation engine (FR-25)
+│  │  │  ├─ xsampa.ts, kirshenbaum.ts, espeak.ts  # code tables (FR-26 – FR-28)
+│  │  │  ├─ formats.ts        # FORMAT_IDS, names, the HTML snippet (FR-29), formatSerialiser
 │  │  │  ├─ labels.ts         # a key's glyph (diacritics on ◌) and TIPA code (FR-2, Q-3)
 │  │  │  └─ filter.ts         # matchesFilter: the palette filter's matching rule (FR-4)
 │  │  ├─ parse/
@@ -259,8 +262,9 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
 
 - `ipaSerialiser`: concatenates `symbol.ipa`. A slashes option adds `/…/`.
 - `tipaSerialiser`: concatenates encodings and applies a **boundary-safety
-  rule**: after a control word (`\ae`, `\textturnr`) emit `{}` whenever the
-  next character is a letter, or always (simpler, and the default). Also check
+  rule**: after a control word (`\ae`, `\textturnr`) emit `{}` always (the
+  default), or, with `minimalBraces` (FR-24), nothing, or a space when the next
+  character is a letter. Also check
   multi-character shortcut collisions: TIPA reads `""` as secondary stress, so two
   primary-stress tokens in a row must be separated (`"{}"`). Property-based tests
   (fast-check) generate random words and assert:
@@ -268,8 +272,18 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   2. tokenising the TIPA output with a reference TIPA tokeniser (test-only)
      gives back the original symbol sequence (round trip),
   3. no unbalanced braces.
-- Future serialisers (X-SAMPA, Kirshenbaum, espeak phoneme mnemonics for audio)
-  plug in behind the same interface.
+- **Other formats** (FR-25 – FR-29, `notation.ts`): a `FormatSerialiser`
+  returns `{ text, unsupported }`, because a notation may have no code for a
+  symbol. Such a symbol is left out of `text` and listed in `unsupported`,
+  never guessed at. X-SAMPA and Kirshenbaum spell each symbol from its stored
+  IPA, codepoint by codepoint, through a table; eSpeak looks symbols up by ID,
+  since it only has RP mnemonics. One engine joins the codes. Where two codes
+  would read as a different sound, it puts in the notation's separator
+  (X-SAMPA `-`, eSpeak `|`), or, after a diacritic or in a notation without a
+  separator, reports the symbol. A merge that reads as the same sound
+  (`i` + `:`) is allowed. fast-check checks that every output is ASCII, and
+  that a greedy reference reader reads back exactly the sounds that were kept.
+  The HTML snippet wraps the IPA serialiser's output.
 
 ## 5. State management
 
@@ -288,7 +302,7 @@ registry; tests inject fixtures): `createIpaSerialiser(options, symbols?)`,
   or missing field falls back to its default (or, in the reducer, its current
   value) without discarding the valid ones. Fields: `theme` (system|dark|light),
   `contrast`, `inventory`, `macroName` (letters only), `ipaSlashes` (FR-20),
-  `tipaSlashes` (Q-2), `minimalBraces` (FR-24), `rDisplay`, `tieBars` (M6.5), `collapsedGroups` (categories), `soundOnSelect`,
+  `tipaSlashes` (Q-2), `minimalBraces` (FR-24), `format` (FR-25), `rDisplay`, `tieBars` (M6.5), `collapsedGroups` (categories), `soundOnSelect`,
   `hoverableTooltips` (FR-2, ADR-0016), `wordDetailsOpen` (#4).
   `main.tsx` reads them with `loadSettings(store)` before the first render;
   `<SettingsSync>` writes them back with `saveSettings` on every change.

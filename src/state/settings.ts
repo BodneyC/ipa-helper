@@ -2,6 +2,8 @@ import { CATEGORIES, INVENTORY_IDS } from '../domain/inventory/types';
 import type { Category, InventoryId } from '../domain/inventory/types';
 import type { KeyValueStore } from '../domain/ports';
 import { assertNever } from '../domain/result';
+import { FORMAT_IDS } from '../domain/serialise/formats';
+import type { FormatId } from '../domain/serialise/formats';
 import type { GlyphOptions, RDisplay } from '../domain/serialise/serialiser';
 
 /** FR-40: `system` follows `prefers-color-scheme`; the others override it. */
@@ -30,6 +32,8 @@ export interface Settings {
   readonly tipaSlashes: boolean;
   /** FR-24: brace TIPA macros only where a letter follows (`tr\ae p`). */
   readonly minimalBraces: boolean;
+  /** FR-25: the format the third output row shows. */
+  readonly format: FormatId;
   /** Q-3: display the British r as `ɹ` (narrow) or `r` (broad). */
   readonly rDisplay: RDisplay;
   /** SPEC §7.2 (M6.5): write affricates with a tie bar, `t͡ʃ` and `\t{tS}`. */
@@ -56,6 +60,7 @@ export const DEFAULT_SETTINGS: Settings = {
   ipaSlashes: true,
   tipaSlashes: false,
   minimalBraces: false,
+  format: 'xsampa',
   rDisplay: 'narrow',
   tieBars: false,
   collapsedGroups: [],
@@ -91,6 +96,7 @@ const validators: { readonly [K in keyof Settings]: (value: unknown) => value is
   ipaSlashes: isBoolean,
   tipaSlashes: isBoolean,
   minimalBraces: isBoolean,
+  format: oneOf(FORMAT_IDS),
   rDisplay: oneOf(R_DISPLAYS),
   tieBars: isBoolean,
   collapsedGroups: isCategoryList,
@@ -127,6 +133,7 @@ export const parseSettings = (value: unknown, fallback: Settings = DEFAULT_SETTI
     ipaSlashes: pick('ipaSlashes'),
     tipaSlashes: pick('tipaSlashes'),
     minimalBraces: pick('minimalBraces'),
+    format: pick('format'),
     rDisplay: pick('rDisplay'),
     tieBars: pick('tieBars'),
     collapsedGroups: pick('collapsedGroups'),

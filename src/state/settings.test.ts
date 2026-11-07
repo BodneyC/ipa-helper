@@ -17,6 +17,7 @@ import {
 } from './settings';
 import type { Settings } from './settings';
 import type { KeyValueStore } from '../domain/ports';
+import { FORMAT_IDS } from '../domain/serialise/formats';
 
 /** An in-memory KeyValueStore. */
 const memoryStore = (initial: Record<string, string> = {}): KeyValueStore => {
@@ -36,6 +37,7 @@ const custom: Settings = {
   ipaSlashes: false,
   tipaSlashes: true,
   minimalBraces: true,
+  format: 'espeak',
   rDisplay: 'broad',
   tieBars: true,
   collapsedGroups: ['vowel', 'diphthong'],
@@ -52,6 +54,7 @@ const anySettings: fc.Arbitrary<Settings> = fc.record({
   ipaSlashes: fc.boolean(),
   tipaSlashes: fc.boolean(),
   minimalBraces: fc.boolean(),
+  format: fc.constantFrom(...FORMAT_IDS),
   rDisplay: fc.constantFrom('narrow', 'broad'),
   tieBars: fc.boolean(),
   collapsedGroups: fc.subarray(['consonant', 'affricate', 'vowel'] as const),
@@ -74,6 +77,7 @@ describe('settings schema', () => {
       ipaSlashes: true,
       tipaSlashes: false,
       minimalBraces: false,
+      format: 'xsampa',
       rDisplay: 'narrow',
       tieBars: false,
       collapsedGroups: [],

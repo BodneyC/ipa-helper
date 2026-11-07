@@ -172,6 +172,34 @@ pronounced in British English, at no cost and without signing up for anything.
   letters only keeps `{}`, and the `{}` between literals that would merge
   (FR-22) stays as it is. The TeX check compiles every symbol and every
   ordered pair in this mode too.
+- **FR-25** *(#7)* **Other formats**: a third output row, **More**, shows
+  the word in a format chosen from a picker (X-SAMPA by default, remembered
+  with the settings), with a copy button whose feedback works like FR-23. A
+  format writes each symbol it has a code for. Symbols it has no code for
+  are left out, never guessed at, and the row names them ("eSpeak can't write
+  y close front rounded vowel, so it is left out."). The ASCII notations write
+  each symbol's own IPA: the broad British r (Q-3) is still ɹ, since `r` is
+  the trill in both.
+- **FR-26** **X-SAMPA**, as Wells's table writes it (`"TO:nIk`). Every
+  symbol in the inventory has a code. Where X-SAMPA gives two spellings, it uses
+  `v\` for ʋ and `_j` for ʲ. With tie bars on (§7.2), affricates are tied
+  (`t_S`). `-` separates two sounds that would otherwise read as one (`|\-|\`).
+  A diacritic that would merge with its base into another symbol (ɹ + ˞ as
+  `r\``, ɻ) is left out.
+- **FR-27** **Kirshenbaum** (Usenet ASCII-IPA), as its charts write it
+  (`'TO:nIk`, `r` for ɹ and `r<trl>` for the trill). It has no codes for ɫ,
+  ǂ, ɥ ʜ ʢ ʡ ɕ ʑ ɧ, ˑ, the syllable break, or any diacritic except nasalised
+  `~`, centralised `"`, breathy `<?>` and rhoticity `<r>`. It has no separator,
+  so a symbol that would merge with the one before into a different sound is
+  left out.
+- **FR-28** **eSpeak**: eSpeak NG phoneme input for British English,
+  `[[T'O:nIk]]`, using the mnemonics of its English dictionary. Only RP
+  sounds have one; `u`, `ɐ`, `ˑ` and the syllable break don't. Stress moves to
+  just before the stressed vowel, and `|` separates mnemonics that would
+  otherwise read as one (`a|I`).
+- **FR-29** **HTML**: the IPA, with or without slashes as the IPA row copies
+  it (FR-20), in `<span lang="und-fonipa">…</span>`. That also works in
+  Markdown, and marks the text as an IPA transcription.
 
 ### 4.4 Audio (milestones M4–M5)
 
@@ -465,8 +493,7 @@ out (FR-31, #15).
 - Automatic grapheme-to-phoneme ("type a spelling, get the IPA").
 - Accents other than British English for audio. The data model must not
   *preclude* adding them later.
-- Exporting formats other than IPA text and TIPA (e.g. X-SAMPA, Kirshenbaum).
-  These are candidates for later because the serialiser design allows them (ADR-0008).
+- Exporting formats other than IPA, TIPA and those of FR-25 – FR-29.
 
 ## 9. Open questions
 

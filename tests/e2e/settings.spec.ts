@@ -50,7 +50,7 @@ test.describe('settings (FR-40 – FR-42, Q-2, Q-3)', () => {
   }) => {
     await page.getByRole('button', { name: /^tʃ\s?, voiceless postalveolar affricate/ }).click();
     const outputs = page.getByRole('region', { name: 'Word' }).locator('output');
-    await expect(outputs.last()).toHaveText('tS');
+    await expect(outputs.nth(1)).toHaveText('tS');
 
     await page.getByRole('button', { name: 'Settings' }).click();
     const dialog = page.getByRole('dialog', { name: 'Settings' });
@@ -59,7 +59,7 @@ test.describe('settings (FR-40 – FR-42, Q-2, Q-3)', () => {
     await page.keyboard.press('Escape');
 
     await expect(outputs.first()).toHaveText('/t\u0361ʃ/');
-    await expect(outputs.last()).toHaveText('\\t{tS}');
+    await expect(outputs.nth(1)).toHaveText('\\t{tS}');
     const key = page.getByRole('button', {
       name: /^t\u0361ʃ\s?, voiceless postalveolar affricate/,
     });
@@ -68,7 +68,7 @@ test.describe('settings (FR-40 – FR-42, Q-2, Q-3)', () => {
     await expect(page).toHaveURL(/#w=1:tesh$/);
 
     await page.reload();
-    await expect(outputs.last()).toHaveText('\\t{tS}');
+    await expect(outputs.nth(1)).toHaveText('\\t{tS}');
   });
 
   test('FR-24: minimal braces drops {} after a macro unless a letter follows, and is remembered', async ({
@@ -76,7 +76,7 @@ test.describe('settings (FR-40 – FR-42, Q-2, Q-3)', () => {
   }) => {
     await page.goto('/#w=1:t.turned-r.ash.p.ash');
     const outputs = page.getByRole('region', { name: 'Word' }).locator('output');
-    await expect(outputs.last()).toHaveText('t\\textturnr{}\\ae{}p\\ae{}');
+    await expect(outputs.nth(1)).toHaveText('t\\textturnr{}\\ae{}p\\ae{}');
 
     await page.getByRole('button', { name: 'Settings' }).click();
     const dialog = page.getByRole('dialog', { name: 'Settings' });
@@ -86,9 +86,9 @@ test.describe('settings (FR-40 – FR-42, Q-2, Q-3)', () => {
     await expectNoA11yViolations(page);
     await page.keyboard.press('Escape');
 
-    await expect(outputs.last()).toHaveText('t\\textturnr\\ae p\\ae');
+    await expect(outputs.nth(1)).toHaveText('t\\textturnr\\ae p\\ae');
     await page.reload();
-    await expect(outputs.last()).toHaveText('t\\textturnr\\ae p\\ae');
+    await expect(outputs.nth(1)).toHaveText('t\\textturnr\\ae p\\ae');
   });
 
   test('FR-40: "Match system" follows the system again after an override', async ({ page }) => {

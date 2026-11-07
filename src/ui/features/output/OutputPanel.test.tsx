@@ -106,6 +106,45 @@ describe('<OutputPanel>', () => {
   it('disables copying while the word is empty', () => {
     setup([]);
     for (const button of screen.getAllByRole('button')) expect(button).toBeDisabled();
-    expect(screen.getAllByText('—')).toHaveLength(2);
+    expect(screen.getAllByText('—')).toHaveLength(3);
+  });
+
+  describe('other formats (FR-25)', () => {
+    it('shows the word in X-SAMPA by default, and copies it', async () => {
+      const { clipboard, user } = setup();
+      // For this word, TIPA and X-SAMPA happen to agree.
+      expect(screen.getAllByText('"TO:nIk')).toHaveLength(2);
+      await user.click(screen.getByRole('button', { name: 'Copy X-SAMPA' }));
+      expect(copied(clipboard)).toEqual(['"TO:nIk']);
+      expect(await screen.findByText('Copied X-SAMPA')).toBeInTheDocument();
+    });
+
+    it('switches format from the picker', async () => {
+      const { user } = setup();
+      await user.selectOptions(screen.getByRole('combobox', { name: 'Format' }), 'eSpeak');
+      expect(screen.getByText("[[T'O:nIk]]")).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Copy eSpeak' })).toBeEnabled();
+      await user.selectOptions(screen.getByRole('combobox', { name: 'Format' }), 'HTML');
+      expect(screen.getByText('<span lang="und-fonipa">/ˈθɔːnɪk/</span>')).toBeInTheDocument();
+    });
+
+    it("names the symbols a format can't write", () => {
+      setup(ids('k', 'y', 'nasal-release', 'k'), { format: 'espeak' });
+      expect(screen.getByText('[[kk]]')).toBeInTheDocument();
+      expect(screen.getByText(/^eSpeak can’t write/)).toHaveTextContent(
+        'eSpeak can’t write y close front rounded vowel, ◌ⁿ nasal release, so they are left out.',
+      );
+    });
+
+    it('says "it" for one symbol, and nothing when every symbol is written', () => {
+      setup(ids('k', 'y'), { format: 'espeak' });
+      expect(screen.getByText(/^eSpeak can’t write/)).toHaveTextContent(/so it is left out\.$/);
+    });
+
+    it('has no note when the format can write the whole word', () => {
+      setup(thornic, { format: 'kirshenbaum' });
+      expect(screen.getByText("'TO:nIk")).toBeInTheDocument();
+      expect(screen.queryByText(/can’t write/)).not.toBeInTheDocument();
+    });
   });
 });

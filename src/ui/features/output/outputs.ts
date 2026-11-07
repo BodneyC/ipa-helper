@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 
+import { formatSerialiser } from '../../../domain/serialise/formats';
 import { createIpaSerialiser } from '../../../domain/serialise/ipa';
+import type { Transcription } from '../../../domain/serialise/notation';
 import { createTipaSerialiser } from '../../../domain/serialise/tipa';
 import { useEditor, useSettings } from '../../../state/hooks';
 import { glyphsOf } from '../../../state/settings';
@@ -15,6 +17,8 @@ interface Outputs {
   readonly tipa: string;
   /** The full macro call, e.g. `\ipa{"TO:nIk}` (FR-21). */
   readonly macro: string;
+  /** The word in the chosen other format (FR-25), with the symbols it can't write. */
+  readonly other: Transcription;
 }
 
 /** The current word's output texts, shared by the output panel and the copy shortcuts. */
@@ -35,6 +39,11 @@ export const useOutputs = (): Outputs => {
       ipaCopied: createIpaSerialiser({ slashes: settings.ipaSlashes, ...glyphs }).serialise(word),
       tipa,
       macro: `\\${settings.macroName}{${tipa}}`,
+      // The HTML snippet's slashes follow the IPA copy setting (FR-20).
+      other: formatSerialiser(settings.format, {
+        slashes: settings.ipaSlashes,
+        ...glyphs,
+      }).serialise(word),
     };
   }, [word, settings]);
 };
