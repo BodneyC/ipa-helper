@@ -28,6 +28,7 @@
     "size": "size-limit",
     "audio:candidates": "node --import jiti/register scripts/audio/candidates.ts",
     "audio:select": "node --import jiti/register scripts/audio/select.ts",
+    "audio:vowels": "node --import jiti/register scripts/audio/vowel-candidates.ts",
     "voice:fetch": "node --import jiti/register scripts/audio/fetch-voice.ts",
     "tex:generate": "node --import jiti/register scripts/tex/write-tex.ts",
     "icons:render": "node --import jiti/register scripts/pwa/render-icons.ts",
