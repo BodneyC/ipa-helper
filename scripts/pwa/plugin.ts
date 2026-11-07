@@ -5,9 +5,9 @@ import { fileURLToPath } from 'node:url';
 
 import type { Plugin } from 'vite';
 
-import { colour, readPalette } from './palette';
-import { selectPrecache, WORKER_SCRIPT } from '../../src/sw/rules';
-import type { PrecacheManifest } from '../../src/sw/rules';
+import { colour, readPalette } from './palette.ts';
+import { selectPrecache, WORKER_SCRIPT } from '../../src/sw/rules.ts';
+import type { PrecacheManifest } from '../../src/sw/rules.ts';
 
 const WORKER_ENTRY = fileURLToPath(new URL('../../src/sw/sw.ts', import.meta.url));
 
